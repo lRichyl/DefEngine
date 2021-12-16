@@ -6,26 +6,10 @@ in float outAlphaValue;
 in float depth;
 in vec3 outColor;
 
-//uniform vec4 u_Color;
 uniform sampler2D u_textures[32];
 uniform int u_max_texture_units;
 
-void main()
-{
-	//vec4 white = vec4(1.0f,1.0f,1.0f,1.0f);
-	//vec4 difference;
-	//for(int i = 0; i < u_max_texture_units; i++){
-	//	if(i == int(outTexID)){
-	//		fragColor = texture2D(u_textures[i], outTexCoord);
-			//fragColor *= vec4(outColor, 1.0f);
-
-			//if(outAlphaValue < 1 && fragColor.w != 0){
-			//	fragColor.w = outAlphaValue;
-			//}
-			//break;
-		//}
-	//}
-	
+void set_fragColor(){
 	switch(int(outTexID)){
 		case 0: fragColor = texture2D(u_textures[0], outTexCoord); break;
 		case 1: fragColor = texture2D(u_textures[1], outTexCoord); break;
@@ -61,11 +45,12 @@ void main()
 		case 31: fragColor = texture2D(u_textures[31], outTexCoord); break;
 		default: fragColor = vec4(outColor, 1.0f);
 	}
-	fragColor *= vec4(outColor, 1.0f);
-	//fragColor.z = gl_FragCoord.z;
-	if(outAlphaValue < 1 && fragColor.w != 0){
-		fragColor.w = outAlphaValue;
-	}
-	
-	//fragColor = vec4(vec3(gl_FragCoord.z), 1.0);
 }
+
+void main()
+{
+	set_fragColor();
+	float average = (fragColor.x + fragColor.y + fragColor.z) / 3.0f;
+	
+	fragColor = vec4(average,average,average, fragColor.w);		
+};

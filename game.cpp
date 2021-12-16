@@ -28,10 +28,13 @@ void Game::UpdateGame(float dt){
 Rect A = {300,300,200,200};
 Rect B = {350,250,200,200};
 Rect C = {375,225,200,200};
+
 void Game::DrawGame(float dt, float fps){
+	static ShaderProgram test_shader = make_shader(renderer, "assets/shaders/fragment_shader_test.glsl", "test_shader");
 	static Texture texture = make_texture("assets/textures/4.png");
-	render_quad(renderer, &A, &texture, 0);
-	render_quad(renderer, &B, &texture, 1, NULL, false, 1, {0,255,0});
+	render_quad(renderer, &A, &texture, 2);
+	render_quad_with_shader(renderer, &B, &texture, test_shader, 0, NULL, false, 1, {0,255,0});
+	render_quad(renderer, &C, &texture, 1);
     // render_colored_rect(renderer, &A, {0,255,0}    , 1,  0);
 	// render_colored_rect(renderer, &C, {255,255,0}  , 1,  90);
 	// render_colored_rect(renderer, &B, {0,255,255}  , 1,  20);

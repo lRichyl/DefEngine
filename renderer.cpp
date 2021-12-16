@@ -5,12 +5,152 @@
 #include "stb_image.h"
 #include <assert.h>
 
-bool check_if_texture_is_not_registered(Texture texture, Batch *batch);
-void bind_texture(int slot, unsigned int id);
+// static const char *default_vertex_shader = 
+// "#version 330 core"
+// ""
+// "layout(location = 0) in vec3 position;"
+// "layout(location = 1) in vec2 texCoord;"
+// "layout(location = 2) in float texID;"
+// "layout(location = 3) in float alphaValue;"
+// "layout(location = 4) in vec3 color;"
+// ""
+// "out vec2 outTexCoord;"
+// "out float outTexID;"
+// "out float outAlphaValue;"
+// "out float depth;"
+// "out vec3 outColor;"
+// ""
+// "uniform mat4 u_projection;"
+// "uniform mat4 u_view;"
+// ""
+// "void main()"
+// "{"
+    // "gl_Position = u_projection * u_view * vec4(position, 1.0f);"
+	// "depth = position.z;"
+    // "outTexCoord = texCoord;"
+    // "outTexID = texID;"
+    // "outAlphaValue = alphaValue;"
+    // "outColor = color;"
+// "}";
+
+static const char *default_vertex_shader = 
+"#version 330 core \n"
+"layout(location = 0) in vec3 position;\n"
+"layout(location = 1) in vec2 texCoord;\n"
+"layout(location = 2) in float texID;\n"
+"layout(location = 3) in float alphaValue;\n"
+"layout(location = 4) in vec3 color;\n"
+"\n"
+"out vec2 outTexCoord;\n"
+"out float outTexID;\n"
+"out float outAlphaValue;\n"
+"out float depth;\n"
+"out vec3 outColor;\n"
+"\n"
+"uniform mat4 u_projection;\n"
+"uniform mat4 u_view;\n"
+"\n"
+"void main()\n"
+"{\n"
+    "gl_Position = u_projection * u_view * vec4(position, 1.0f);\n"
+	"depth = position.z;\n"
+    "outTexCoord = texCoord;\n"
+    "outTexID = texID;\n"
+    "outAlphaValue = alphaValue;\n"
+    "outColor = color;\n"
+"}";
+
+static const char *default_fragment_shader =
+"#version 330 core\n"
+"layout(location = 0)out vec4 fragColor;\n"
+"in vec2 outTexCoord;\n"
+"in float outTexID;\n"
+"in float outAlphaValue;\n"
+"in float depth;\n"
+"in vec3 outColor;\n"
+
+"uniform sampler2D u_textures[32];\n"
+"uniform int u_max_texture_units;\n"
+
+"void main()\n"
+"{\n"
+	"switch(int(outTexID)){\n"
+		"case 0: fragColor = texture2D(u_textures[0], outTexCoord); break;\n"
+		"case 1: fragColor = texture2D(u_textures[1], outTexCoord); break;\n"
+		"case 2: fragColor = texture2D(u_textures[2], outTexCoord); break;\n"
+		"case 3: fragColor = texture2D(u_textures[3], outTexCoord); break;\n"
+		"case 4: fragColor = texture2D(u_textures[4], outTexCoord); break;\n"
+		"case 5: fragColor = texture2D(u_textures[5], outTexCoord); break;\n"
+		"case 6: fragColor = texture2D(u_textures[6], outTexCoord); break;\n"
+		"case 7: fragColor = texture2D(u_textures[7], outTexCoord); break;\n"
+		"case 8: fragColor = texture2D(u_textures[8], outTexCoord); break;\n"
+		"case 9: fragColor = texture2D(u_textures[9], outTexCoord); break;\n"
+		"case 10: fragColor = texture2D(u_textures[10], outTexCoord); break;\n"
+		"case 11: fragColor = texture2D(u_textures[11], outTexCoord); break;\n"
+		"case 12: fragColor = texture2D(u_textures[12], outTexCoord); break;\n"
+		"case 13: fragColor = texture2D(u_textures[13], outTexCoord); break;\n"
+		"case 14: fragColor = texture2D(u_textures[14], outTexCoord); break;\n"
+		"case 15: fragColor = texture2D(u_textures[15], outTexCoord); break;\n"
+		"case 16: fragColor = texture2D(u_textures[16], outTexCoord); break;\n"
+		"case 17: fragColor = texture2D(u_textures[17], outTexCoord); break;\n"
+		"case 18: fragColor = texture2D(u_textures[18], outTexCoord); break;\n"
+		"case 19: fragColor = texture2D(u_textures[19], outTexCoord); break;\n"
+		"case 20: fragColor = texture2D(u_textures[20], outTexCoord); break;\n"
+		"case 21: fragColor = texture2D(u_textures[21], outTexCoord); break;\n"
+		"case 22: fragColor = texture2D(u_textures[22], outTexCoord); break;\n"
+		"case 23: fragColor = texture2D(u_textures[23], outTexCoord); break;\n"
+		"case 24: fragColor = texture2D(u_textures[24], outTexCoord); break;\n"
+		"case 25: fragColor = texture2D(u_textures[25], outTexCoord); break;\n"
+		"case 26: fragColor = texture2D(u_textures[26], outTexCoord); break;\n"
+		"case 27: fragColor = texture2D(u_textures[27], outTexCoord); break;\n"
+		"case 28: fragColor = texture2D(u_textures[28], outTexCoord); break;\n"
+		"case 29: fragColor = texture2D(u_textures[29], outTexCoord); break;\n"
+		"case 30: fragColor = texture2D(u_textures[30], outTexCoord); break;\n"
+		"case 31: fragColor = texture2D(u_textures[31], outTexCoord); break;\n"
+		"default: fragColor = vec4(outColor, 1.0f);\n"
+	"}\n"
+	"fragColor *= vec4(outColor, 1.0f);\n"
+	"if(outAlphaValue < 1 && fragColor.w != 0){\n"
+		"fragColor.w = outAlphaValue;\n"
+	"}\n"
+	
+"}\n";
+
+static const char *framebuffer_vertex_shader = 
+"#version 330 core\n"
+"layout (location = 0) in vec2 aPos;\n"
+"layout (location = 1) in vec2 aTexCoords;\n"
+
+"out vec2 TexCoords;\n"
+
+"void main()\n"
+"{\n"
+    "gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0); \n"
+    "TexCoords = aTexCoords;\n"
+"}  \n";
+
+static const char *framebuffer_fragment_shader =
+"#version 330 core\n"
+"out vec4 FragColor;\n"
+
+"in vec2 TexCoords;\n"
+
+"uniform sampler2D screenTexture;\n"
+
+"void main()\n"
+"{\n"
+	"FragColor = texture(screenTexture, TexCoords);\n"
+	
+"}\n";
+
+static bool check_if_texture_is_not_registered(Texture texture, Batch *batch);
+static void bind_texture(int slot, unsigned int id);
 static void rebind_registered_texture_ids(Batch *batch);
-void create_shader_program(ShaderProgram *program, unsigned int vertex_shader, unsigned int fragment_shader);
-void make_vertex_shader(const char* path, unsigned int *vertex_shader);
-void make_fragment_shader(const char* path, unsigned int *fragment_shader);
+static void create_shader_program(ShaderProgram *program, unsigned int vertex_shader, unsigned int fragment_shader);
+static void make_vertex_shader(const char* path, unsigned int *vertex_shader);
+static void make_fragment_shader(const char* path, unsigned int *fragment_shader);
+static void make_vertex_shader_from_source(const char* path, unsigned int *vertex_shader);
+static void make_fragment_shader_from_source(const char* path, unsigned int *fragment_shader);
 
 int RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH = 0;
 
@@ -213,6 +353,18 @@ void compile_shader_program(ShaderProgram *shader_program, const char *vs_path, 
      printf("Succesfully compiled\n\n");
 }
 
+static void compile_shader_program_from_source(ShaderProgram *shader_program, const char *vs_text, const char *fs_text){
+     unsigned int vs;
+     unsigned int fs;
+     make_vertex_shader_from_source(vs_text, &vs);
+     make_fragment_shader_from_source(fs_text, &fs);
+     create_shader_program(shader_program, vs, fs);
+     printf("SHADER PROGRAM FROM SOURCE CODE %s\n", shader_program->name);
+     // printf("%s\n", vs_text);
+     // printf("%s\n", fs_path);
+     printf("Succesfully compiled\n\n");
+}
+
 void initialize_renderer(Renderer *renderer, Window *window){
      renderer->projection = glm::ortho(0.0f, (float)window->internalWidth, 0.0f, (float)window->internalHeight, 0.0f, -100.f);
      renderer->view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Modify this in real time to move the camera.
@@ -222,8 +374,8 @@ void initialize_renderer(Renderer *renderer, Window *window){
 
      renderer->default_shader_program.name = "Batch shader";
      renderer->framebuffer_shader_program.name = "Framebuffer shader";
-     compile_shader_program(&renderer->default_shader_program, "assets/shaders/default_vertex_shader.txt", "assets/shaders/default_fragment_shader.txt");
-     compile_shader_program(&renderer->framebuffer_shader_program, "assets/shaders/framebuffer_vertex_shader.txt", "assets/shaders/framebuffer_fragment_shader.txt");
+     compile_shader_program_from_source(&renderer->default_shader_program, default_vertex_shader, default_fragment_shader);
+     compile_shader_program_from_source(&renderer->framebuffer_shader_program, framebuffer_vertex_shader, framebuffer_fragment_shader);
 
      create_framebuffer_buffers(renderer);
      initialize_framebuffer(renderer);
@@ -393,20 +545,25 @@ void render_quad(Renderer *renderer, Rect *position, Texture *texture, int layer
      //This is temporary and it should actually select the next available batch when the current one gets filled or the
      //max amount of textures gets bound.
      if(renderer->current_shader.id != renderer->default_shader_program.id) {
+          // renderer->current_shader = renderer->default_shader_program;
+          // renderer->current_batch->shader_program = renderer->current_shader;
+		  
+		   renderer->batch_index++;
+          renderer->current_batch = &renderer->batches[renderer->batch_index];
           renderer->current_shader = renderer->default_shader_program;
           renderer->current_batch->shader_program = renderer->current_shader;
      }
-     if(renderer->current_batch->number_of_quads_to_copy == RendererInfo::QUADS_PER_BATCH || renderer->current_batch->texture_index == RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH){
+     else if(renderer->current_batch->number_of_quads_to_copy == RendererInfo::QUADS_PER_BATCH || renderer->current_batch->texture_index == RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH){
 
           // renderer->current_batch->texture_index = 0;
           renderer->batch_index++;
           renderer->current_batch = &renderer->batches[renderer->batch_index];
-          // renderer->current_shader = renderer->default_shader_program;
-          // renderer->current_batch->shader_program = renderer->current_shader;
+          renderer->current_shader = renderer->default_shader_program;
+          renderer->current_batch->shader_program = renderer->current_shader;
           // if(renderer->batch_index > 4) renderer->batch_index = 0;
      }
      // printf("Batch: %d,  Texture Index: %d\n", renderer->batch_index, renderer->current_batch->texture_index);
-     assert(renderer->batch_index < 5);
+      assert(renderer->batch_index < RendererInfo::NUMBER_OF_BATCHES);
      Batch *batch = renderer->current_batch;
 
      render_quad_on_batch(renderer, batch, position, texture, clip_region, layer, mirrorX, alpha_value, color, mirrorY);
@@ -422,7 +579,7 @@ void render_quad_to_ui(Renderer *renderer, Rect *position, Texture *texture, Rec
      render_quad_on_batch(renderer, &renderer->ui_batch, position, texture, clip_region, layer, mirrorX, alpha_value, color, mirrorY);
 }
 
-void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture,ShaderProgram shader ,Rect *clip_region, int layer, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
+void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture,ShaderProgram shader , int layer, Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
      if(renderer->current_batch->number_of_quads_to_copy == RendererInfo::QUADS_PER_BATCH || renderer->current_batch->texture_index == RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH || renderer->current_shader.id != shader.id){
 
           // renderer->current_batch->texture_index = 0;
@@ -433,7 +590,7 @@ void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *textur
           // if(renderer->batch_index > 4) renderer->batch_index = 0;
      }
      // printf("Batch: %d,  Texture Index: %d\n", renderer->batch_index, renderer->current_batch->texture_index);
-     assert(renderer->batch_index < 5);
+     assert(renderer->batch_index < RendererInfo::NUMBER_OF_BATCHES);
      Batch *batch = renderer->current_batch;
 
      render_quad_on_batch(renderer, batch, position, texture, clip_region, layer, mirrorX, alpha_value, color, mirrorY);
@@ -473,14 +630,14 @@ void renderer_draw(Renderer *renderer){
      //to reserve a texture unit just for the framebuffer.
      //What happened was that we used the texture unit 0 for the frambuffer texture, so the first texture
      //of the batch would get overwritten.
-	 // print_batching_info(renderer);
+	 print_batching_info(renderer);
      glBindFramebuffer(GL_FRAMEBUFFER, renderer->fbo);
      glEnable(GL_BLEND);
      // glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
      // glEnable(GL_DEPTH_TEST);
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0,0,(int)renderer->drawing_resolution.x, (int)renderer->drawing_resolution.y);
      for(int i = 0; i < RendererInfo::NUMBER_OF_BATCHES; ++i){
-          glViewport(0,0,(int)renderer->drawing_resolution.x, (int)renderer->drawing_resolution.y);
           glUseProgram(renderer->batches[i].shader_program.id);
 
           rebind_registered_texture_ids(&renderer->batches[i]);
@@ -562,7 +719,7 @@ void create_shader_program(ShaderProgram *program, unsigned int vertex_shader, u
      glDeleteShader(fragment_shader);
 }
 
-void make_vertex_shader(const char* path, unsigned int *vertex_shader){
+static void make_vertex_shader(const char* path, unsigned int *vertex_shader){
      char *source = text_file_to_char(path);
      *vertex_shader = glCreateShader(GL_VERTEX_SHADER);
      glShaderSource(*vertex_shader, 1 , &source, NULL);
@@ -583,7 +740,26 @@ void make_vertex_shader(const char* path, unsigned int *vertex_shader){
      free(source);
 }
 
-void make_fragment_shader(const char* path, unsigned int *fragment_shader){
+static void make_vertex_shader_from_source(const char* shader, unsigned int *vertex_shader){
+     *vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+     glShaderSource(*vertex_shader, 1 , &shader, NULL);
+     glCompileShader(*vertex_shader);
+
+     int  success;
+     char infoLog[512];
+     glGetShaderiv(*vertex_shader, GL_COMPILE_STATUS, &success);
+
+     if(!success)
+     {
+         glGetShaderInfoLog(*vertex_shader, 512, NULL, infoLog);
+         printf("Vertex shader compilation failed: \n %s", infoLog);
+     }
+     else{
+          // printf("Vertex shader succesfully compiled \n");
+     }
+}
+
+static void make_fragment_shader(const char* path, unsigned int *fragment_shader){
      char *source = text_file_to_char(path);
      *fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
      glShaderSource(*fragment_shader, 1 , &source, NULL);
@@ -602,6 +778,54 @@ void make_fragment_shader(const char* path, unsigned int *fragment_shader){
           // printf("Fragment shader succesfully compiled \n");
      }
      free(source);
+}
+
+static void make_fragment_shader_from_source(const char* shader, unsigned int *fragment_shader){
+     *fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+     glShaderSource(*fragment_shader, 1 , &shader, NULL);
+     glCompileShader(*fragment_shader);
+
+     int  success;
+     char infoLog[512];
+     glGetShaderiv(*fragment_shader, GL_COMPILE_STATUS, &success);
+
+     if(!success)
+     {
+         glGetShaderInfoLog(*fragment_shader, 512, NULL, infoLog);
+         printf("Fragmetn shader compilation failed: \n %s", infoLog);
+     }
+     else{
+          // printf("Fragment shader succesfully compiled \n");
+     }
+}
+
+ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shader, const char *name){
+	ShaderProgram shader;
+	shader.name = name;
+	unsigned int vs;
+	unsigned int fs;
+	make_vertex_shader_from_source(default_vertex_shader, &vs);
+	make_fragment_shader(path_to_fragment_shader, &fs);
+	shader.id = glCreateProgram();
+     glAttachShader(shader.id, vs);
+     glAttachShader(shader.id, fs);
+     glLinkProgram(shader.id);
+     int success;
+     glGetProgramiv(shader.id, GL_LINK_STATUS, &success);
+     if( success == GL_FALSE){
+          printf("Could not link the shader program \n");
+          exit(1);
+     }
+
+     glDetachShader(shader.id, vs);
+     glDetachShader(shader.id, fs);
+     glDeleteShader(vs);
+     glDeleteShader(fs);
+	 
+	 printf("SHADER PROGRAM %s\n", shader.name);
+     printf("Succesfully compiled\n\n");
+	 load_mvp_to_shader(renderer, shader);
+	return shader;
 }
 
 // TODO: Add the ability to choose the type of filter when creating the texture.
@@ -639,12 +863,12 @@ Texture make_texture(const char *path){
      return texture;
 }
 
-void bind_texture(int slot, unsigned int id){
+static void bind_texture(int slot, unsigned int id){
      glActiveTexture(GL_TEXTURE0 + slot);
      glBindTexture(GL_TEXTURE_2D, id);
 }
 
-bool check_if_texture_is_not_registered(Texture texture, Batch *batch){
+static bool check_if_texture_is_not_registered(Texture texture, Batch *batch){
      int difference_count = 0;
      // static int count = 0;
      for(int i = 0; i < RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH; i++){

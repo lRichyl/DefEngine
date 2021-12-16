@@ -1,5 +1,4 @@
-#ifndef RENDERER_H
-#define RENDERER_H
+#pragma once
 #include "glad/glad.h"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/type_ptr.hpp"
@@ -12,7 +11,7 @@ struct RendererInfo{
      static const int INDICES_PER_QUAD = 6;
      static const int TOTAL_INDICES =  QUADS_PER_BATCH * INDICES_PER_QUAD;
      static int MAX_TEXTURE_UNITS_PER_BATCH;
-     static const int NUMBER_OF_BATCHES = 5;
+     static const int NUMBER_OF_BATCHES = 30;
 };
 
 
@@ -89,9 +88,9 @@ void load_mvp_to_shader(Renderer *renderer, ShaderProgram shader);
 void render_quad(Renderer *renderer, Rect *position, Texture *texture, int layer, Rect *clip_region = NULL, bool mirror = false, float alpha_value = 255, V3 color = {1.0f,1.0f,1.0f}, bool mirrorY = false);
 void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alpha_value = 1,  int layer = 0);
 void render_quad_to_ui(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region = NULL,  int layer = 0, bool mirror = false, float alpha_value = 255, V3 color = {1.0f,1.0f,1.0f}, bool mirrorY = false);
-void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture, ShaderProgram shader,Rect *clip_region = NULL ,  int layer = 0, bool mirrorX = false, float alpha_value = 255, V3 color = {1.0f,1.0f,1.0f}, bool mirrorY = false);
+void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture, ShaderProgram shader, int layer ,Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {1.0f,1.0f,1.0f}, bool mirrorY = false);
 void change_drawing_resolution(Renderer *renderer, int width, int height);
 Texture make_texture(const char *path);
+ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shader, const char *name);
 void renderer_draw(Renderer *renderer);
 void destroy_renderer(Renderer *renderer);
-#endif

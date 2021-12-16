@@ -1,4 +1,4 @@
-#include "time.h"
+#include "timer.h"
 #include "renderer.h"
 #include "game.h"
 #include "text.h"
@@ -29,6 +29,9 @@ int main(){
 	window = create_window(1280, 720, "Game Engine");
 	window->internalWidth  = 1280;
 	window->internalHeight = 720;
+	// You should also probably change the drawing resolution with the function which is the internal resolution
+	// that is used to render to the framebuffer. This can benefit performance in lower values. The default value is 800x600.
+	// change_drawing_resolution(Renderer *renderer, int width, int height).
 
 	printf("%s \n",glGetString(GL_VERSION));
 	Renderer *renderer = create_renderer(window);
@@ -70,12 +73,10 @@ int main(){
 		//This is done because when we select the window it stops the execution of
 		//the program so the next time we get the current time and calculate dt
 		//it will be so big that physics break.
+		// So if we grab the window for more than 100ms we skip the game loop.
 		if(dt > 0 && dt < 0.1){
 		   game.GameLoop(dt, average_fps);
 		}
-		// MousePosition mouse= GetMousePosition(window);
-		// printf("%f , %f\n", mouse.x, mouse.y);
-		// printf("%f\n", average_fps);
 
 		LARGE_INTEGER end_time = get_time_counter();
 		float ms_per_frame = get_time_in_ms(start_time, end_time, perf_count_frequency);

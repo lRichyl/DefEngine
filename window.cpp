@@ -37,7 +37,6 @@ Window* create_window(int width, int height, const char *title){
      }
      glEnable(GL_BLEND);
 	 glEnable(GL_DEPTH_TEST);
-	 // glDepthFunc();  
 	 glDepthMask(true);
      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
      return window;
