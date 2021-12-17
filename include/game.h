@@ -4,6 +4,7 @@
 #include "renderer.h"
 #include "asset_manager.h"
 #include "sprite.h"
+#include "audio.h"
 
 
 struct Game{
@@ -17,4 +18,5 @@ struct Game{
 	bool showFPS = true;
 	
 	static AssetManager asset_manager;
+	Sound shot;
 };

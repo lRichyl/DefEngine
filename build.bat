@@ -1,1 +1,1 @@
-g++ -g -O0 -Wl,-subsystem,console *.cpp glad.c  -o EngineTest.exe -Iinclude -Idependencies/glfw/include  -Idependencies/glad/include -Idependencies/glm/ -Idependencies/stb/  -Ldependencies/glfw/lib -lglfw3 -lmingw32 -lopengl32 -lgdi32
+g++ -g -O0 -Wl,-subsystem,console *.cpp glad.c  -o EngineTest.exe -Iinclude -Idependencies/glfw/include -Idependencies/OpenAL/include  -Idependencies/glad/include -Idependencies/ -Idependencies/stb/  -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib -lglfw3 -lmingw32 -lOpenAL32 -lopengl32 -lgdi32

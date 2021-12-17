@@ -630,7 +630,7 @@ void renderer_draw(Renderer *renderer){
      //to reserve a texture unit just for the framebuffer.
      //What happened was that we used the texture unit 0 for the frambuffer texture, so the first texture
      //of the batch would get overwritten.
-	 print_batching_info(renderer);
+	 // print_batching_info(renderer);
      glBindFramebuffer(GL_FRAMEBUFFER, renderer->fbo);
      glEnable(GL_BLEND);
      // glClearColor(1.0f, 0.0f, 0.0f, 1.0f);

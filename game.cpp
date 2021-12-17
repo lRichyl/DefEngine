@@ -2,6 +2,7 @@
 #include "window.h"
 #include "input.h"
 #include "collision.h"
+#include "audio.h"
 // #include "engine/sprite.h"
 
 #include "GLFW/glfw3.h"
@@ -16,11 +17,20 @@ Game::Game(Renderer *r, Window *w){
     renderer = r;
     window = w;
     
-    
+    shot = make_sound("assets/sounds/shot.ogg");
+	// print_sound_data(&forest);
 }
 
 void Game::UpdateGame(float dt){
-  
+	Event e;
+	while(GetNextEvent(&e)){
+		if(e.key == GLFW_KEY_P && e.action == GLFW_PRESS){
+			play_sound(&shot);
+		}
+		else if(e.key == GLFW_KEY_S && e.action == GLFW_PRESS){
+			stop_sound(&shot);
+		}
+	}
     
 	
 }

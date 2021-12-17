@@ -3,6 +3,8 @@
 #include "game.h"
 #include "text.h"
 #include "input.h"
+#include "audio.h"
+#include "AL/alc.h"
 
 #include <cmath>
 #include <string>
@@ -11,10 +13,13 @@
 #include <stdlib.h>
 
 
+
+
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_image.h"
 #include "stb_truetype.h"
+
 
 
 void WindowResizeCallback(GLFWwindow* window, int width, int height){
@@ -53,7 +58,7 @@ int main(){
 	long long perf_count_frequency = get_performance_counter_frequency();
 	LARGE_INTEGER start_time = get_time_counter();
 
-	Game game = Game(renderer, window);
+	
 	// bool showFPS = true;
 	// Texture font = make_texture("assets/fonts/font.png");
 	// Text FPSText = Text(font, 12, V2{0,float(window->internalHeight)});
@@ -65,7 +70,22 @@ int main(){
 	SetMouseButtonCallback(window);
 	
 	float average_fps;
-
+	
+	char *s = (char *)ALCCall(alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER));
+	ALCdevice *audio_device = NULL; 
+	audio_device = ALCCall(alcOpenDevice(s));
+	assert(audio_device);
+	
+	ALCcontext *audio_context = NULL;
+	audio_context = ALCCall(alcCreateContext(audio_device, NULL ));
+	assert(audio_context);
+	ALCCall(alcMakeContextCurrent(audio_context));
+	// char *s;
+	
+	// printf("default output device: %s\n", s);
+	
+	
+	Game game = Game(renderer, window);
 	// float realfps ;
      while(!glfwWindowShouldClose(window->GLFWInstance)){
 
@@ -101,6 +121,9 @@ int main(){
 		}
 		
      }
+	 
+	 alcDestroyContext(audio_context);
+	 alcCloseDevice(audio_device);
      glfwTerminate();
      destroy_window(window);
      destroy_renderer(renderer);
