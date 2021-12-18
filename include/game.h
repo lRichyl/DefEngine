@@ -19,4 +19,6 @@ struct Game{
 	
 	static AssetManager asset_manager;
 	Sound shot;
+	Sound forest;
+	Music music;
 };

@@ -4,6 +4,7 @@
 #include "text.h"
 #include "input.h"
 #include "audio.h"
+
 #include "AL/alc.h"
 
 #include <cmath>
@@ -19,6 +20,7 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_image.h"
 #include "stb_truetype.h"
+
 
 
 
@@ -96,6 +98,7 @@ int main(){
 		// So if we grab the window for more than 100ms we skip the game loop.
 		if(dt > 0 && dt < 0.1){
 		   game.GameLoop(dt, average_fps);
+		   update_audio_streams();
 		}
 
 		LARGE_INTEGER end_time = get_time_counter();
