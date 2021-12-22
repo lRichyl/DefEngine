@@ -18,7 +18,7 @@ struct Game{
 	bool showFPS = true;
 	
 	static AssetManager asset_manager;
-	Sound shot;
-	Sound forest;
-	Music music;
+	
+	AnimatedSprite sprite;
+	Texture texture;
 };

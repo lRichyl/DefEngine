@@ -5,34 +5,8 @@
 #include "stb_image.h"
 #include <assert.h>
 
-// static const char *default_vertex_shader = 
-// "#version 330 core"
-// ""
-// "layout(location = 0) in vec3 position;"
-// "layout(location = 1) in vec2 texCoord;"
-// "layout(location = 2) in float texID;"
-// "layout(location = 3) in float alphaValue;"
-// "layout(location = 4) in vec3 color;"
-// ""
-// "out vec2 outTexCoord;"
-// "out float outTexID;"
-// "out float outAlphaValue;"
-// "out float depth;"
-// "out vec3 outColor;"
-// ""
-// "uniform mat4 u_projection;"
-// "uniform mat4 u_view;"
-// ""
-// "void main()"
-// "{"
-    // "gl_Position = u_projection * u_view * vec4(position, 1.0f);"
-	// "depth = position.z;"
-    // "outTexCoord = texCoord;"
-    // "outTexID = texID;"
-    // "outAlphaValue = alphaValue;"
-    // "outColor = color;"
-// "}";
 
+/////////// Default internal shaders ///////////////
 static const char *default_vertex_shader = 
 "#version 330 core \n"
 "layout(location = 0) in vec3 position;\n"
@@ -142,6 +116,8 @@ static const char *framebuffer_fragment_shader =
 	"FragColor = texture(screenTexture, TexCoords);\n"
 	
 "}\n";
+
+///////////////////////////////////////////////////////
 
 static bool check_if_texture_is_not_registered(Texture texture, Batch *batch);
 static void bind_texture(int slot, unsigned int id);
@@ -830,14 +806,14 @@ ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shade
 
 // TODO: Add the ability to choose the type of filter when creating the texture.
 Texture make_texture(const char *path){
-     Texture texture;
-     texture.data_buffer = stbi_load(path, &texture.width, &texture.height, &texture.channels, 0);
-     if(!texture.data_buffer){
-          printf("Could not find a texture image at the relative path: %s\n", path);
-          exit(-1);
-     }
+	Texture texture;
+	texture.data_buffer = stbi_load(path, &texture.width, &texture.height, &texture.channels, 0);
+	if(!texture.data_buffer){
+		printf("Could not find a texture image at the relative path: %s\n", path);
+		exit(-1);
+	}
 	 
-	 if(texture.channels == 4){
+	if(texture.channels == 4){
 		glGenTextures(1, &texture.id);
 		// printf("Texture ID: %d\n", texture.id);
 		glBindTexture(GL_TEXTURE_2D, texture.id);
@@ -848,7 +824,7 @@ Texture make_texture(const char *path){
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)texture.data_buffer);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		stbi_image_free(texture.data_buffer);
-	 }else if(texture.channels == 3){
+	}else if(texture.channels == 3){
 		glGenTextures(1, &texture.id);
 		// printf("Texture ID: %d\n", texture.id);
 		glBindTexture(GL_TEXTURE_2D, texture.id);
@@ -859,13 +835,13 @@ Texture make_texture(const char *path){
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)texture.data_buffer);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		stbi_image_free(texture.data_buffer);
-	 }
-     return texture;
+	}
+	return texture;
 }
 
 static void bind_texture(int slot, unsigned int id){
-     glActiveTexture(GL_TEXTURE0 + slot);
-     glBindTexture(GL_TEXTURE_2D, id);
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, id);
 }
 
 static bool check_if_texture_is_not_registered(Texture texture, Batch *batch){

@@ -97,6 +97,7 @@ int main(){
 		//it will be so big that physics break.
 		// So if we grab the window for more than 100ms we skip the game loop.
 		if(dt > 0 && dt < 0.1){
+			Timer::dt = dt;
 		   game.GameLoop(dt, average_fps);
 		   update_audio_streams();
 		}
