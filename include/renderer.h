@@ -2,17 +2,22 @@
 #include "glad/glad.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "collision.h"
 #include "window.h"
 #include "math.h"
+#include "texture.h"
+#include "memory_arena.h"
 
-struct RendererInfo{
+
+
+namespace RendererInfo{
      static const int QUADS_PER_BATCH = 1000;
      static const int FLOATS_PER_QUAD = 40;
      static const int INDICES_PER_QUAD = 6;
      static const int TOTAL_INDICES =  QUADS_PER_BATCH * INDICES_PER_QUAD;
      static int MAX_TEXTURE_UNITS_PER_BATCH;
      static const int NUMBER_OF_BATCHES = 30;
-};
+}
 
 
 
@@ -62,24 +67,14 @@ struct Renderer{
      Batch *current_batch;
      ShaderProgram default_shader_program;
      ShaderProgram current_shader;
+	 
+	 static MemoryArena main_arena;
 };
 
 
 
-struct Texture{
-     unsigned int id;
-     int width;
-     int height;
-     int channels;
-     unsigned char *data_buffer;
-};
 
-struct Rect{
-     float x;
-     float y;
-     float w;
-     float h;
-};
+
 
 Renderer* create_renderer(Window *window);
 void compile_shader_program(ShaderProgram *shader_program, const char *vs_path, const char *fs_path);
@@ -90,7 +85,9 @@ void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alp
 void render_quad_to_ui(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region = NULL,  int layer = 1, bool mirror = false, float alpha_value = 255, V3 color = {1.0f,1.0f,1.0f}, bool mirrorY = false);
 void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture, ShaderProgram shader, int layer ,Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {1.0f,1.0f,1.0f}, bool mirrorY = false);
 void change_drawing_resolution(Renderer *renderer, int width, int height);
-Texture make_texture(const char *path);
+// Texture make_texture(const char *path);
+// Texture make_texture(unsigned int channels, int width, int height);
+// void update_texture(Texture *texture);
 ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shader, const char *name);
 void renderer_draw(Renderer *renderer);
 void destroy_renderer(Renderer *renderer);

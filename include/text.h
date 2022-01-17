@@ -12,7 +12,7 @@ struct Font{
      Font(const char *path, float size);
      float size;
      Texture texture;
-     static constexpr int texture_size = 512;
+     static const int texture_size = 512;
      stbtt_bakedchar characters_data[96];
 };
 

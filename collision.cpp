@@ -1,6 +1,9 @@
 #include "collision.h"
 #include <cmath>
+#include <stdio.h>
+#include <vector>
 #include <cfloat>
+// #include "entity.h"
 
 //Collision check using the minkowski difference method
 bool DoRectsCollide(Rect b1, Rect b2, V2 *penetration){
@@ -53,3 +56,22 @@ bool DoRectContainsPoint(Rect b, V2 point){
 		return false;
 	}
 }
+
+
+static std::vector<Rect> collision_boxes;
+
+void check_collisions(EntityManager *em){
+	check_collision_between_player_and_entities(&em->player, &em->enemies);
+}
+
+// Rect*& set_collision_box(EntityType type, void *entity){
+	// Rect r;
+	// r.collision_info.origin.type = type;
+	// r.collision_info.origin.entity = entity;
+	
+	
+	// collision_boxes.push_back(r);
+	// Rect *rect = (Rect*)&collision_boxes.back();
+	// printf("%d\n", rect->collision_info.origin.type);
+	// return collision_boxes.back();
+// }

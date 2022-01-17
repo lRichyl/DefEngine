@@ -1,5 +1,4 @@
-#ifndef EVENTS_H
-#define EVENTS_H
+#pragma once
 
 #include "GLFW/glfw3.h"
 #include "window.h"
@@ -41,4 +40,4 @@ bool GetNextEvent(Event *event);
 
 MouseInfo GetMouseInfo(Window *window);
 
-#endif
+

@@ -1,5 +1,4 @@
-#ifndef MATH_H
-#define MATH_H
+#pragma once
 
 struct V2{
      float x = 0;
@@ -15,5 +14,19 @@ struct V3{
      float z = 0;
 };
 
+struct V4{
+     float x = 0;
+     float y = 0;
+     float z = 0;
+	 float w = 0;
+};
 
-#endif
+struct Rect{
+	float x;
+	float y;
+	float w;
+	float h;
+	
+	// bool collided = false;
+	// CollisionInfo collision_info;
+};

@@ -1,5 +1,4 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#pragma once
 #include "GLFW/glfw3.h"
 struct Window{
      GLFWwindow *GLFWInstance;
@@ -13,4 +12,3 @@ void swap_buffers(Window *window);
 void poll_events();
 void destroy_window(Window *window);
 
-#endif

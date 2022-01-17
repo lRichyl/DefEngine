@@ -128,8 +128,8 @@ int main(){
 	 
 	 alcDestroyContext(audio_context);
 	 alcCloseDevice(audio_device);
-     glfwTerminate();
      destroy_window(window);
      destroy_renderer(renderer);
+     glfwTerminate();
      return 0;
 }

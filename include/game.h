@@ -2,6 +2,7 @@
 
 #include "time.h"
 #include "renderer.h"
+// #include "texture.h"
 #include "asset_manager.h"
 #include "sprite.h"
 #include "audio.h"
@@ -19,6 +20,7 @@ struct Game{
 	
 	static AssetManager asset_manager;
 	
-	AnimatedSprite sprite;
+	// AnimatedSprite sprite;
 	Texture texture;
+	EntityManager em;
 };

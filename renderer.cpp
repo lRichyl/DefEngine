@@ -1,8 +1,9 @@
 #include "glad/glad.h"
 #include "utilities.h"
 #include "renderer.h"
+#include "texture.h"
 #include "math.h"
-#include "stb_image.h"
+
 #include <assert.h>
 
 
@@ -128,7 +129,7 @@ static void make_fragment_shader(const char* path, unsigned int *fragment_shader
 static void make_vertex_shader_from_source(const char* path, unsigned int *vertex_shader);
 static void make_fragment_shader_from_source(const char* path, unsigned int *fragment_shader);
 
-int RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH = 0;
+// int RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH = 0;
 
 void create_framebuffer_buffers(Renderer *renderer){
      // glUseProgram(renderer->framebuffer_shader_program.id);
@@ -154,23 +155,22 @@ void create_framebuffer_buffers(Renderer *renderer){
 }
 
 void change_drawing_resolution(Renderer *renderer, int width, int height){
-     renderer->drawing_resolution.x = width;
-     renderer->drawing_resolution.y = height;
-     glDeleteTextures(1, &renderer->framebuffer_texture);
-     glGenTextures(1, &renderer->framebuffer_texture);
-     glActiveTexture(GL_TEXTURE0);
-     glBindTexture(GL_TEXTURE_2D, renderer->framebuffer_texture);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-     glBindTexture(GL_TEXTURE_2D, 0);
+	renderer->drawing_resolution.x = width;
+	renderer->drawing_resolution.y = height;
+	glDeleteTextures(1, &renderer->framebuffer_texture);
+	glGenTextures(1, &renderer->framebuffer_texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, renderer->framebuffer_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-     glBindFramebuffer(GL_FRAMEBUFFER, renderer->fbo);
-     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderer->framebuffer_texture, 0);
-     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+	glBindFramebuffer(GL_FRAMEBUFFER, renderer->fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderer->framebuffer_texture, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void initialize_framebuffer(Renderer *renderer){
@@ -182,10 +182,10 @@ static void initialize_framebuffer(Renderer *renderer){
      glActiveTexture(GL_TEXTURE0);
      glBindTexture(GL_TEXTURE_2D, renderer->framebuffer_texture);
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)renderer->drawing_resolution.x, (int)renderer->drawing_resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
      glBindTexture(GL_TEXTURE_2D, 0);
 
 
@@ -341,7 +341,10 @@ static void compile_shader_program_from_source(ShaderProgram *shader_program, co
      printf("Succesfully compiled\n\n");
 }
 
+MemoryArena Renderer::main_arena;
+
 void initialize_renderer(Renderer *renderer, Window *window){
+	init_memory_arena(&Renderer::main_arena, 1000000); // Allocate an arena of 10MB.
      renderer->projection = glm::ortho(0.0f, (float)window->internalWidth, 0.0f, (float)window->internalHeight, 0.0f, -100.f);
      renderer->view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Modify this in real time to move the camera.
      renderer->drawing_resolution.x = window->internalWidth;
@@ -369,6 +372,8 @@ void initialize_renderer(Renderer *renderer, Window *window){
      load_mvp_to_shader(renderer, renderer->default_shader_program);
 
 }
+
+// static void re
 
 Renderer* create_renderer(Window *window){
      Renderer *renderer = new Renderer;
@@ -804,40 +809,8 @@ ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shade
 	return shader;
 }
 
-// TODO: Add the ability to choose the type of filter when creating the texture.
-Texture make_texture(const char *path){
-	Texture texture;
-	texture.data_buffer = stbi_load(path, &texture.width, &texture.height, &texture.channels, 0);
-	if(!texture.data_buffer){
-		printf("Could not find a texture image at the relative path: %s\n", path);
-		exit(-1);
-	}
-	 
-	if(texture.channels == 4){
-		glGenTextures(1, &texture.id);
-		// printf("Texture ID: %d\n", texture.id);
-		glBindTexture(GL_TEXTURE_2D, texture.id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)texture.data_buffer);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		stbi_image_free(texture.data_buffer);
-	}else if(texture.channels == 3){
-		glGenTextures(1, &texture.id);
-		// printf("Texture ID: %d\n", texture.id);
-		glBindTexture(GL_TEXTURE_2D, texture.id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)texture.data_buffer);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		stbi_image_free(texture.data_buffer);
-	}
-	return texture;
-}
+
+
 
 static void bind_texture(int slot, unsigned int id){
 	glActiveTexture(GL_TEXTURE0 + slot);
