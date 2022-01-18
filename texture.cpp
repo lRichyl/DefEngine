@@ -85,7 +85,8 @@ Texture make_texture(unsigned int channels, int width, int height){
 // When you modify the data buffer of a texture you need to call this function to send the new data to the GPU.
 void update_texture(Texture *texture){
 	glBindTexture(GL_TEXTURE_2D, texture->id);
-	glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)texture->data_buffer);
+	// glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)texture->data_buffer);
+	glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, texture->width, texture->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)texture->data_buffer);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
