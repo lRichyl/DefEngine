@@ -91,3 +91,4 @@ void change_drawing_resolution(Renderer *renderer, int width, int height);
 ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shader, const char *name);
 void renderer_draw(Renderer *renderer);
 void destroy_renderer(Renderer *renderer);
+void print_rect(Rect *rect);

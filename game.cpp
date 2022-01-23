@@ -19,7 +19,6 @@ Game::Game(Renderer *r, Window *w){
     window = w;
 	
 	texture = make_texture(4, 64, 32);
-	// texture.data_buffer = unsigned char[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 	int size = texture.channels * texture.width * texture.height;
 	
 	for(int j = 0; j < texture.height; j++){
@@ -34,26 +33,9 @@ Game::Game(Renderer *r, Window *w){
 			// }
 		}
 	}
-	update_texture(&texture);
+	// clear_texture(&texture);
+	// font = Font("assets/fonts/Chicken Crispy.ttf", 32);
 	
-	// sprite.info.texture = texture;
-	// sprite.info.size = {128,128};
-	// sprite.timer.timeToWait = 1;
-	// add_animation_frame(&sprite, {0,0,32,32});
-	// add_animation_frame(&sprite, {32,0,32,32});
-    
-	// Player *p1 = &em.player;
-	// p1->collision_box.x = 500;
-	// p1->collision_box.y = 500;
-	// p1->collision_box.w = 10;
-	// p1->collision_box.h = 10;
-	
-	// p2.collision_box->x = 500;
-	// p2.collision_box->y = 500;
-	// p2.collision_box->w = 5;
-	// p2.collision_box->h = 5;
-	
-	// Player p4;
 	
 	Enemy e;
 	e.collision_box = Rect{500,500,10,10};
@@ -77,11 +59,13 @@ void Game::UpdateGame(float dt){
 // Rect B = {350,250,200,200};
 // Rect C = {375,225,200,200};
 
-static Rect r = {0, 200, 64, 32};
+static Rect r = {0, 800, 10, 10};
 
 void Game::DrawGame(float dt, float fps){
 	// static ShaderProgram test_shader = make_shader(renderer, "assets/shaders/fragment_shader_test.glsl", "test_shader");
 	// render_animation(renderer, &sprite, {0,(float)renderer->window->internalHeight});
+	std::string a = "ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz1234567890";
+	render_text(renderer, &font, &a, {0, 720}, V3{255,255,255});
 	render_quad(renderer, &r, &texture, 0);
     
     renderer_draw(renderer);

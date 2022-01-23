@@ -845,3 +845,7 @@ static void rebind_registered_texture_ids(Batch *batch){
           bind_texture( i, batch->registered_textures_ids[i]);
      }
 }
+
+void print_rect(Rect *rect){
+	printf("x: %f, y: %f, w: %f, h: %f\n", rect->x, rect->y, rect->w, rect->h);
+}

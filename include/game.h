@@ -2,7 +2,7 @@
 
 #include "time.h"
 #include "renderer.h"
-// #include "texture.h"
+#include "text.h"
 #include "asset_manager.h"
 #include "sprite.h"
 #include "audio.h"
@@ -20,7 +20,7 @@ struct Game{
 	
 	static AssetManager asset_manager;
 	
-	// AnimatedSprite sprite;
+	Font font  =Font("assets/fonts/ChrustyRock.ttf", 40);
 	Texture texture;
 	EntityManager em;
 };

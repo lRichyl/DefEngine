@@ -83,6 +83,7 @@ Texture make_texture(unsigned int channels, int width, int height){
 }
 
 // When you modify the data buffer of a texture you need to call this function to send the new data to the GPU.
+// This copies the entire texture data buffer onto the GPU, so it may not be the most optimal. 
 void update_texture(Texture *texture){
 	glBindTexture(GL_TEXTURE_2D, texture->id);
 	// glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)texture->data_buffer);
@@ -93,10 +94,37 @@ void update_texture(Texture *texture){
 
 void set_pixel(Texture *texture, V4 color, V2 location){
 	int index = (location.y * texture->width + location.x) * (texture->channels);
-	printf("%d , %d\n", index, texture->size);
+	// printf("%d , %d\n", index, texture->size);
 	assert(index <= texture->size);
+	unsigned char pixel_data[4] = {color.x, color.y, color.z, color.w} ;
+	glBindTexture(GL_TEXTURE_2D, texture->id);
+	glTexSubImage2D (GL_TEXTURE_2D, 0, location.x, location.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixel_data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	
+	// This is done to update the texture data reference on CPU side.
 	texture->data_buffer[index] = color.x;
 	texture->data_buffer[index + 1] = color.y;
 	texture->data_buffer[index + 2] = color.z;
 	texture->data_buffer[index + 3] = color.w;
+}
+
+V4 get_pixel(Texture *texture, V2 location){
+	int index = (location.y * texture->width + location.x) * (texture->channels);
+	// printf("%d , %d\n", index, texture->size);
+	V4 result;
+	assert(index <= texture->size);
+	result.x = texture->data_buffer[index];
+	result.y = texture->data_buffer[index + 1];
+	result.z = texture->data_buffer[index + 2];
+	result.w = texture->data_buffer[index + 3];
+	
+	return result;
+}
+
+void clear_texture(Texture *texture){
+	glBindTexture(GL_TEXTURE_2D, texture->id);
+	unsigned char data[texture->size] = {}; 
+	glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, texture->width, texture->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	memset(texture->data_buffer, 0, texture->size);
 }

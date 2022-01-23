@@ -20,4 +20,6 @@ struct Texture{
 Texture make_texture(const char *path);
 Texture make_texture(unsigned int channels, int width, int height);
 void set_pixel(Texture *texture, V4 color, V2 location);
+V4 get_pixel(Texture *texture, V2 location);
 void update_texture(Texture *texture);
+void clear_texture(Texture *texture);
