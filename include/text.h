@@ -29,6 +29,7 @@ struct Font{
 	std::unordered_map<char, CharacterInfo> characters;
 };
 
+int utf8_to_unicode(unsigned short c);
 void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {1.0f, 1.0f, 1.0f}
                , bool center = false);
 

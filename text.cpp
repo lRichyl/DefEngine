@@ -5,8 +5,21 @@
 
 
 
-static int BUFFER_SIZE          = 1 << 20;
+static int BUFFER_SIZE = 1 << 20;
 
+int utf8_to_unicode(unsigned short c){
+	unsigned short unicode = 0x0000;
+	
+	if(c < 128){
+		unicode = c;
+	}
+	else if(c < 65536){
+		unsigned char low  = c & 0x003F;
+		unsigned char high = (c & 0x1F00) >> 8;
+		unicode = low | (high << 6);
+	}
+	return unicode;
+}
 
 Font::Font(const char *path, float size){
 	texture.width = texture_size;
@@ -30,6 +43,7 @@ Font::Font(const char *path, float size){
 	GLint swizzleMask[] = {GL_ONE, GL_ONE, GL_ONE, GL_RED};
 	glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	texture.id = ftex;
 	glBindTexture(GL_TEXTURE_2D, 0);
 	fclose(file);
@@ -40,6 +54,7 @@ Font::Font(const char *path, float size){
 	for(int i = 0; i < AMOUNT_OF_CHARACTERS; ++i){
 		stbtt_aligned_quad q;
 		
+		// unsigned char c = i;
 		stbtt_GetBakedQuad(characters_data, texture_size,texture_size, i, &x, &y ,&q,1);
 		
 		int width  = abs(q.x1 - q.x0);
@@ -73,8 +88,17 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 		// finalPosition.x = position.x - textSize/4.0f;//This is a hack. We should store the characters data to calculate this properly.
 		// finalPosition.y = position.y;
      // }
-     for(int i = 0; i < length; ++i){
-		int char_index = text[i] - 32;
+     for(int i = 0; i < length; i++){
+		unsigned short c = text[i];
+		
+		// For the moment we only take into account 2 byte wide Utf-8 characters, which is enough to represent most of the 
+		// alphabets.
+		if(c > 127){ // If the character is greater than 127 we sample 2 bytes from the string.
+			c = ((text[i] & 0x00FF) << 8) | text[i + 1] & 0x00FF;
+			i++;
+		}
+		int char_index = utf8_to_unicode(c);
+		char_index    -= 32;
 		CharacterInfo *character = &font->characters[char_index];
 		// Rect boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
 		Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
@@ -82,7 +106,6 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 		
 		render_quad(renderer, &bounding_box, &font->texture, 0, &character->clipping_box, false, 255, color, true);
      }
-	// once = false;
 
 }
 

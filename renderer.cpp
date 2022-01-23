@@ -605,44 +605,43 @@ void renderer_draw(Renderer *renderer){
      //What happened was that we used the texture unit 0 for the frambuffer texture, so the first texture
      //of the batch would get overwritten.
 	 // print_batching_info(renderer);
-     glBindFramebuffer(GL_FRAMEBUFFER, renderer->fbo);
-     glEnable(GL_BLEND);
-     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, renderer->fbo);
+	glEnable(GL_BLEND);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0,0,(int)renderer->drawing_resolution.x, (int)renderer->drawing_resolution.y);
      for(int i = 0; i < RendererInfo::NUMBER_OF_BATCHES; ++i){
-          glUseProgram(renderer->batches[i].shader_program.id);
+		glUseProgram(renderer->batches[i].shader_program.id);
 
-          rebind_registered_texture_ids(&renderer->batches[i]);
+		rebind_registered_texture_ids(&renderer->batches[i]);
 
-          glBindVertexArray(renderer->batches[i].vao);
-          glBindBuffer(GL_ARRAY_BUFFER, renderer->batches[i].vbo);
+		glBindVertexArray(renderer->batches[i].vao);
+		glBindBuffer(GL_ARRAY_BUFFER, renderer->batches[i].vbo);
 
-          int bytes_to_copy = renderer->batches[i].vertices_index * sizeof(float);
-          //We only copy the vertex data that we are going to draw instead of copying the entire preallocated buffer.
-          //This way we can preallocate a vertex buffer of any size and not affect performance.
-          glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_to_copy, (void*)renderer->batches[i].vertex_buffer);
-          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->ibo);
-          glDrawElements(GL_TRIANGLES, renderer->batches[i].total_indices_to_draw, GL_UNSIGNED_INT, 0);
-          glBindVertexArray(0);
+		int bytes_to_copy = renderer->batches[i].vertices_index * sizeof(float);
+		//We only copy the vertex data that we are going to draw instead of copying the entire preallocated buffer.
+		//This way we can preallocate a vertex buffer of any size and not affect performance.
+		glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_to_copy, (void*)renderer->batches[i].vertex_buffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->ibo);
+		glDrawElements(GL_TRIANGLES, renderer->batches[i].total_indices_to_draw, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 
-          // renderer->batches[i].vertices_index = 0;
-          // renderer->batches[i].number_of_quads_to_copy = 0;
-          // renderer->batches[i].total_indices_to_draw = 0;
-
-     }
-     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-     int width, height;
-     glfwGetWindowSize(renderer->window->GLFWInstance, &width, &height);
-
-     glViewport(0, 0, width, height);
-     draw_framebuffer(renderer);
+		// renderer->batches[i].vertices_index = 0;
+		// renderer->batches[i].number_of_quads_to_copy = 0;
+		// renderer->batches[i].total_indices_to_draw = 0;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-	print_batching_info(renderer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	int width, height;
+	glfwGetWindowSize(renderer->window->GLFWInstance, &width, &height);
+
+	glViewport(0, 0, width, height);
+	draw_framebuffer(renderer);
+
+
+	// print_batching_info(renderer);
 	clear_batches(renderer);
 
 }
