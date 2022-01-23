@@ -8,15 +8,25 @@
 #include <map>
 #include <string>
 
-struct Font{
-     Font(const char *path, float size);
-     float size;
-     Texture texture;
-     static const int texture_size = 512;
-     stbtt_bakedchar characters_data[96];
+
+struct CharacterInfo{
+	Rect clipping_box;
+	float width;
+	float height;
+	float down_padding;
 };
 
-void render_text(Renderer* renderer, Font *font, std::string *text, V2 position, V3 color = {1.0f, 1.0f, 1.0f}
+struct Font{
+	Font(const char *path, float size);
+	static const int texture_size = 512;
+	float size;
+	
+	Texture texture;
+	stbtt_bakedchar characters_data[96];
+	std::map<char, CharacterInfo> characters;
+};
+
+void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {1.0f, 1.0f, 1.0f}
                , bool center = false);
 
 // struct Text{

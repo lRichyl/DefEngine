@@ -64,9 +64,10 @@ static Rect r = {0, 800, 10, 10};
 void Game::DrawGame(float dt, float fps){
 	// static ShaderProgram test_shader = make_shader(renderer, "assets/shaders/fragment_shader_test.glsl", "test_shader");
 	// render_animation(renderer, &sprite, {0,(float)renderer->window->internalHeight});
-	std::string a = "ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz1234567890";
-	render_text(renderer, &font, &a, {0, 720}, V3{255,255,255});
-	render_quad(renderer, &r, &texture, 0);
+	const char *a = "jugar a los gatos no se puede quien";
+	render_text(renderer, &font, a, {0, 500}, V3{255,255,255});
+	render_text(renderer, &font, "Esta es una prueba", {0, 500 - font.size}, V3{255,255,255});
+	// render_quad(renderer, &r, &texture, 0);
     
     renderer_draw(renderer);
     swap_buffers(window);
