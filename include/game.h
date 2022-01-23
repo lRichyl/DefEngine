@@ -20,7 +20,7 @@ struct Game{
 	
 	static AssetManager asset_manager;
 	
-	Font font  =Font("assets/fonts/ChrustyRock.ttf", 40);
+	Font font  =Font("assets/fonts/Simvoni.ttf", 40);
 	Texture texture;
 	EntityManager em;
 };

@@ -6,10 +6,7 @@
 
 
 static int BUFFER_SIZE          = 1 << 20;
-static int FIRST_CHARACTER      = 32;
-static int AMOUNT_OF_CHARACTERS = 96;
-static int LAST_CHARACTER       = FIRST_CHARACTER + AMOUNT_OF_CHARACTERS;
-static int SPACE                = 15;
+
 
 Font::Font(const char *path, float size){
 	texture.width = texture_size;
@@ -55,6 +52,7 @@ Font::Font(const char *path, float size){
 		char_info.width        = width;
 		char_info.height       = height;
 		char_info.down_padding = q.y1;
+		char_info.advance      = characters_data[i].xadvance;
 		
 		// Add every character to the map.
 		characters[i] = char_info;
@@ -79,8 +77,8 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 		int char_index = text[i] - 32;
 		CharacterInfo *character = &font->characters[char_index];
 		// Rect boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
-		Rect bounding_box = {position.x, position.y + character->height - character->down_padding, character->width, character->height};
-		position.x += character->width;
+		Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
+		position.x += character->advance;
 		
 		render_quad(renderer, &bounding_box, &font->texture, 0, &character->clipping_box, false, 255, color, true);
      }

@@ -367,8 +367,6 @@ void initialize_renderer(Renderer *renderer, Window *window){
      initialize_texture_sampler(renderer->default_shader_program);
      //This needs to happen after the shader program is compiled.
 
-     initialize_batch_vertex_buffers_and_arrays(&renderer->ui_batch, renderer);
-     initialize_texture_sampler(renderer->ui_batch.shader_program);
      load_mvp_to_shader(renderer, renderer->default_shader_program);
 
 }
@@ -445,7 +443,6 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
 
      //We do this so that if we try to draw outside the window we don't add data to the vertex buffer.
      if((final_position.x + final_position.w >= 0) && (final_position.x <= win->internalWidth) && (final_position.y >= 0) && (final_position.y - final_position.h <= win->internalHeight)){
-          // Batch *current_batch = &renderer->main_batch;
 			float texture_slot_id = 0;
 			if(texture){
 				if(check_if_texture_is_not_registered(*texture, batch)){
@@ -554,12 +551,6 @@ void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alp
 	render_quad(renderer, position, NULL, layer, NULL, false, alpha_value, color);
 }
 
-//Things drawn with this function do no get drawn on the same framebuffer as the main render_quad function so it does not get
-//the postprocessing effects. Mainly used to do UI stuff.
-void render_quad_to_ui(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region, int layer, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
-     render_quad_on_batch(renderer, &renderer->ui_batch, position, texture, clip_region, layer, mirrorX, alpha_value, color, mirrorY);
-}
-
 void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture,ShaderProgram shader , int layer, Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
      if(renderer->current_batch->number_of_quads_to_copy == RendererInfo::QUADS_PER_BATCH || renderer->current_batch->texture_index == RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH || renderer->current_shader.id != shader.id){
 
@@ -585,6 +576,9 @@ static void clear_batches(Renderer *renderer){
      //frame we can repopulate the batches with new textures.
      for(int i = 0; i < RendererInfo::NUMBER_OF_BATCHES; ++i){
           renderer->batches[i].texture_index = 0;
+		  renderer->batches[i].vertices_index = 0;
+          renderer->batches[i].number_of_quads_to_copy = 0;
+          renderer->batches[i].total_indices_to_draw = 0;
           for(int j = 0; j < RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH; ++j){
                renderer->batches[i].registered_textures_ids[j] = 0;
           }
@@ -603,7 +597,6 @@ void print_batching_info(Renderer *renderer){
 
 void renderer_draw(Renderer *renderer){
      // print_batching_info(renderer);
-     // Batch *current_batch = &renderer->main_batch;
 
 
      //We need to rebind the registered textures in each batch before drawing to the framebuffer.
@@ -614,8 +607,6 @@ void renderer_draw(Renderer *renderer){
 	 // print_batching_info(renderer);
      glBindFramebuffer(GL_FRAMEBUFFER, renderer->fbo);
      glEnable(GL_BLEND);
-     // glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-     // glEnable(GL_DEPTH_TEST);
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0,0,(int)renderer->drawing_resolution.x, (int)renderer->drawing_resolution.y);
      for(int i = 0; i < RendererInfo::NUMBER_OF_BATCHES; ++i){
@@ -634,21 +625,16 @@ void renderer_draw(Renderer *renderer){
           glDrawElements(GL_TRIANGLES, renderer->batches[i].total_indices_to_draw, GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
 
-          renderer->batches[i].vertices_index = 0;
-          renderer->batches[i].number_of_quads_to_copy = 0;
-          renderer->batches[i].total_indices_to_draw = 0;
-          // renderer->batches[i].texture_index = 0;
+          // renderer->batches[i].vertices_index = 0;
+          // renderer->batches[i].number_of_quads_to_copy = 0;
+          // renderer->batches[i].total_indices_to_draw = 0;
 
      }
-	 // glClear(GL_DEPTH_BUFFER_BIT);
      glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-     // glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-     // glDisable(GL_DEPTH_TEST);
 
-     // renderer->batches[i].texture_index = 0;
      int width, height;
      glfwGetWindowSize(renderer->window->GLFWInstance, &width, &height);
 
@@ -656,27 +642,7 @@ void renderer_draw(Renderer *renderer){
      draw_framebuffer(renderer);
 
 
-//----------------UI will be rendered after the framebuffer so that shaders related to the aspect of the game do not affect it---------------------------------------
-     {
-     rebind_registered_texture_ids(&renderer->ui_batch);
-
-          glUseProgram(renderer->ui_batch.shader_program.id);
-          glBindVertexArray(renderer->ui_batch.vao);
-          glBindBuffer(GL_ARRAY_BUFFER, renderer->ui_batch.vbo);
-
-          int bytes_to_copy = renderer->ui_batch.vertices_index * sizeof(float);
-          //We only copy the vertex data that we are going to draw instead of copying the entire preallocated buffer.
-          //This way we can preallocate a vertex buffer of any size and not affect performance.
-          glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_to_copy, (void*)renderer->ui_batch.vertex_buffer);
-          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->ibo);
-          glDrawElements(GL_TRIANGLES, renderer->ui_batch.total_indices_to_draw, GL_UNSIGNED_INT, 0);
-          glBindVertexArray(0);
-
-          renderer->ui_batch.vertices_index = 0;
-          renderer->ui_batch.number_of_quads_to_copy = 0;
-          renderer->ui_batch.total_indices_to_draw = 0;
-     }
-	// print_batching_info(renderer);
+	print_batching_info(renderer);
 	clear_batches(renderer);
 
 }

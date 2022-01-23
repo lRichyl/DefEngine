@@ -1,12 +1,14 @@
 #ifndef TEXT_H
 #define TEXT_H
 #include "renderer.h"
-#include "math.h"
 #include "stb_truetype.h"
 #include "glad/glad.h"
-#include <vector>
-#include <map>
-#include <string>
+#include <unordered_map>
+
+static const int FIRST_CHARACTER      = 32;
+static const int LAST_CHARACTER       = 255;
+static const int AMOUNT_OF_CHARACTERS = LAST_CHARACTER - FIRST_CHARACTER;
+static const int SPACE                = 15;
 
 
 struct CharacterInfo{
@@ -14,6 +16,7 @@ struct CharacterInfo{
 	float width;
 	float height;
 	float down_padding;
+	float advance;
 };
 
 struct Font{
@@ -22,28 +25,13 @@ struct Font{
 	float size;
 	
 	Texture texture;
-	stbtt_bakedchar characters_data[96];
-	std::map<char, CharacterInfo> characters;
+	stbtt_bakedchar characters_data[AMOUNT_OF_CHARACTERS];
+	std::unordered_map<char, CharacterInfo> characters;
 };
 
 void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {1.0f, 1.0f, 1.0f}
                , bool center = false);
 
-// struct Text{
-//      void SetGlyphs();
-//      void Render(Renderer *renderer, std::string text);
-//
-//      int x;
-//      int y;
-//      float size;
-//      std::string currentText;
-//      Texture font;
-//
-//      std::vector<Rect> glyphsToRender {};
-//      std::vector<Rect> glyphsPositions {};
-//
-//      static std::map<std::string, Rect> glyphsMap;
-//
-// };
+
 
 #endif
