@@ -59,15 +59,15 @@ void Game::UpdateGame(float dt){
 // Rect B = {350,250,200,200};
 // Rect C = {375,225,200,200};
 
-static Rect r = {0, 400, 200, 200};
+static Rect r = {640, 360, 1, 1};
 
 void Game::DrawGame(float dt, float fps){
 	// static ShaderProgram test_shader = make_shader(renderer, "assets/shaders/fragment_shader_test.glsl", "test_shader");
 	// render_animation(renderer, &sprite, {0,(float)renderer->window->internalHeight});
 	const char *a = "Qué Cómo sí á úlcera";
 	render_text(renderer, &font, a, {0, 500}, V3{255,255,255});
-	render_text(renderer, &font, "The quick brown fox jumps over the lazy dog", {0, 500 - font.size}, V3{255,255,255});
-	render_quad(renderer, &r, &font.texture, 0);
+	render_text(renderer, &font, "The quick brown fox jumps over the lazy dog", {640, 360}, V3{255,255,255}, true);
+	render_quad(renderer, &r, NULL, 0, NULL, false, 255, {255,0,255});
 	// unsigned short c = 'á';
 	// unsigned short unicode = utf8_to_unicode(c);
 	// printf("%d, \n", unicode);

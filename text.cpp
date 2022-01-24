@@ -48,13 +48,12 @@ Font::Font(const char *path, float size){
 	glBindTexture(GL_TEXTURE_2D, 0);
 	fclose(file);
 	 
-	// Cache the character's clipping box in the texture, width and height.
+	// Cache the character's texture clipping box(position in the atlas), width and height.
 	float x = 0;
 	float y = 0;
 	for(int i = 0; i < AMOUNT_OF_CHARACTERS; ++i){
 		stbtt_aligned_quad q;
 		
-		// unsigned char c = i;
 		stbtt_GetBakedQuad(characters_data, texture_size,texture_size, i, &x, &y ,&q,1);
 		
 		int width  = abs(q.x1 - q.x0);
@@ -78,17 +77,36 @@ Font::Font(const char *path, float size){
 	characters[0].width = SPACE;
 }
 
+// The text origin is on the bottom left. 
+// @SPEED: For static text it's probably best to make a text type and calculate it's length when created so that we don't have
+// 		 to do it every frame. And leave this function for text that changes constantly. 
 void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color, bool center){
      int length = strlen(text);
 	 
-	 //This does not center correctly, it's just a very raw approximation.
-     // if(center){
-		// float textSize = length * font->size;
-		// printf("%f\n", textSize);
-		// finalPosition.x = position.x - textSize/4.0f;//This is a hack. We should store the characters data to calculate this properly.
-		// finalPosition.y = position.y;
-     // }
-     for(int i = 0; i < length; i++){
+	if(center){
+		float whole_text_size = 0;
+		float tallest = 0;
+		for(int i = 0; i < length; i++){
+			unsigned short c = text[i];
+			if(c > 127){ // If the character is greater than 127 we sample 2 bytes from the string.
+				c = ((text[i] & 0x00FF) << 8) | text[i + 1] & 0x00FF;
+				i++;
+			}
+			int char_index = utf8_to_unicode(c);
+			char_index    -= 32;
+			CharacterInfo *character = &font->characters[char_index];
+			whole_text_size += character->advance;
+			if(character->height - character->down_padding > tallest){
+				tallest = character->height - character->down_padding;
+			}
+		}
+		float middle_x_pos = whole_text_size / 2.f;
+		position.x -= middle_x_pos;
+		position.y -= tallest / 2.f;
+	}
+	
+	
+	for(int i = 0; i < length; i++){
 		unsigned short c = text[i];
 		
 		// For the moment we only take into account 2 byte wide Utf-8 characters, which is enough to represent most of the 
@@ -105,7 +123,7 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 		position.x += character->advance;
 		
 		render_quad(renderer, &bounding_box, &font->texture, 0, &character->clipping_box, false, 255, color, true);
-     }
+	}
 
 }
 

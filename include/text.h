@@ -6,6 +6,8 @@
 #include <unordered_map>
 
 static const int FIRST_CHARACTER      = 32;
+// We should change this if we want to support more characters. Don't forget to increase the texture size
+// to fit all the characters.
 static const int LAST_CHARACTER       = 255;
 static const int AMOUNT_OF_CHARACTERS = LAST_CHARACTER - FIRST_CHARACTER;
 static const int SPACE                = 15;
