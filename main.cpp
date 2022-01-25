@@ -37,11 +37,20 @@ int main(){
 	window->internalWidth  = 1280;
 	window->internalHeight = 720;
 	// You should also probably change the drawing resolution with the function which is the internal resolution
-	// that is used to render to the framebuffer. This can benefit performance in lower values. The default value is 800x600.
+	// that is used to render to the framebuffer. This can benefit performance in lower values. The default value is 800x600 but
+	// if you change the value of internalWidth and internalHeight before calling create_renderer() the drawing resolution is set
+	// to those values.
+	// The internal width and height are different than the drawing resolution. The first pair is used to do calculations and positioning
+	// things on screen and the drawing resolution is the size of the framebuffer.
+	// So you can set the drawing resolution to 480 by 320 and the display will look blurry and the window size and internal dimensions are kept the same.
+	// This can be changed during runtime.
+	
+	// This function must be called after create_renderer(). 
 	// change_drawing_resolution(Renderer *renderer, int width, int height).
 
 	printf("%s \n",glGetString(GL_VERSION));
 	Renderer *renderer = create_renderer(window);
+	// change_drawing_resolution(renderer, 480, 320);
 
 	if(!renderer){
 	  printf("Error creating the renderer\n");

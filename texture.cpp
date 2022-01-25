@@ -40,6 +40,8 @@ Texture make_texture(const char *path){
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		stbi_image_free(texture.data_buffer);
+	}else{
+		printf("Incorrect number of channels\n");
 	}
 	return texture;
 }

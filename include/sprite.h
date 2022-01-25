@@ -14,8 +14,8 @@ struct SpriteInfo{
 	Texture texture;
 	bool is_x_mirrored = false;
 	bool is_y_mirrored = false;
-	float alpha = 1;
-	int layer = 0;
+	float alpha = 255;
+	// int layer = 0;  // This is not used at the moment.
 	V3 tint = {1,1,1};
 	V2 size = {32, 32};
 	// V2 position = {};

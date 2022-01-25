@@ -18,6 +18,9 @@ Game::Game(Renderer *r, Window *w){
     renderer = r;
     window = w;
 	
+	frame_texture = make_texture("assets/textures/4.png");
+	smiley = make_texture("assets/textures/smiley.png");
+	link = make_texture("assets/textures/link.png");
 	texture = make_texture(4, 64, 32);
 	int size = texture.channels * texture.width * texture.height;
 	
@@ -33,6 +36,13 @@ Game::Game(Renderer *r, Window *w){
 			// }
 		}
 	}
+	Texture texture;
+	// Sprite frame_sprite;
+	// frame_sprite.info.texture = frame_texture;
+	init_frame(&frame, {0, 720, 500, 500}, texture);
+	set_padding(&frame, 5, 5);
+	add_button(&frame, {0, 0, 100, 40}, "Hola", frame_texture, {0,0,0,0});
+	move_frame(&frame, {500,500});
 	// clear_texture(&texture);
 	// font = Font("assets/fonts/Chicken Crispy.ttf", 32);
 	
@@ -59,18 +69,19 @@ void Game::UpdateGame(float dt){
 // Rect B = {350,250,200,200};
 // Rect C = {375,225,200,200};
 
-static Rect r = {640, 360, 1, 1};
+static Rect r  = {640, 360, 100, 100};
+static Rect r1 = {660, 360, 100, 100};
 
 void Game::DrawGame(float dt, float fps){
 	// static ShaderProgram test_shader = make_shader(renderer, "assets/shaders/fragment_shader_test.glsl", "test_shader");
 	// render_animation(renderer, &sprite, {0,(float)renderer->window->internalHeight});
 	const char *a = "Qué Cómo sí á úlcera";
-	render_text(renderer, &font, a, {0, 500}, V3{255,255,255});
-	render_text(renderer, &font, "The quick brown fox jumps over the lazy dog", {640, 360}, V3{255,255,255}, true);
-	render_quad(renderer, &r, NULL, 0, NULL, false, 255, {255,0,255});
-	// unsigned short c = 'á';
-	// unsigned short unicode = utf8_to_unicode(c);
-	// printf("%d, \n", unicode);
+	render_frame(renderer, &frame);
+	render_text(renderer, &font, a, {450, 450}, V3{255,255,255});
+	render_text(renderer, &font, "The quick brown fox jumps over the lazy dog", {640, 360}, V3{255,0,255}, true);
+	render_quad(renderer, &r1, &link);
+	render_quad(renderer, &r, &smiley);
+	
     
     renderer_draw(renderer);
     swap_buffers(window);

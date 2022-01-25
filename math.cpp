@@ -1,5 +1,6 @@
 #include "math.h"
 
+// Mirror x.
 void V2::SwitchXComponents(V2 *a, V2 *b){
      float temporalX = a->x;
 
@@ -7,6 +8,7 @@ void V2::SwitchXComponents(V2 *a, V2 *b){
      b->x = temporalX;
 }
 
+// Mirror y.
 void V2::SwitchYComponents(V2 *a, V2 *b){
      float temporalY = a->y;
 

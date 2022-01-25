@@ -122,7 +122,7 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 		Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
 		position.x += character->advance;
 		
-		render_quad(renderer, &bounding_box, &font->texture, 0, &character->clipping_box, false, 255, color, true);
+		render_quad(renderer, &bounding_box, &font->texture, &character->clipping_box, false, 255, color, true);
 	}
 
 }

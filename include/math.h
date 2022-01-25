@@ -26,7 +26,4 @@ struct Rect{
 	float y;
 	float w;
 	float h;
-	
-	// bool collided = false;
-	// CollisionInfo collision_info;
 };
