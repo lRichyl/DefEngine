@@ -20,8 +20,8 @@ Window* create_window(int width, int height, const char *title){
      //if you resize the window the everything scales correctly.
      //This should be set only once at the start of the program.
 	 // Default values.
-     window->internalWidth = 800;
-     window->internalHeight = 600;
+     window->internalWidth = width;
+     window->internalHeight = height;
 
      if(!window->GLFWInstance){
           glfwTerminate();

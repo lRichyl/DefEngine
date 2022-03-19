@@ -2,6 +2,7 @@
 
 #include "GLFW/glfw3.h"
 #include "window.h"
+#include "math.h"
 
 struct Event{
      int key;
@@ -22,8 +23,7 @@ struct MouseButton{
 };
 
 struct MouseInfo{
-	double x;
-	double y;
+	V2 position;
 	MouseButton left {GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE};
 	MouseButton right {GLFW_MOUSE_BUTTON_RIGHT, GLFW_RELEASE};
 };

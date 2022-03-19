@@ -2,11 +2,11 @@
 #include <queue>
 #include <stdio.h>
 
-static std::queue<Event> events;
+static std::queue<Event> events; 
 
 static MouseInfo mouseInfo;
 
-static void set_mouse_button_state(MouseButton *mb_info){
+static void get_mouse_button_state(MouseButton *mb_info){
 	
 	if(mb_info->state == MouseButtonState::MOUSE_NONE && mb_info->gl_key_state == GLFW_PRESS){
 		mb_info->state = MouseButtonState::MOUSE_PRESSED;
@@ -54,8 +54,8 @@ void PollKeyboardEvents(GLFWwindow* window, int key, int scancode, int action, i
 
 void CursorCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	mouseInfo.x = xpos;
-	mouseInfo.y = ypos;
+	mouseInfo.position.x = xpos;
+	mouseInfo.position.y = ypos;
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods){
@@ -87,7 +87,7 @@ void SetMouseButtonCallback(Window *window){
 
 
 MouseInfo GetMouseInfo(Window *window){
-	MouseInfo result;
+	MouseInfo result = mouseInfo;
 	int windowWidth;
 	int windowHeight;
 	glfwGetWindowSize(window->GLFWInstance, &windowWidth, &windowHeight);
@@ -95,14 +95,14 @@ MouseInfo GetMouseInfo(Window *window){
 	double xBufferToWindowFactor = (double)window->internalWidth / (float)windowWidth; 
 	double yBufferToWindowFactor = (double)window->internalHeight / (float)windowHeight;
 	
-	result.x = mouseInfo.x * xBufferToWindowFactor;
-	result.y = mouseInfo.y * yBufferToWindowFactor;
+	result.position.x = mouseInfo.position.x * xBufferToWindowFactor;
+	result.position.y = mouseInfo.position.y * yBufferToWindowFactor;
 	
-	result.y = window->internalHeight - result.y;
+	result.position.y = window->internalHeight - result.position.y;
 	// printf("%f , %f , %f\n", xBufferToWindowFactor, result.x, result.y);
 	
-	set_mouse_button_state(&mouseInfo.left);
-	set_mouse_button_state(&mouseInfo.right);
+	get_mouse_button_state(&mouseInfo.left);
+	get_mouse_button_state(&mouseInfo.right);
 
 	result.left = mouseInfo.left;
 	result.right = mouseInfo.right;

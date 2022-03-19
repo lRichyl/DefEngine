@@ -1,5 +1,4 @@
-#ifndef TEXT_H
-#define TEXT_H
+#pragma once
 #include "renderer.h"
 #include "stb_truetype.h"
 #include "glad/glad.h"
@@ -22,6 +21,7 @@ struct CharacterInfo{
 };
 
 struct Font{
+	Font(){};
 	Font(const char *path, float size);
 	static const int texture_size = 512;
 	float size;
@@ -32,9 +32,7 @@ struct Font{
 };
 
 int utf8_to_unicode(unsigned short c);
-void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {1.0f, 1.0f, 1.0f}
+void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {255, 255, 255}
                , bool center = false);
+float get_text_width(Font *font, const char *text);			
 
-
-
-#endif

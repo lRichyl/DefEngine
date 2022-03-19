@@ -1,10 +1,11 @@
-#include "renderer.h"
+// #include "renderer.h"
+#include "game.h"
 #include "texture.h"
 #include "memory_arena.h"
 #include "glad/glad.h"
 #include "stb_image.h"
 #include <assert.h>
-#include "texture.h"
+// #include "texture.h"
 
 
 // TODO: Add the ability to choose the type of filter when creating the texture.
@@ -50,7 +51,7 @@ Texture make_texture(unsigned int channels, int width, int height){
 	Texture texture;
 	texture.size = channels * width * height;
 	// texture.data_buffer = new unsigned char[texture.size];
-	texture.data_buffer = allocate_array_from_arena<unsigned char>(&Renderer::main_arena, texture.size);
+	texture.data_buffer = allocate_array_from_arena<unsigned char>(&Game::main_arena, texture.size);
 	assert(texture.data_buffer);
 	texture.width = width;
 	texture.height = height;

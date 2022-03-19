@@ -4,10 +4,17 @@
 #include "renderer.h"
 #include "text.h"
 #include "asset_manager.h"
-#include "sprite.h"
+#include "input.h"
 #include "audio.h"
 #include "gui.h"
+#include "level_editor.h"
 
+#define DEV
+
+enum GameState{
+	GAME_PLAY,
+	GAME_EDITOR
+};
 
 struct Game{
 	void UpdateGame(float dt);
@@ -18,14 +25,21 @@ struct Game{
 	Renderer *renderer;
 	Window *window;
 	bool showFPS = true;
+	bool showEditor = false;
+	GameState state = GameState::GAME_PLAY;
 	
-	static AssetManager asset_manager;
+	static MouseInfo     mouse;
+	static AssetManager  asset_manager;
+	static MemoryArena   main_arena;
+	static EntityManager em;
+	static float         dt;
 	
-	Font font  =Font("assets/fonts/Simvoni.ttf", 40);
-	Frame frame;
+	Font font  = Font("assets/fonts/Simvoni.ttf", 16);
+	// Frame frame;
+
+	LevelEditor level_editor;
 	Texture texture;
 	Texture smiley;
 	Texture link;
 	Texture frame_texture;
-	EntityManager em;
 };

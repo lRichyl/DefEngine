@@ -50,7 +50,7 @@ int main(){
 
 	printf("%s \n",glGetString(GL_VERSION));
 	Renderer *renderer = create_renderer(window);
-	// change_drawing_resolution(renderer, 480, 320);
+	// change_drawing_resolution(renderer, 1280, 720);
 
 	if(!renderer){
 	  printf("Error creating the renderer\n");
@@ -70,9 +70,6 @@ int main(){
 	LARGE_INTEGER start_time = get_time_counter();
 
 	
-	// bool showFPS = true;
-	// Texture font = make_texture("assets/fonts/font.png");
-	// Text FPSText = Text(font, 12, V2{0,float(window->internalHeight)});
 	glfwSetWindowSizeCallback(window->GLFWInstance,WindowResizeCallback);
 	glfwSwapInterval(1); //This should be set to 2 if the refresh rate of a monitor is 120Hz. If it's higher we need to come up with a factor.
 	

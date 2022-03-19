@@ -1,11 +1,12 @@
-#ifndef SPRITE_H
-#define SPRITE_H
-#include "renderer.h"
+#pragma once
 #include "math.h"
+#include "texture.h"
+// #include "renderer.h"
 #include "timer.h"
 
 #include <vector>
 
+struct Renderer;
 // Clipping boxes values are based on the top left corner of the texture. 
 // Position is the position of the top left corner of the sprite. The origin of world coordinates is on the
 // bottom left corner of the screen.
@@ -16,7 +17,7 @@ struct SpriteInfo{
 	bool is_y_mirrored = false;
 	float alpha = 255;
 	// int layer = 0;  // This is not used at the moment.
-	V3 tint = {1,1,1};
+	V3 tint = {255,255,255};
 	V2 size = {32, 32};
 	// V2 position = {};
 
@@ -42,6 +43,3 @@ struct AnimatedSprite{
 
 void add_animation_frame(AnimatedSprite *animation, Rect clipping_box);
 void render_animation(Renderer *renderer, AnimatedSprite *anim_spr, V2 position);
-
-
-#endif

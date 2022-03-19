@@ -1,7 +1,5 @@
 #pragma once
 #include <cstddef>
-#include "renderer.h"
-// #include "texture.h"
 #include "memory_arena.h"
 #include "glad/glad.h"
 #include "stb_image.h"

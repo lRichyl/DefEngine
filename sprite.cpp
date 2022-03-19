@@ -1,4 +1,5 @@
 #include "sprite.h"
+#include "renderer.h"
 
 void render_sprite(Renderer *renderer, Sprite *spr, V2 position){
 	Rect bounding_box = {position.x, position.y, spr->info.size.x, spr->info.size.y};

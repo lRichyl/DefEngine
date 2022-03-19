@@ -9,7 +9,6 @@
 #include "memory_arena.h"
 
 
-
 namespace RendererInfo{
      static const int QUADS_PER_BATCH = 1000;
      static const int FLOATS_PER_QUAD = 36;
@@ -68,7 +67,6 @@ struct Renderer{
      ShaderProgram default_shader_program;
      ShaderProgram current_shader;
 	 
-	 static MemoryArena main_arena;
 };
 
 
@@ -80,9 +78,9 @@ Renderer* create_renderer(Window *window);
 void compile_shader_program(ShaderProgram *shader_program, const char *vs_path, const char *fs_path);
 void initialize_texture_sampler(ShaderProgram shader);
 void load_mvp_to_shader(Renderer *renderer, ShaderProgram shader);
-void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region = NULL, bool mirror = false, float alpha_value = 255, V3 color = {1.0f,1.0f,1.0f}, bool mirrorY = false);
+void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region = NULL, bool mirror = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
 void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alpha_value = 255);
-void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture, ShaderProgram shader, Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {1.0f,1.0f,1.0f}, bool mirrorY = false);
+void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture, ShaderProgram shader, Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
 void change_drawing_resolution(Renderer *renderer, int width, int height);
 ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shader, const char *name);
 void renderer_draw(Renderer *renderer);

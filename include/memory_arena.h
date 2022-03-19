@@ -93,6 +93,7 @@ T* allocate_from_arena(MemoryArena *arena){
 	if(fittable_memory){
 		T* data;
 		data = (T*)fittable_memory;
+		*data = T(); // We call the default constructor to initialize default values.
 		// printf("Allocated Address : %X\n", fittable_memory);
 		arena->allocated_memory += sizeof(T);
 		arena->available_memory = arena->total_memory - arena->allocated_memory;
@@ -116,6 +117,10 @@ T* allocate_array_from_arena(MemoryArena *arena, int array_size){
 		// printf("Allocated Address : %X\n", fittable_memory);
 		arena->allocated_memory += sizeof(T) * array_size;
 		arena->available_memory = arena->total_memory - arena->allocated_memory;
+		
+		for(int i = 0; i < array_size; i++){
+			data[i] = T(); // We call the default constructor to initialize default values for every object in the array.
+		}
 		
 		return data;
 	}

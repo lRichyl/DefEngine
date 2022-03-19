@@ -2,7 +2,7 @@
 #include "utilities.h"
 #include "renderer.h"
 #include "texture.h"
-#include "math.h"
+// #include "math.h"
 
 #include <assert.h>
 
@@ -341,10 +341,9 @@ static void compile_shader_program_from_source(ShaderProgram *shader_program, co
      printf("Succesfully compiled\n\n");
 }
 
-MemoryArena Renderer::main_arena;
 
 void initialize_renderer(Renderer *renderer, Window *window){
-	init_memory_arena(&Renderer::main_arena, 1000000); // Allocate an arena of 10MB.
+	// init_memory_arena(&Renderer::main_arena, 1000000); // Allocate an arena of 10MB.
      renderer->projection = glm::ortho(0.0f, (float)window->internalWidth, 0.0f, (float)window->internalHeight, 0.0f, -100.f);
      renderer->view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Modify this in real time to move the camera.
      renderer->drawing_resolution.x = window->internalWidth;
@@ -394,6 +393,7 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
      V2 top_right_clip;
      V2 bottom_right_clip;
      float normalized_alpha_value = alpha_value / 255.f; // / 255.f;
+	 V3 normalized_color = {color.x/255.f, color.y/255.f, color.z/255.f};
      Rect final_position;
 	 // float layer  = 0;
 	 // int max_layers = 100;
@@ -471,9 +471,9 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
           batch->vertex_buffer[batch->vertices_index + 3] = top_left_clip.y;
           batch->vertex_buffer[batch->vertices_index + 4] = texture_slot_id;
           batch->vertex_buffer[batch->vertices_index + 5] = normalized_alpha_value;
-          batch->vertex_buffer[batch->vertices_index + 6] = color.x;
-          batch->vertex_buffer[batch->vertices_index + 7] = color.y;
-          batch->vertex_buffer[batch->vertices_index + 8] = color.z;
+          batch->vertex_buffer[batch->vertices_index + 6] = normalized_color.x;
+          batch->vertex_buffer[batch->vertices_index + 7] = normalized_color.y;
+          batch->vertex_buffer[batch->vertices_index + 8] = normalized_color.z;
 
           batch->vertex_buffer[batch->vertices_index + 9] = final_position.x;
           batch->vertex_buffer[batch->vertices_index + 10] = final_position.y - final_position.h;
@@ -482,9 +482,9 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
           batch->vertex_buffer[batch->vertices_index + 12] = bottom_left_clip.y;
           batch->vertex_buffer[batch->vertices_index + 13] = texture_slot_id;
           batch->vertex_buffer[batch->vertices_index + 14] = normalized_alpha_value;
-          batch->vertex_buffer[batch->vertices_index + 15] = color.x;
-          batch->vertex_buffer[batch->vertices_index + 16] = color.y;
-          batch->vertex_buffer[batch->vertices_index + 17] = color.z;
+          batch->vertex_buffer[batch->vertices_index + 15] = normalized_color.x;
+          batch->vertex_buffer[batch->vertices_index + 16] = normalized_color.y;
+          batch->vertex_buffer[batch->vertices_index + 17] = normalized_color.z;
 
           batch->vertex_buffer[batch->vertices_index + 18] = final_position.x + final_position.w;
           batch->vertex_buffer[batch->vertices_index + 19] = final_position.y - final_position.h;
@@ -493,9 +493,9 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
           batch->vertex_buffer[batch->vertices_index + 21] = bottom_right_clip.y;
           batch->vertex_buffer[batch->vertices_index + 22] = texture_slot_id;
           batch->vertex_buffer[batch->vertices_index + 23] = normalized_alpha_value;
-          batch->vertex_buffer[batch->vertices_index + 24] = color.x;
-          batch->vertex_buffer[batch->vertices_index + 25] = color.y;
-          batch->vertex_buffer[batch->vertices_index + 26] = color.z;
+          batch->vertex_buffer[batch->vertices_index + 24] = normalized_color.x;
+          batch->vertex_buffer[batch->vertices_index + 25] = normalized_color.y;
+          batch->vertex_buffer[batch->vertices_index + 26] = normalized_color.z;
 
           batch->vertex_buffer[batch->vertices_index + 27] = final_position.x + final_position.w;
           batch->vertex_buffer[batch->vertices_index + 28] = final_position.y;
@@ -504,9 +504,9 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
           batch->vertex_buffer[batch->vertices_index + 30] = top_right_clip.y;
           batch->vertex_buffer[batch->vertices_index + 31] = texture_slot_id;
           batch->vertex_buffer[batch->vertices_index + 32] = normalized_alpha_value;
-          batch->vertex_buffer[batch->vertices_index + 33] = color.x;
-          batch->vertex_buffer[batch->vertices_index + 34] = color.y;
-          batch->vertex_buffer[batch->vertices_index + 35] = color.z;
+          batch->vertex_buffer[batch->vertices_index + 33] = normalized_color.x;
+          batch->vertex_buffer[batch->vertices_index + 34] = normalized_color.y;
+          batch->vertex_buffer[batch->vertices_index + 35] = normalized_color.z;
 
           batch->vertices_index += RendererInfo::FLOATS_PER_QUAD;
           batch->number_of_quads_to_copy++;
@@ -608,7 +608,9 @@ void renderer_draw(Renderer *renderer){
 	glBindFramebuffer(GL_FRAMEBUFFER, renderer->fbo);
 	glEnable(GL_BLEND);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// glViewport(0,0,(int)renderer->drawing_resolution.x, (int)renderer->drawing_resolution.y);
+	
+	// This makes sure that the batches are scaled properly when changing the size of the window.
+	glViewport(0,0,(int)renderer->drawing_resolution.x, (int)renderer->drawing_resolution.y); 
      for(int i = 0; i < RendererInfo::NUMBER_OF_BATCHES; ++i){
 		glUseProgram(renderer->batches[i].shader_program.id);
 
@@ -634,10 +636,9 @@ void renderer_draw(Renderer *renderer){
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// int width, height;
-	// glfwGetWindowSize(renderer->window->GLFWInstance, &width, &height);
-
-	// glViewport(0, 0, width, height);
+	int width, height;
+	glfwGetWindowSize(renderer->window->GLFWInstance, &width, &height);
+	glViewport(0, 0, width, height);
 	draw_framebuffer(renderer);
 
 

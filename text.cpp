@@ -127,3 +127,19 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 
 }
 
+float get_text_width(Font *font, const char *text){
+	float whole_text_size = 0;
+	int length = strlen(text);
+	for(int i = 0; i < length; i++){
+		unsigned short c = text[i];
+		if(c > 127){ // If the character is greater than 127 we sample 2 bytes from the string.
+			c = ((text[i] & 0x00FF) << 8) | text[i + 1] & 0x00FF;
+			i++;
+		}
+		int char_index = utf8_to_unicode(c);
+		char_index    -= 32;
+		CharacterInfo *character = &font->characters[char_index];
+		whole_text_size += character->advance;
+	}
+	return whole_text_size;
+}
