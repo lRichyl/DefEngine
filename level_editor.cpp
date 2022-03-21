@@ -98,6 +98,17 @@ static V2 get_tile(V2 mouse_pos){
 	return V2{mouse_pos.x / TILE_SIZE, ceil(mouse_pos.y / TILE_SIZE)};
 }
 
+static bool is_mouse_on_collision_region(Level *level, V2 mouse_pos, int *index = NULL){
+	for(int i = 0; i < level->collision_regions.size; i++){
+		Rect col_reg = level->collision_regions[i];
+		if(DoRectContainsPoint(col_reg, mouse_pos)){
+			if(index) *index = i;
+			return true;
+		} 
+	}
+	return false;
+}
+
 void update_level_editor(Renderer *renderer, LevelEditor *editor){
 	// printf("Layer %d\n", editor->current_layer);
 	switch(editor->state){
@@ -106,6 +117,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 				update_tabbed_menu(renderer, &editor->menu);
 			}else{
 				MapObject *tile_map = editor->current_level.layers[editor->current_layer];
+				assert(tile_map);
 				// When the entity selector is not showing, we can place tiles on the map.
 				MouseInfo mouse                  = Game::mouse;
 				EntitySelection *selection       = &editor->selected_entity;
@@ -121,27 +133,32 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 					if(entity->type == EntityType::ENTITY_COLLIDER){
 						static bool is_phase_one = true;
 						static V2 start_pos;
-						V2 tile_screen_pos = {(int)tile_position.x * TILE_SIZE, (int)tile_position.y * TILE_SIZE};
+						V2 tile_screen_pos = {(int)tile_position.x * TILE_SIZE, (int)tile_position.y * TILE_SIZE}; 
 						if(is_phase_one){
-							// TODO: Check if there's already a clip region on mouse tile position by checking if the mouse position is
-							//       inside one of the already placed collision regions. DO THE SAME FOR THE SECOND CLICK.
-							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED){
+							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&editor->current_level, mouse.position)){
 								start_pos    = tile_screen_pos;
 								is_phase_one = false;
 							}
+							// If we right click on an entity collider if gets removed. At the moment we can only delete collision regions if
+							// the collider entity is selected. Maybe we should change this ????
 							else if(mouse.right.state == MouseButtonState::MOUSE_PRESSED){
-								
+								int index = -1;
+								if(is_mouse_on_collision_region(&editor->current_level, mouse.position, &index)){
+									assert(index > -1);
+									erase_from_array(&editor->current_level.collision_regions, index);
+									return;
+								}
 							}
 							
 						}else{
-							// Correctly determine the corner positions of the collision region depending on where the second click is pressed.
+							// This code determines the corner positions of the collision region depending on where the second click is pressed.
 							Rect collision_region;
-							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED){
+							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&editor->current_level, mouse.position)){
 								if(start_pos.x == tile_screen_pos.x && start_pos.y == tile_screen_pos.y){
 									V2 final_pos     = {tile_screen_pos.x + editor->icon_size.x, tile_screen_pos.y - editor->icon_size.y};
 									collision_region = {start_pos.x, start_pos.y, abs(final_pos.x - start_pos.x), abs(final_pos.y - start_pos.y)};
 								}
-								else if (start_pos.x <= tile_screen_pos.x && start_pos.y > tile_screen_pos.y){
+								else if (start_pos.x <= tile_screen_pos.x && start_pos.y >= tile_screen_pos.y){
 									V2 final_pos     = {tile_screen_pos.x + editor->icon_size.x, tile_screen_pos.y - editor->icon_size.y};
 									collision_region = {start_pos.x, start_pos.y, abs(final_pos.x - start_pos.x), abs(final_pos.y - start_pos.y)};
 								}
@@ -152,7 +169,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 									int height       = top_right.y - bottom_left.y;
 									collision_region = {bottom_left.x, bottom_left.y + height, width, height};
 								}
-								else if (start_pos.x >= tile_screen_pos.x && start_pos.y > tile_screen_pos.y){
+								else if (start_pos.x >= tile_screen_pos.x && start_pos.y >= tile_screen_pos.y){
 									V2 bottom_left   = {tile_screen_pos.x, tile_screen_pos.y - editor->icon_size.y};
 									V2 top_right     = {start_pos.x + editor->icon_size.x, start_pos.y};
 									int width        = top_right.x - bottom_left.x;
@@ -166,6 +183,8 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 									int height       = top_left.y - bottom_right.y;
 									collision_region = {top_left.x, top_left.y, width, height};
 								}
+								
+								// TODO?: If the resulting rect is contained or contains another rect do not add the collision region.
 								add_array(&editor->current_level.collision_regions, collision_region);
 								is_phase_one = true;
 							}
@@ -173,11 +192,27 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 						return;
 					}
 					
-					// If we are within bounds and the current tile is not occupied insert the new tile in the current layer.
-					if(tile_position.x >= 0 && tile_position.y >= 0 && mouse.left.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index == -1){
-						tile_map[index].selected_entity = *selection;
-						tile_map[index].origin          =  selection;
+					if(tile_position.x >= 0 && tile_position.x < LEVEL_SIZE && tile_position.y >= 0 && tile_position.y < LEVEL_SIZE){
+						// If we are within bounds and the current tile is not occupied insert the new tile in the current layer.
+						if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index == -1){
+							if(!entity->special_placement){
+								tile_map[index].selected_entity = *selection;
+								tile_map[index].origin          =  selection;
+							}
+							else{
+								entity->special_placement();
+							}
+						}
+						else if(mouse.right.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index != -1){
+							EntitySelection empty_selection;
+							tile_map[index].selected_entity = empty_selection;
+						}
+						
+						
+						
 					}
+					
+					
 					
 				}
 			}
@@ -285,6 +320,7 @@ void init_level_entity_manager(Level *level, EntityManager *em){
 					Player *player = (Player*)entity;
 					em->player = *player;
 					em->player.position = position;
+					em->player.is_on_level = true;
 					break;
 				}
 				case ENTITY_SLIME:{
@@ -296,7 +332,7 @@ void init_level_entity_manager(Level *level, EntityManager *em){
 			}
 		}
 	}
-	// Collision regions can be used directly, as they are not dynamic entities. Just like the background and foreground tiles.
+	// Collision regions can be used directly, as they are not dynamic entities like the background and foreground tiles and do not require initialization.
 }
 
 void update_level(Renderer *renderer, Level *level, EntityManager *em){

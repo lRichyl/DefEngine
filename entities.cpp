@@ -8,18 +8,21 @@ void init_entity_manager(EntityManager *em){
 }
 
 void update_entities(EntityManager *em, Renderer *renderer){
-	update_player(&em->player, renderer);
+	if(em->player.is_on_level)
+		update_player(&em->player, renderer);
 	for(int i = 0; i < em->slimes.size; i++) update_slime(&em->slimes[i], renderer);
 }
 
 void render_entities(EntityManager *em, Renderer *renderer){
 	// This is just for testing. Entities should be drawn in order using the draw list.
-	render_player(&em->player, renderer);
+	if(em->player.is_on_level)
+		render_player(&em->player, renderer);
 	for(int i = 0; i < em->slimes.size; i++) render_slime(&em->slimes[i], renderer);
 }
 
 void clear_entity_manager(EntityManager *em){
 	// Do not clear the player and other entities that persist between levels.
+	em->player.is_on_level = false;
 	clear_array(&em->entities_draw_list);
 	clear_array(&em->slimes);
 }
@@ -59,6 +62,11 @@ void init_player(Player *player, V2 icon_size){
 	player->speed = 100;
 	player->bounding_box.w = icon_size.x;
 	player->bounding_box.h = icon_size.y;
+	
+	// Example of how to set the special placement function.
+	// player->special_placement = [](){
+		// printf("Player special placement\n");
+	// };
 }
 
 void update_player(Player *player, Renderer *renderer){

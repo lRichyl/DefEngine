@@ -42,6 +42,14 @@ inline void add_array(DefArray<T> *array, T data){
 	
 }
 
+template<typename T>
+void erase_from_array(DefArray<T> *array, int index){
+	for(int i = index; i < array->size - 1; i++){
+		array->data[i] = array_at(array, i + 1);
+	}
+	array->size--;
+}
+
 
 template<typename T>
 inline void clear_array(DefArray<T> *array){

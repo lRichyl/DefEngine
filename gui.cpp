@@ -206,7 +206,7 @@ void add_tab(TabbedMenu *tabbed_menu, const char *tab_text){
 	insert_to_def_table(tabbed_menu->tabs, tab_text, &tabbed_menu->tabbed_frames[tabbed_menu->number_of_tabs].frame);
 	tabbed_menu->number_of_tabs++;
 	tabbed_menu->last_tab_x_pos += tabbed_frame.tab.bounding_box.w;
-	printf("Added tab\n");
+	// printf("Added tab\n");
 	
 }
 

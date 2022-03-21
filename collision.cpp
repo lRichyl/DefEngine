@@ -76,7 +76,9 @@ void check_collision_between_player_and_collision_regions(Player *player, DefArr
 }
 
 void check_collisions(EntityManager *em, Level *current_level){
-	check_collision_between_player_and_entities(&em->player, &em->slimes);
-	check_collision_between_player_and_collision_regions(&em->player, &current_level->collision_regions);
+	if(em->player.is_on_level){
+		check_collision_between_player_and_entities(&em->player, &em->slimes);
+		check_collision_between_player_and_collision_regions(&em->player, &current_level->collision_regions);
+	}
 }
 

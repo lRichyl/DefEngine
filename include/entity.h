@@ -32,6 +32,10 @@ struct Entity{
 	Icon icon;
 	Texture texture;
 	int prototype_id = -1;
+	
+	// This function pointer is set when a placed entity requires extra configuration, like setting a relantionship with another entity, 
+	// setting text, etc.
+	void (*special_placement)() = NULL;
 };
 
 struct Collider : public Entity{
@@ -54,6 +58,7 @@ struct Player : public Entity{
 	float speed;
 	V2 direction;
 	Sprite sprite;
+	bool is_on_level = false;
 };
 
 void init_player(Player *player, V2 icon_size);
