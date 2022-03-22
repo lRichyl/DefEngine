@@ -32,7 +32,7 @@ void clear_entity_manager(EntityManager *em){
 	clear_array(&em->slimes);
 }
 
-void init_collider(Collider   *collider, V2 icon_size){
+void init_entity(Collider *collider, V2 icon_size){
 	collider->icon.sprite = Sprite();
 	collider->icon.sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
 	collider->icon.sprite.info.alpha     = 100;
@@ -50,7 +50,7 @@ void init_collider(Collider   *collider, V2 icon_size){
 	
 // }
 
-void init_player(Player *player, V2 icon_size){
+void init_entity(Player *player, V2 icon_size){
 	// Initialize the player's icon sprite.
 	player->icon.sprite = Sprite();
 	player->icon.sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
@@ -111,13 +111,12 @@ void render_player(Player *player, Renderer *renderer){
 	// printf("%f,%f\n", player->bounding_box.w, player->bounding_box.h);
 }
 
-void init_slime(Slime *slime, V2 icon_size){
+void init_entity(Slime *slime, V2 icon_size){
 	slime->sprite = Sprite();
 	slime->sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
-	slime->sprite.info.size      = {32,32};
+	slime->sprite.info.size      = icon_size;
 	slime->sprite.clipping_box   = {64,0,32,32};
 	slime->icon.sprite           = slime->sprite;
-	slime->icon.sprite.info.size = icon_size;
 	
 	slime->type                  = EntityType::ENTITY_SLIME;
 	slime->area                  = {1,1};
@@ -133,4 +132,19 @@ void render_slime(Slime *slime, Renderer *renderer){
 	render_sprite(renderer, &slime->sprite, slime->position);
 }
 
+void init_entity(Multi *multi, V2 icon_size){
+	multi->sprite = Sprite();
+	multi->sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
+	multi->sprite.info.size      = {64,64};
+	multi->sprite.clipping_box   = {0,32,64,64};
+	
+	multi->icon.sprite           = multi->sprite;
+	multi->icon.sprite.info.size = icon_size;
+
+	multi->type                  = EntityType::ENTITY_MULTI;
+	multi->area                  = {2,2};
+	multi->sprite = multi->icon.sprite;
+}
+void update_multi(Multi *multi, Renderer *renderer);
+void render_multi(Multi *multi, Renderer *renderer);
 

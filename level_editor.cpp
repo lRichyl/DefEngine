@@ -43,6 +43,13 @@ static void init_level(Level *level){
 	// }
 }
 
+template<typename T>
+void add_entity_prototype(LevelEditor *editor){
+	T *e = allocate_from_arena<T>(&Game::main_arena);
+	init_entity(e, editor->icon_size);
+	add_entity_prototype(editor, e);
+}
+
 void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_texture, Texture tab_texture){
 	init_tabbed_menu(&editor->menu, bounding_box, tab_texture, frame_texture, get_font(&Game::asset_manager, "tabs_font"), {0,0,0}, {0,0,0});
 	init_prototype_list(&editor->tiles, TILES_AMOUNT, "Tiles");
@@ -66,10 +73,14 @@ void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_tex
 	add_tile_prototype(editor, get_texture(&Game::asset_manager, "test_tiles"), {0,32,64,64}, {2,2});
 	
 	// Add entities prototypes.
-	Slime    *slime    = allocate_from_arena<Slime>   (&Game::main_arena); init_slime   (slime,    editor->icon_size); add_entity_prototype(editor, slime);
-	Player   *player   = allocate_from_arena<Player>  (&Game::main_arena); init_player  (player,   editor->icon_size); add_entity_prototype(editor, player);
-	Collider *collider = allocate_from_arena<Collider>(&Game::main_arena); init_collider(collider, editor->icon_size); add_entity_prototype(editor, collider);
-	
+	// Collider *collider = allocate_from_arena<Collider>(&Game::main_arena); init_collider(collider, editor->icon_size); add_entity_prototype(editor, collider);
+	// Slime    *slime    = allocate_from_arena<Slime>   (&Game::main_arena); init_slime   (slime,    editor->icon_size); add_entity_prototype(editor, slime);
+	// Player   *player   = allocate_from_arena<Player>  (&Game::main_arena); init_player  (player,   editor->icon_size); add_entity_prototype(editor, player);
+	add_entity_prototype<Collider>(editor);
+	add_entity_prototype<Slime>(editor);
+	add_entity_prototype<Player>(editor);
+	add_entity_prototype<Multi>(editor);
+	// IMPLEMENT MULTI TILE ENTITIES.
 }
 
 static Frame* get_tab_frame(DefTable<Frame*> *frame_table, const char *tab_name){
@@ -188,7 +199,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 									collision_region = {top_left.x, top_left.y, width, height};
 								}
 								
-								// TODO?: If the resulting rect is contained or contains another rect do not add the collision region.
+								// TODO?: If the resulting rect is contained or contains another collision region do not add the collision region.
 								add_array(&editor->current_level.collision_regions, collision_region);
 								is_phase_one = true;
 							}
@@ -206,7 +217,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 								tile_map[index].origin                = &tile_map[index].selected_entity;
 							}
 							else{
-								
+								// If it's multi tile we first check that there's not an object already in its area.
 								for(int j = 0; j < entity->area.y; j++){
 									for(int i = 0; i < entity->area.x; i++){
 										int multi_tile_index = index - i + (j * LEVEL_SIZE);
@@ -234,6 +245,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 								entity->special_placement();
 						}
 						else if(mouse.right.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index != -1){
+							// When right click is pressed the tile or multi tile on mouse position gets erased from the tile map. 
 							MapObject *map_object = &tile_map[index];
 							Entity *entity_to_erase = get_selection_entity(&map_object->selected_entity);
 							if(&map_object->selected_entity == map_object->origin && entity_to_erase->area.x == 1 && entity_to_erase->area.y == 1){
@@ -269,12 +281,6 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 			break;
 		}
 		
-		case EDITOR_COLLISION:{
-			
-			
-			
-			break;
-		}
 		
 		case EDITOR_TEST:{
 			update_level(renderer, &editor->current_level, &Game::em);
@@ -286,7 +292,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 	
 }
 
-static render_tile_map(Renderer *renderer, MapObject *tile_map){
+static void render_tile_map(Renderer *renderer, MapObject *tile_map){
 	for(int j = 0; j < LEVEL_SIZE; j++){
 		for(int i = 0; i < LEVEL_SIZE; i++){
 			V2 position = {i * TILE_SIZE, j * TILE_SIZE};
@@ -378,12 +384,8 @@ void init_level_entity_manager(Level *level, EntityManager *em){
 					em->player.is_on_level = true;
 					break;
 				}
-				case ENTITY_SLIME:{
-					Slime new_slime = cast_and_position_entity<Slime>(entity, position);
-					// new_slime.position = position;
-					add_array(&em->slimes, new_slime);
-					break;
-				}
+				case ENTITY_SLIME: Slime new_slime = cast_and_position_entity<Slime>(entity, position); add_array(&em->slimes, new_slime); break;
+				
 			}
 		}
 	}

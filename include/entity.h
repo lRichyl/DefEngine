@@ -19,7 +19,8 @@ enum EntityType{
 	ENTITY_COLLIDER,
 	ENTITY_TILE,
 	ENTITY_PLAYER,
-	ENTITY_SLIME
+	ENTITY_SLIME,
+	ENTITY_MULTI
 };
 
 struct Icon{
@@ -47,7 +48,7 @@ struct Collider : public Entity{
 	Sprite sprite;
 };
 
-void init_collider(Collider   *collider, V2 icon_size);
+void init_entity(Collider   *collider, V2 icon_size);
 // void update_collider(Collider *collider, Renderer *renderer);
 // void render_collider(Collider *collider, Renderer *renderer);
 
@@ -66,7 +67,7 @@ struct Player : public Entity{
 	bool is_on_level = false;
 };
 
-void init_player(Player *player, V2 icon_size);
+void init_entity(Player *player, V2 icon_size);
 void update_player(Player *player, Renderer *renderer);
 void render_player(Player *player, Renderer *renderer);
 
@@ -74,10 +75,17 @@ struct Slime : public Entity{
 	Sprite sprite;
 };
 
-void init_slime(Slime *slime, V2 icon_size);
+void init_entity(Slime *slime, V2 icon_size);
 void update_slime(Slime *slime, Renderer *renderer);
 void render_slime(Slime *slime, Renderer *renderer);
 
+struct Multi : public Entity{
+	Sprite sprite;
+};
+
+void init_entity(Multi *multi, V2 icon_size);
+void update_multi(Multi *multi, Renderer *renderer);
+void render_multi(Multi *multi, Renderer *renderer);
 	
 struct EntityManager{
 	Player player;

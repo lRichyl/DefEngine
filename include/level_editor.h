@@ -11,7 +11,6 @@ const int MAX_COLLISION_REGIONS = 100;
 
 enum EditorState{
 	EDITOR_EDIT,
-	EDITOR_COLLISION, // This state happens when we are inserting a collision region.
 	EDITOR_TEST
 };
 
