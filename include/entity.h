@@ -9,7 +9,10 @@ struct PrototypeList;
 struct EntitySelection{
 	int entity_index = -1;
 	PrototypeList *prototype_list;
+	int index = -1;
 };
+
+
 
 enum EntityType{
 	ENTITY_NONE,
@@ -37,6 +40,8 @@ struct Entity{
 	// setting text, etc.
 	void (*special_placement)() = NULL;
 };
+
+Entity* get_selection_entity(EntitySelection *selection);
 
 struct Collider : public Entity{
 	Sprite sprite;

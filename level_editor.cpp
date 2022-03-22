@@ -6,13 +6,15 @@
 #include "utilities.h"
 #include <cmath>
 
-static void add_tile_prototype(LevelEditor *editor, Texture texture, Rect clipping_box){
+static void add_tile_prototype(LevelEditor *editor, Texture texture, Rect clipping_box, V2 area = {1,1}){
 	Tile *tile                = allocate_from_arena<Tile>(&Game::main_arena);
 	tile->sprite = Sprite();
-	tile->sprite.clipping_box = clipping_box;
-	tile->sprite.info.size    = editor->icon_size;
-	tile->sprite.info.texture = texture;
-	tile->icon.sprite         = tile->sprite;
+	tile->area   = area;
+	tile->sprite.clipping_box   = clipping_box;
+	tile->sprite.info.size      = {area.x * editor->icon_size.x, area.y * editor->icon_size.y};
+	tile->sprite.info.texture   = texture;
+	tile->icon.sprite           = tile->sprite;
+	tile->icon.sprite.info.size = editor->icon_size;
 	
 	add_prototype(&editor->tiles, tile);
 }
@@ -58,8 +60,10 @@ void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_tex
 	editor->test_level = false;
 	
 	// Add tile prototypes.
+	// We currently don't have a way of identifying a particular tile other than visually. We may add a tag later to identity in code the tile type.
 	add_tile_prototype(editor, get_texture(&Game::asset_manager, "test_tiles"), {0,0,32,32});
 	add_tile_prototype(editor, get_texture(&Game::asset_manager, "test_tiles"), {32,0,32,32});
+	add_tile_prototype(editor, get_texture(&Game::asset_manager, "test_tiles"), {0,32,64,64}, {2,2});
 	
 	// Add entities prototypes.
 	Slime    *slime    = allocate_from_arena<Slime>   (&Game::main_arena); init_slime   (slime,    editor->icon_size); add_entity_prototype(editor, slime);
@@ -126,7 +130,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 					V2 tile_position                    = get_tile(mouse.position);
 					int index                           = (int)tile_position.x * LEVEL_SIZE + (int)tile_position.y;
 					EntitySelection *entity_on_location = &tile_map[index].selected_entity;
-					Entity *entity                      = selection->prototype_list->entities[selection->entity_index];
+					Entity *entity                      = get_selection_entity(selection);
 					
 					// TODO: We should be able to erase objects when right clicked, collision regions aswell.
 					
@@ -194,22 +198,63 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 					
 					if(tile_position.x >= 0 && tile_position.x < LEVEL_SIZE && tile_position.y >= 0 && tile_position.y < LEVEL_SIZE){
 						// If we are within bounds and the current tile is not occupied insert the new tile in the current layer.
-						if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index == -1){
-							if(!entity->special_placement){
-								tile_map[index].selected_entity = *selection;
-								tile_map[index].origin          =  selection;
+						if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index == -1) {
+							// Insert the tile only if the entity on the selected tile is not part of a multi tile object.
+							if(entity->area.x == 1 && entity->area.y == 1){
+								tile_map[index].selected_entity       = *selection;
+								tile_map[index].selected_entity.index = index;
+								tile_map[index].origin                = &tile_map[index].selected_entity;
 							}
 							else{
-								entity->special_placement();
+								
+								for(int j = 0; j < entity->area.y; j++){
+									for(int i = 0; i < entity->area.x; i++){
+										int multi_tile_index = index - i + (j * LEVEL_SIZE);
+										EntitySelection *selection = &tile_map[multi_tile_index].selected_entity;
+										if(selection->entity_index != -1) return;
+									}
+								}
+								
+								// If the entity or tile occuppies an area bigger than 1x1 we set the corresponding tiles to the correct entity index
+								// and set the origin to the tile where we clicked.
+								tile_map[index].selected_entity       = *selection;
+								tile_map[index].selected_entity.index = index;
+								tile_map[index].origin                = &tile_map[index].selected_entity;
+								for(int j = 0; j < entity->area.y; j++){
+									for(int i = 0; i < entity->area.x; i++){
+										if(j == 0 && i == 0) continue;
+										int multi_tile_index = index - i + (j * LEVEL_SIZE) ;
+										tile_map[multi_tile_index].selected_entity = *selection;
+										tile_map[multi_tile_index].origin          = &tile_map[index].selected_entity;
+									}
+								}
 							}
+							
+							if(entity->special_placement)
+								entity->special_placement();
 						}
 						else if(mouse.right.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index != -1){
-							EntitySelection empty_selection;
-							tile_map[index].selected_entity = empty_selection;
+							MapObject *map_object = &tile_map[index];
+							Entity *entity_to_erase = get_selection_entity(&map_object->selected_entity);
+							if(&map_object->selected_entity == map_object->origin && entity_to_erase->area.x == 1 && entity_to_erase->area.y == 1){
+								EntitySelection empty_selection;
+								tile_map[index].selected_entity = empty_selection;
+							}
+							else{
+								int origin_index = map_object->origin->index;
+								// assert(origin_index > -1);
+								EntitySelection empty_selection;
+								for(int j = 0; j < entity_to_erase->area.y; j++){
+									for(int i = 0; i < entity_to_erase->area.x; i++){
+										int multi_tile_index = origin_index - i + (j * LEVEL_SIZE) ;
+										tile_map[multi_tile_index].selected_entity = empty_selection;
+										// tile_map[multi_tile_index].selected_entity.index = -1;
+										// tile_map[multi_tile_index].selected_entity.entity_index = -1;
+										tile_map[multi_tile_index].origin          = NULL;
+									}
+								}
+							}
 						}
-						
-						
-						
 					}
 					
 					
@@ -241,22 +286,32 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 	
 }
 
+static render_tile_map(Renderer *renderer, MapObject *tile_map){
+	for(int j = 0; j < LEVEL_SIZE; j++){
+		for(int i = 0; i < LEVEL_SIZE; i++){
+			V2 position = {i * TILE_SIZE, j * TILE_SIZE};
+			int index = i * LEVEL_SIZE + j;
+			EntitySelection *selection = &tile_map[index].selected_entity;
+			MapObject *map_object      = &tile_map[index];
+			if(selection->entity_index != -1 && selection->prototype_list){
+				if(&map_object->selected_entity == map_object->origin){
+					Sprite *icon = &selection->prototype_list->entities[selection->entity_index]->icon.sprite; 
+					// render_sprite(renderer, icon, position);
+					Entity *entity = get_selection_entity(selection);
+					Rect bounding_box = {position.x, position.y, entity->area.x * TILE_SIZE, entity->area.y * TILE_SIZE};
+					render_quad(renderer, &bounding_box, &icon->info.texture, &icon->clipping_box);
+				}
+			}		
+			
+		}
+	}	
+}
+
 static void render_editor_level(Renderer *renderer, LevelEditor *editor){
 	// Render all the level's layers.
 	for(int k = 0; k < LEVEL_LAYERS; k++){
 		MapObject *layer = editor->current_level.layers[k];
-		for(int j = 0; j < LEVEL_SIZE; j++){
-			for(int i = 0; i < LEVEL_SIZE; i++){
-				V2 position = {i * TILE_SIZE, j * TILE_SIZE};
-				int index = i * LEVEL_SIZE + j;
-				EntitySelection *selection = &layer[index].selected_entity;
-				if(selection->entity_index != -1 && selection->prototype_list){
-					Sprite *icon = &selection->prototype_list->entities[selection->entity_index]->icon.sprite; 
-					render_sprite(renderer, icon, position);
-				}		
-				
-			}
-		}
+		render_tile_map(renderer, layer);
 	}
 }
 
@@ -343,18 +398,7 @@ void render_level(Renderer *renderer, Level *level, EntityManager *em){
 	// We first render the first to layers(background).
 	for(int k = 0; k < 2; k++){
 		MapObject *layer = level->layers[k];
-		for(int j = 0; j < LEVEL_SIZE; j++){
-			for(int i = 0; i < LEVEL_SIZE; i++){
-				V2 position = {i * TILE_SIZE, j * TILE_SIZE};
-				int index = i * LEVEL_SIZE + j;
-				EntitySelection *selection = &layer[index].selected_entity;
-				if(selection->entity_index != -1 && selection->prototype_list){
-					Sprite *icon = &selection->prototype_list->entities[selection->entity_index]->icon.sprite; 
-					render_sprite(renderer, icon, position);
-				}		
-				
-			}
-		}
+		render_tile_map(renderer, layer);
 	}
 	
 	render_entities(em, renderer); 
@@ -362,18 +406,7 @@ void render_level(Renderer *renderer, Level *level, EntityManager *em){
 	// Render the last two layers(foreground).
 	for(int k = 3; k < 5; k++){
 		MapObject *layer = level->layers[k];
-		for(int j = 0; j < LEVEL_SIZE; j++){
-			for(int i = 0; i < LEVEL_SIZE; i++){
-				V2 position = {i * TILE_SIZE, j * TILE_SIZE};
-				int index = i * LEVEL_SIZE + j;
-				EntitySelection *selection = &layer[index].selected_entity;
-				if(selection->entity_index != -1 && selection->prototype_list){
-					Sprite *icon = &selection->prototype_list->entities[selection->entity_index]->icon.sprite; 
-					render_sprite(renderer, icon, position);
-				}		
-				
-			}
-		}
+		render_tile_map(renderer, layer);
 	}
 }
 

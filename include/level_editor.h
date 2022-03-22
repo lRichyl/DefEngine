@@ -20,7 +20,7 @@ enum EditorState{
 struct MapObject{
 	EntitySelection selected_entity;
 	EntitySelection *origin = NULL;// This is used when we wanna place and delete multi tile entities.
-	int layer;
+	// int index = -1;
 };
 
 struct Level{

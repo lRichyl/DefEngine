@@ -20,6 +20,11 @@ void render_entities(EntityManager *em, Renderer *renderer){
 	for(int i = 0; i < em->slimes.size; i++) render_slime(&em->slimes[i], renderer);
 }
 
+Entity* get_selection_entity(EntitySelection *selection){
+	Entity *entity = selection->prototype_list->entities[selection->entity_index];
+	return entity;
+}
+
 void clear_entity_manager(EntityManager *em){
 	// Do not clear the player and other entities that persist between levels.
 	em->player.is_on_level = false;
