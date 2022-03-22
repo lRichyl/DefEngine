@@ -361,10 +361,10 @@ void init_prototype_list(PrototypeList *list, int size, const char *name){
 }
 
 void add_prototype(PrototypeList *list, Entity *e){
-	e->prototype_id = list->entities.size;
+    e->prototype_id = list->entities.size;
 	add_array(&list->entities, e);
 }
-
+    
 void init_level_entity_manager(Level *level, EntityManager *em){
 	clear_entity_manager(em);
 	MapObject *entities_layer = level->layers[2];
