@@ -8,6 +8,7 @@
 #include "audio.h"
 #include "gui.h"
 #include "level_editor.h"
+#include "camera.h"
 
 #define DEV
 
@@ -33,6 +34,7 @@ struct Game{
 	static MemoryArena   main_arena;
 	static EntityManager em;
 	static float         dt;
+	static Camera        camera;
 	
 	Font font  = Font("assets/fonts/Simvoni.ttf", 16);
 	// Frame frame;

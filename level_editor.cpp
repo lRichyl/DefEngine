@@ -50,7 +50,7 @@ void add_entity_prototype(LevelEditor *editor){
 	add_entity_prototype(editor, e);
 }
 
-void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_texture, Texture tab_texture){
+void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_texture, Texture tab_texture, Renderer *renderer){
 	init_tabbed_menu(&editor->menu, bounding_box, tab_texture, frame_texture, get_font(&Game::asset_manager, "tabs_font"), {0,0,0}, {0,0,0});
 	init_prototype_list(&editor->tiles, TILES_AMOUNT, "Tiles");
 	init_prototype_list(&editor->entities, ENTITIES_AMOUNT, "Entities");
@@ -61,10 +61,13 @@ void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_tex
 	init_array(&editor->current_level.collision_regions, &Game::main_arena, MAX_COLLISION_REGIONS);
 	init_level(&editor->current_level);
 	
-	editor->icon_size = V2 {32,32}; // At the moment this can only be set during initialization.
+	editor->icon_size            = V2 {32,32}; // At the moment this can only be set during initialization.
 	editor->show_entity_selector = false;
-	editor->current_layer = 0;
-	editor->test_level = false;
+	editor->current_layer        = 0;
+	editor->test_level           = false;
+	editor->show_console         = false;
+	
+	init_console(&editor->console, renderer);
 	
 	// Add tile prototypes.
 	// We currently don't have a way of identifying a particular tile other than visually. We may add a tag later to identity in code the tile type.
@@ -128,6 +131,12 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 	// printf("Layer %d\n", editor->current_layer);
 	switch(editor->state){
 		case EDITOR_EDIT:{
+			if(editor->show_console){
+				update_console(&editor->console);
+				// The console should interrupt any editing so we always return when the console is active.
+				return;
+			}
+			
 			if(editor->show_entity_selector){
 				update_tabbed_menu(renderer, &editor->menu);
 			}else{
@@ -268,11 +277,10 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 							}
 						}
 					}
-					
-					
-					
 				}
 			}
+			
+			
 			
 			if(editor->test_level){
 				editor->state = EditorState::EDITOR_TEST;
@@ -280,6 +288,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 			} 
 			break;
 		}
+		
 		
 		
 		case EDITOR_TEST:{
@@ -342,6 +351,12 @@ void render_level_editor(Renderer *renderer, LevelEditor *editor){
 			const char *number_string    = to_string(editor->current_layer);
 			const char *complete_string  = strcat(layer_string, number_string);
 			render_text(renderer, get_font(&Game::asset_manager, "default"), complete_string, {0,0});
+			
+			if(editor->show_console){
+				render_console(&editor->console, renderer);
+				return;
+			}
+			
 			break;
 		}
 		
@@ -351,6 +366,8 @@ void render_level_editor(Renderer *renderer, LevelEditor *editor){
 			break;
 		}
 	}
+	
+	
 	
 	
 }

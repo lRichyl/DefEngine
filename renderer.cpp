@@ -547,8 +547,13 @@ void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *cli
      render_quad_on_batch(renderer, batch, position, texture, clip_region, mirrorX, alpha_value, color, mirrorY);
 }
 
-void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alpha_value){
-	render_quad(renderer, position, NULL, NULL, false, alpha_value, color);
+void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alpha_value, ShaderProgram *shader){
+	if(!shader){
+		render_quad(renderer, position, NULL, NULL, false, alpha_value, color);
+	}
+	else{
+		render_quad_with_shader(renderer, position, NULL, *shader, NULL, false, alpha_value, color);
+	}
 }
 
 void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture,ShaderProgram shader , Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){

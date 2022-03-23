@@ -15,6 +15,7 @@ MemoryArena   Game::main_arena;
 MouseInfo     Game::mouse;
 EntityManager Game::em;
 float         Game::dt;
+Camera        Game::camera;
 
 Game::Game(Renderer *r, Window *w){
     init_memory_arena(&main_arena, 10000000);
@@ -23,11 +24,12 @@ Game::Game(Renderer *r, Window *w){
     renderer = r;
     window = w;
 	
-	
+	init_camera(&camera, renderer);
 	
 	
 	add_font(&asset_manager, "default", "assets/fonts/Simvoni.ttf", 40); 
 	add_font(&asset_manager, "tabs_font", "assets/fonts/Simvoni.ttf", 16);
+	add_font(&asset_manager, "console_font", "assets/fonts/Simvoni.ttf", 16);
 	add_font(&asset_manager, "prototype_list_font", "assets/fonts/Simvoni.ttf", 32);
 	
 	// frame_texture = make_texture("assets/textures/4.png");
@@ -39,7 +41,7 @@ Game::Game(Renderer *r, Window *w){
 	link = make_texture("assets/textures/link.png");
 	
 	
-	init_level_editor(&level_editor, {500,500,500,500}, get_texture(&asset_manager, "level_editor_frame"), get_texture(&asset_manager, "level_editor_tab"));
+	init_level_editor(&level_editor, {500,500,500,500}, get_texture(&asset_manager, "level_editor_frame"), get_texture(&asset_manager, "level_editor_tab"), renderer);
 	// set_level_editor_tab_font(&level_editor, get_font(&Game::asset_manager, "tabs_font"));
 	add_tab(&level_editor.menu, "Tiles");
 	add_tab(&level_editor.menu, "Entities");
@@ -54,6 +56,7 @@ void Game::UpdateGame(float dt){
 	Game::dt = dt;
 	switch(state){
 		case GAME_PLAY:{
+			// This is the state the actual game will start on.(Intro screen, menu, etc).
 			Event e;
 			while(GetNextEvent(&e)){
 				#ifdef DEV //Open the editor.
@@ -68,6 +71,7 @@ void Game::UpdateGame(float dt){
 		#ifdef DEV
 		case GAME_EDITOR:{
 			Event e;
+			static V2 pos = {0,0};
 			while(GetNextEvent(&e)){
 				
 				if(e.key == GLFW_KEY_TAB && e.action == GLFW_PRESS){
@@ -87,7 +91,28 @@ void Game::UpdateGame(float dt){
 					level_editor.current_layer--;
 					if(level_editor.current_layer < 0) level_editor.current_layer = LEVEL_LAYERS - 1;
 				}
+				else if(e.key == GLFW_KEY_ESCAPE && e.action == GLFW_PRESS){
+					level_editor.show_console = !level_editor.show_console;
+				}
 				
+			}
+			
+			if(IsKeyPressed(renderer->window, GLFW_KEY_RIGHT)){
+				pos.x += 50 * Game::dt;
+				set_camera_position(&Game::camera, pos);
+			}
+			else if(IsKeyPressed(renderer->window, GLFW_KEY_LEFT)){
+				pos.x -= 50 * Game::dt;
+				set_camera_position(&Game::camera, pos);
+			}
+			
+			if(IsKeyPressed(renderer->window, GLFW_KEY_UP)){
+				pos.y += 50 * Game::dt;
+				set_camera_position(&Game::camera, pos);
+			}
+			else if(IsKeyPressed(renderer->window, GLFW_KEY_DOWN)){
+				pos.y -= 50 * Game::dt;
+				set_camera_position(&Game::camera, pos);
 			}
 			update_level_editor(renderer, &level_editor);
 			break;
