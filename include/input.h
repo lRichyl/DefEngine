@@ -16,6 +16,12 @@ enum MouseButtonState{
 	MOUSE_HELD
 };
 
+enum ScrollWheelState{
+	WHEEL_NONE,
+	WHEEL_FORWARDS,
+	WHEEL_BACKWARDS
+};
+
 struct MouseButton{
 	int button;
 	int gl_key_state;
@@ -26,6 +32,7 @@ struct MouseInfo{
 	V2 position;
 	MouseButton left {GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE};
 	MouseButton right {GLFW_MOUSE_BUTTON_RIGHT, GLFW_RELEASE};
+	ScrollWheelState wheel = ScrollWheelState::WHEEL_NONE;
 };
 
 
@@ -34,10 +41,12 @@ void PollKeyboardEvents();
 void SetKeyboardCallback(Window *window);
 void SetCursorCallback(Window *window);
 void SetMouseButtonCallback(Window *window);
+void set_scroll_wheel_callback(Window *window);
 void PrintMouseInfo(MouseInfo *mouse);
 void PrintEvents();
 bool GetNextEvent(Event *event);
 
 MouseInfo GetMouseInfo(Window *window);
+void clear_mouse_info();
 
 

@@ -76,6 +76,7 @@ int main(){
 	SetKeyboardCallback(window);
 	SetCursorCallback(window);
 	SetMouseButtonCallback(window);
+	set_scroll_wheel_callback(window);
 	
 	float average_fps;
 	

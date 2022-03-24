@@ -97,7 +97,13 @@ void Game::UpdateGame(float dt){
 				else if(e.key == GLFW_KEY_ESCAPE && e.action == GLFW_PRESS){
 					console.show_console = !console.show_console;
 				}
-				
+			}
+			
+			if(mouse.wheel == ScrollWheelState::WHEEL_FORWARDS){
+				zoom(&camera);
+			}
+			else if (mouse.wheel == ScrollWheelState::WHEEL_BACKWARDS){
+				zoom(&camera, true);
 			}
 			
 			V2 movement = {0,0};
@@ -172,5 +178,6 @@ void Game::GameLoop(float dt, float fps){
 	
     DrawGame(dt, fps);
 	Game::camera.moved = false;
+	clear_mouse_info();
     poll_events();
 }

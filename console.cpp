@@ -18,6 +18,8 @@ void init_console(Console *console, Renderer *renderer){
 	int view_uniform_id = glGetUniformLocation(console->shader.id, ("u_view"));
 	glUniformMatrix4fv(view_uniform_id, 1, GL_FALSE, glm::value_ptr(view));
 	
+	
+	
 	glUseProgram(0);
 
 }

@@ -41,21 +41,29 @@ bool GetNextEvent(Event *event){
 }
 
 bool IsKeyPressed(Window *window, int key){
-     int state = glfwGetKey(window->GLFWInstance, key);
-     return state == GLFW_PRESS;
-    
+	int state = glfwGetKey(window->GLFWInstance, key);
+	return state == GLFW_PRESS;
 }
 
-void PollKeyboardEvents(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-     Event e = {key , action};
-     events.push(e);
+void PollKeyboardEvents(GLFWwindow* window, int key, int scancode, int action, int mods){
+	Event e = {key , action};
+	events.push(e);
 }
 
-void CursorCallback(GLFWwindow* window, double xpos, double ypos)
-{
+void CursorCallback(GLFWwindow* window, double xpos, double ypos){
 	mouseInfo.position.x = xpos;
 	mouseInfo.position.y = ypos;
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
+	if(yoffset > 0){
+		mouseInfo.wheel = ScrollWheelState::WHEEL_FORWARDS;
+		// printf("Wheel up\n");
+	} 
+	else if (yoffset < 0){
+		mouseInfo.wheel = ScrollWheelState::WHEEL_BACKWARDS;
+		// printf("Wheel down\n");
+	} 
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods){
@@ -84,6 +92,9 @@ void SetMouseButtonCallback(Window *window){
 	glfwSetMouseButtonCallback(window->GLFWInstance, MouseButtonCallback);
 }
 
+void set_scroll_wheel_callback(Window *window){
+	glfwSetScrollCallback(window->GLFWInstance, scroll_callback);
+}
 
 
 MouseInfo GetMouseInfo(Window *window){
@@ -107,7 +118,14 @@ MouseInfo GetMouseInfo(Window *window){
 	result.left = mouseInfo.left;
 	result.right = mouseInfo.right;
 	
+	// result.wheel = mouseInfo.wheel;
+
+	
 	return result;
+}
+
+void clear_mouse_info(){
+	mouseInfo.wheel = ScrollWheelState::WHEEL_NONE;
 }
 
 void PrintMouseInfo(MouseInfo *mouse){
