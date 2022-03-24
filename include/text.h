@@ -33,6 +33,6 @@ struct Font{
 
 int utf8_to_unicode(unsigned short c);
 void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {255, 255, 255}
-               , bool center = false);
+               , bool center = false, ShaderProgram *shader = NULL);
 float get_text_width(Font *font, const char *text);			
 

@@ -9,6 +9,7 @@ struct Console{
 	V3 color = {120, 130, 50};
 	V3 division_color;
 	Font *font = NULL;
+	bool show_console = false;
 	
 	// We render the console with its own shader to set individually its MVP so it will not scale and move
 	// when we move the camera.

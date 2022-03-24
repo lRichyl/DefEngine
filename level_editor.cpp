@@ -65,9 +65,7 @@ void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_tex
 	editor->show_entity_selector = false;
 	editor->current_layer        = 0;
 	editor->test_level           = false;
-	editor->show_console         = false;
-	
-	init_console(&editor->console, renderer);
+	// editor->show_console         = false;
 	
 	// Add tile prototypes.
 	// We currently don't have a way of identifying a particular tile other than visually. We may add a tag later to identity in code the tile type.
@@ -131,8 +129,8 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 	// printf("Layer %d\n", editor->current_layer);
 	switch(editor->state){
 		case EDITOR_EDIT:{
-			if(editor->show_console){
-				update_console(&editor->console);
+			if(Game::console.show_console){
+				update_console(&Game::console);
 				// The console should interrupt any editing so we always return when the console is active.
 				return;
 			}
@@ -143,11 +141,12 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 				MapObject *tile_map = editor->current_level.layers[editor->current_layer];
 				assert(tile_map);
 				// When the entity selector is not showing, we can place tiles on the map.
-				MouseInfo mouse                  = Game::mouse;
-				EntitySelection *selection       = &editor->selected_entity;
+				MouseInfo mouse            = Game::mouse;
+				V2 world_pos               = get_world_position(&Game::camera, mouse.position);
+				EntitySelection *selection = &editor->selected_entity;
 				
 				if(selection->entity_index != -1 && selection->prototype_list){
-					V2 tile_position                    = get_tile(mouse.position);
+					V2 tile_position                    = get_tile(world_pos);
 					int index                           = (int)tile_position.x * LEVEL_SIZE + (int)tile_position.y;
 					EntitySelection *entity_on_location = &tile_map[index].selected_entity;
 					Entity *entity                      = get_selection_entity(selection);
@@ -159,7 +158,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 						static V2 start_pos;
 						V2 tile_screen_pos = {(int)tile_position.x * TILE_SIZE, (int)tile_position.y * TILE_SIZE}; 
 						if(is_phase_one){
-							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&editor->current_level, mouse.position)){
+							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&editor->current_level, world_pos)){
 								start_pos    = tile_screen_pos;
 								is_phase_one = false;
 							}
@@ -167,7 +166,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 							// the collider entity is selected. Maybe we should change this ????
 							else if(mouse.right.state == MouseButtonState::MOUSE_PRESSED){
 								int index = -1;
-								if(is_mouse_on_collision_region(&editor->current_level, mouse.position, &index)){
+								if(is_mouse_on_collision_region(&editor->current_level, world_pos, &index)){
 									assert(index > -1);
 									erase_from_array(&editor->current_level.collision_regions, index);
 									return;
@@ -177,7 +176,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 						}else{
 							// This code determines the corner positions of the collision region depending on where the second click is pressed.
 							Rect collision_region;
-							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&editor->current_level, mouse.position)){
+							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&editor->current_level, world_pos)){
 								if(start_pos.x == tile_screen_pos.x && start_pos.y == tile_screen_pos.y){
 									V2 final_pos     = {tile_screen_pos.x + editor->icon_size.x, tile_screen_pos.y - editor->icon_size.y};
 									collision_region = {start_pos.x, start_pos.y, abs(final_pos.x - start_pos.x), abs(final_pos.y - start_pos.y)};
@@ -352,8 +351,8 @@ void render_level_editor(Renderer *renderer, LevelEditor *editor){
 			const char *complete_string  = strcat(layer_string, number_string);
 			render_text(renderer, get_font(&Game::asset_manager, "default"), complete_string, {0,0});
 			
-			if(editor->show_console){
-				render_console(&editor->console, renderer);
+			if(Game::console.show_console){
+				render_console(&Game::console, renderer);
 				return;
 			}
 			

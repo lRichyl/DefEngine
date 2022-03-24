@@ -34,6 +34,7 @@ struct Game{
 	static MemoryArena   main_arena;
 	static EntityManager em;
 	static float         dt;
+	static Console       console;
 	static Camera        camera;
 	
 	Font font  = Font("assets/fonts/Simvoni.ttf", 16);

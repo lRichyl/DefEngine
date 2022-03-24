@@ -40,24 +40,24 @@ void move_frame(Frame *frame, V2 new_pos){
 }
 
 static void render_button(Renderer* renderer, Frame *frame, Button *button){
-	render_sprite(renderer, &button->sprite, {button->relative_bounding_box.x, button->relative_bounding_box.y});
+	render_sprite(renderer, &button->sprite, {button->relative_bounding_box.x, button->relative_bounding_box.y}, get_shader_ptr(&Game::asset_manager, "Gui_shader"));
 }
 
 static void render_entity_selector(Renderer *renderer, Frame *frame){
 	DefArray<Entity*> *entities = &frame->e_selector->prototypes->entities;
 	Rect *work_area             = &frame->work_area;
 	V2 work_area_center         = {work_area->x + work_area->w / 2, work_area->y - frame->e_selector->padding.y};
-	render_text(renderer, get_font(&Game::asset_manager, "prototype_list_font"), frame->e_selector->prototypes->name,work_area_center, V3{255,255,255}, true);
+	render_text(renderer, get_font(&Game::asset_manager, "prototype_list_font"), frame->e_selector->prototypes->name,work_area_center, V3{255,255,255}, true, get_shader_ptr(&Game::asset_manager, "Gui_shader"));
 	for(int i = 0; i < entities->size; i++){
 		Entity *e = array_at(entities, i);
 		V2 position = {e->icon.bounding_box.x, e->icon.bounding_box.y};
-		render_sprite(renderer, &e->icon.sprite, position);
+		render_sprite(renderer, &e->icon.sprite, position, get_shader_ptr(&Game::asset_manager, "Gui_shader"));
 	}
 }
 
 void render_frame(Renderer *renderer, Frame *frame){
 	// If a sprite without a texture is passed to frame, a black rect is rendered.
-	render_sprite(renderer, &frame->sprite, {frame->bounding_box.x, frame->bounding_box.y});
+	render_sprite(renderer, &frame->sprite, {frame->bounding_box.x, frame->bounding_box.y}, get_shader_ptr(&Game::asset_manager, "Gui_shader"));
 	
 	// This is temporary, just to visualize the work_area.
 	// render_colored_rect(renderer, &frame->work_area, V3{255,0,255});
@@ -177,6 +177,8 @@ void init_tabbed_menu(TabbedMenu *tabbed_menu, Rect bounding_box, Texture tab_te
 	tabbed_menu->tab_font       = font;
 	
 	tabbed_menu->bounding_box   = bounding_box;
+	// tabbed_menu->origin         = {bounding_box.x, bounding_box.y};
+	
 	tabbed_menu->tab_texture    = tab_texture;
 	tabbed_menu->frame_texture  = frame_texture;
 	tabbed_menu->tab_clip_box   = tab_clipping_box;
@@ -188,6 +190,16 @@ void init_tabbed_menu(TabbedMenu *tabbed_menu, Rect bounding_box, Texture tab_te
 		Frame *frame = &tabbed_menu->tabbed_frames[i].frame;
 		init_frame(frame, bounding_box, frame_texture, frame_clipping_box);
 	}
+	
+	tabbed_menu->shader = get_shader(&Game::asset_manager, "Console_shader");
+	assert(tabbed_menu->shader.id != -1);
+	glUseProgram(tabbed_menu->shader.id);
+	
+	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	int view_uniform_id = glGetUniformLocation(tabbed_menu->shader.id, ("u_view"));
+	glUniformMatrix4fv(view_uniform_id, 1, GL_FALSE, glm::value_ptr(view));
+	
+	glUseProgram(0);
 }
 
 void add_tab(TabbedMenu *tabbed_menu, const char *tab_text){
@@ -210,8 +222,32 @@ void add_tab(TabbedMenu *tabbed_menu, const char *tab_text){
 	
 }
 
+// static void update_gui_component_bbox(TabbedMenu *menu, Rect *bounding_box, V2 position){
+	// V2 distance = {bounding_box.x - menu->origin.x, bounding_box.y - menu->origin.y};
+	
+// }
+
+// static void update_tabbed_menu_bounding_boxes(TabbedMenu *menu){
+	// if(Game::camera.moved){
+		// menu->bounding_box.x -= Game::camera.movement.x;
+		// menu->bounding_box.y -= Game::camera.movement.y;
+		
+		// for(int i = 0; i < menu->tabbed_frames.size; i++){
+			// Frame *frame = &menu->tabbed_frames[i].frame;
+		
+			// frame->bounding_box.x -= Game::camera.movement.x;
+			// frame->bounding_box.y -= Game::camera.movement.y;
+			
+			// frame->work_area.x -= Game::camera.movement.x;
+			// frame->work_area.y -= Game::camera.movement.y;
+			// KEEP UPDATING.
+		// }
+	// }
+// }
+
 void update_tabbed_menu(Renderer *renderer, TabbedMenu *tabbed_menu){
 	assert(tabbed_menu->tabbed_frames.size > 0);
+	// update_tabbed_menu_bounding_boxes(tabbed_menu);
 	
 	//Check if a tab is clicked on.
 	MouseInfo mouse = Game::mouse;
@@ -235,6 +271,8 @@ Frame* get_current_tab(TabbedMenu *menu){
 	return &menu->tabbed_frames[menu->current_tab].frame;
 }
 
+
+
 void render_tabbed_menu(Renderer *renderer, TabbedMenu *tabbed_menu){
 	// Render the tabs textures and their text.
 	for(int i = 0; i < tabbed_menu->tabbed_frames.size; i++){
@@ -250,10 +288,12 @@ void render_tabbed_menu(Renderer *renderer, TabbedMenu *tabbed_menu){
 			tab->sprite.info.tint = {170,170,170};
 			// render_colored_rect(renderer, &tab->bounding_box, V3{150,150,255});
 		}
-		render_sprite(renderer, &tab->sprite, {tab->bounding_box.x, tab->bounding_box.y});
+		
+		
+		render_sprite(renderer, &tab->sprite, {tab->bounding_box.x, tab->bounding_box.y}, &tabbed_menu->shader);
 		
 		V2 text_position = {tab->bounding_box.x + tab->bounding_box.w / 2, tab->bounding_box.y - tabbed_menu->tab_height / 2};
-		render_text(renderer, tabbed_menu->tab_font, tabbed_menu->tabbed_frames[i].tab_text, text_position, V3{255,255,255}, true);
+		render_text(renderer, tabbed_menu->tab_font, tabbed_menu->tabbed_frames[i].tab_text, text_position, V3{255,255,255}, true, &tabbed_menu->shader);
 	}
 	
 	// Render the current selected tab frame.

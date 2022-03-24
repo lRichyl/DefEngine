@@ -7,6 +7,7 @@
 #include <vector>
 
 struct Renderer;
+struct ShaderProgram;
 // Clipping boxes values are based on the top left corner of the texture. 
 // Position is the position of the top left corner of the sprite. The origin of world coordinates is on the
 // bottom left corner of the screen.
@@ -29,7 +30,7 @@ struct Sprite{
 
 };
 
-void render_sprite(Renderer *renderer, Sprite *spr, V2 position);
+void render_sprite(Renderer *renderer, Sprite *spr, V2 position, ShaderProgram *shader = NULL);
 // void render_sprite_with_transparency(Renderer *renderer, Sprite *spr, V2 position, )
 void render_sprite_as_background(Renderer *renderer, Sprite *spr);
 

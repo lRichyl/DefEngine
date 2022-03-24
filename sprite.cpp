@@ -1,14 +1,18 @@
 #include "sprite.h"
 #include "renderer.h"
 
-void render_sprite(Renderer *renderer, Sprite *spr, V2 position){
+void render_sprite(Renderer *renderer, Sprite *spr, V2 position, ShaderProgram *shader){
 	Rect bounding_box = {position.x, position.y, spr->info.size.x, spr->info.size.y};
 	if(spr->clipping_box.x == 0 && spr->clipping_box.y == 0 && spr->clipping_box.w == 0 && spr->clipping_box.h == 0){
-		render_quad(renderer, &bounding_box, &spr->info.texture, NULL,  spr->info.is_x_mirrored, spr->info.alpha, spr->info.tint, spr->info.is_y_mirrored);
-		
+		if(!shader)
+			render_quad(renderer, &bounding_box, &spr->info.texture, NULL,  spr->info.is_x_mirrored, spr->info.alpha, spr->info.tint, spr->info.is_y_mirrored);
+		else
+			render_quad_with_shader(renderer, &bounding_box, &spr->info.texture, *shader, NULL,  spr->info.is_x_mirrored, spr->info.alpha, spr->info.tint, spr->info.is_y_mirrored);
 	}else{
-		render_quad(renderer, &bounding_box, &spr->info.texture, &spr->clipping_box, spr->info.is_x_mirrored, spr->info.alpha, spr->info.tint, spr->info.is_y_mirrored);
-		
+		if(!shader)
+			render_quad(renderer, &bounding_box, &spr->info.texture, &spr->clipping_box, spr->info.is_x_mirrored, spr->info.alpha, spr->info.tint, spr->info.is_y_mirrored);
+		else
+			render_quad_with_shader(renderer, &bounding_box, &spr->info.texture, *shader, &spr->clipping_box, spr->info.is_x_mirrored, spr->info.alpha, spr->info.tint, spr->info.is_y_mirrored);
 	}
 }
 

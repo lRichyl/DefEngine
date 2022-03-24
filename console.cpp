@@ -11,7 +11,7 @@ void init_console(Console *console, Renderer *renderer){
 	console->division_color   = {console->color.x - console->color.x * 0.5, console->color.y - console->color.y * 0.5, console->color.z - console->color.z * 0.5};
 	
 	// Configure the console shader and its view matrix.
-	console->shader = make_shader(renderer, "assets/shaders/fragment_shader_console.fs", "Console_fragment_shader");
+	console->shader = get_shader(&Game::asset_manager, "Console_shader");
 	glUseProgram(console->shader.id);
 	
 	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));

@@ -74,6 +74,8 @@ struct TabbedMenu{
 	Rect bounding_box;
 	Rect tab_clip_box;
 	Rect frame_clip_box;
+	// V2 origin;
+	ShaderProgram shader;
 };
 
 void init_frame(Frame *frame, Rect bounding_box, Texture texture, Rect frame_clipping_box);

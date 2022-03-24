@@ -35,6 +35,10 @@ ShaderProgram get_shader(AssetManager *m, const char *name){
 	return get_from_def_table(m->shaders, name);
 }
 
+ShaderProgram* get_shader_ptr(AssetManager *m, const char *name){
+	return get_pointer_from_def_table(m->shaders, name);
+}
+
 void add_font(AssetManager *m, const char *name, const char *path, int size){
 	Font font = Font(path, size);
 	// m->fonts.insert({name, font});

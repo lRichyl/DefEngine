@@ -16,6 +16,7 @@ MouseInfo     Game::mouse;
 EntityManager Game::em;
 float         Game::dt;
 Camera        Game::camera;
+Console       Game::console;
 
 Game::Game(Renderer *r, Window *w){
     init_memory_arena(&main_arena, 10000000);
@@ -23,9 +24,6 @@ Game::Game(Renderer *r, Window *w){
 	init_asset_manager(&asset_manager);
     renderer = r;
     window = w;
-	
-	init_camera(&camera, renderer);
-	
 	
 	add_font(&asset_manager, "default", "assets/fonts/Simvoni.ttf", 40); 
 	add_font(&asset_manager, "tabs_font", "assets/fonts/Simvoni.ttf", 16);
@@ -37,10 +35,15 @@ Game::Game(Renderer *r, Window *w){
 	add_texture(&asset_manager, "test_tiles", "assets/textures/test_tiles.png");
 	add_texture(&asset_manager, "level_editor_frame", "assets/textures/level_editor_frame.png");
 	add_texture(&asset_manager, "level_editor_tab", "assets/textures/level_editor_tab.png");
+	
+	add_shader(&asset_manager, renderer, "Console_shader", "assets/shaders/fragment_shader_console.fs");
+	add_shader(&asset_manager, renderer, "Gui_shader", "assets/shaders/fragment_shader_gui.fs");
+
 	smiley = make_texture("assets/textures/smiley.png");
 	link = make_texture("assets/textures/link.png");
 	
-	
+	init_console(&console, renderer);
+	init_camera(&camera, renderer);
 	init_level_editor(&level_editor, {500,500,500,500}, get_texture(&asset_manager, "level_editor_frame"), get_texture(&asset_manager, "level_editor_tab"), renderer);
 	// set_level_editor_tab_font(&level_editor, get_font(&Game::asset_manager, "tabs_font"));
 	add_tab(&level_editor.menu, "Tiles");
@@ -92,27 +95,36 @@ void Game::UpdateGame(float dt){
 					if(level_editor.current_layer < 0) level_editor.current_layer = LEVEL_LAYERS - 1;
 				}
 				else if(e.key == GLFW_KEY_ESCAPE && e.action == GLFW_PRESS){
-					level_editor.show_console = !level_editor.show_console;
+					console.show_console = !console.show_console;
 				}
 				
 			}
 			
+			V2 movement = {0,0};
 			if(IsKeyPressed(renderer->window, GLFW_KEY_RIGHT)){
-				pos.x += 50 * Game::dt;
+				movement.x = camera.speed * Game::dt;
+				pos.x += movement.x;
 				set_camera_position(&Game::camera, pos);
+				camera.movement = movement;
 			}
 			else if(IsKeyPressed(renderer->window, GLFW_KEY_LEFT)){
-				pos.x -= 50 * Game::dt;
+				movement.x = -(camera.speed * Game::dt);
+				pos.x += movement.x;
 				set_camera_position(&Game::camera, pos);
+				camera.movement = movement;
 			}
 			
 			if(IsKeyPressed(renderer->window, GLFW_KEY_UP)){
-				pos.y += 50 * Game::dt;
+				movement.y = camera.speed * Game::dt;
+				pos.y += movement.y;
 				set_camera_position(&Game::camera, pos);
+				camera.movement = movement;
 			}
 			else if(IsKeyPressed(renderer->window, GLFW_KEY_DOWN)){
-				pos.y -= 50 * Game::dt;
+				movement.y = -(camera.speed * Game::dt);
+				pos.y += movement.y;
 				set_camera_position(&Game::camera, pos);
+				camera.movement = movement;
 			}
 			update_level_editor(renderer, &level_editor);
 			break;
@@ -159,5 +171,6 @@ void Game::GameLoop(float dt, float fps){
     UpdateGame(dt);
 	
     DrawGame(dt, fps);
+	Game::camera.moved = false;
     poll_events();
 }

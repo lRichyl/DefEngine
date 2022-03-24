@@ -54,10 +54,10 @@ struct LevelEditor{
 	PrototypeList multi_tiles;
 	PrototypeList multi_entities;
 	Level current_level;
-	Console console;
+	// Console console;
 	bool show_entity_selector;
 	bool test_level;
-	bool show_console;
+	// bool show_console;
 	int current_layer;
 };
 

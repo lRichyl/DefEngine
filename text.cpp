@@ -80,7 +80,7 @@ Font::Font(const char *path, float size){
 // The text origin is on the bottom left. 
 // @SPEED: For static text it's probably best to make a text type and calculate it's length when created so that we don't have
 // 		 to do it every frame. And leave this function for text that changes constantly. 
-void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color, bool center){
+void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color, bool center, ShaderProgram *shader){
      int length = strlen(text);
 	 
 	if(center){
@@ -122,7 +122,10 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 		Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
 		position.x += character->advance;
 		
-		render_quad(renderer, &bounding_box, &font->texture, &character->clipping_box, false, 255, color, true);
+		if(!shader)
+			render_quad(renderer, &bounding_box, &font->texture, &character->clipping_box, false, 255, color, true);
+		else
+			render_quad_with_shader(renderer, &bounding_box, &font->texture, *shader, &character->clipping_box, false, 255, color, true);
 	}
 
 }

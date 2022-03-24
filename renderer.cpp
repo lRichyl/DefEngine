@@ -359,7 +359,6 @@ void initialize_renderer(Renderer *renderer, Window *window){
      initialize_framebuffer(renderer);
 
      initialize_renderer_index_buffer(renderer);
-     //This should be in a loop when we add multiple batches to initialize them.
      for(int i = 0; i < RendererInfo::NUMBER_OF_BATCHES; ++i){
           initialize_batch_vertex_buffers_and_arrays(&renderer->batches[i], renderer);
      }
@@ -759,24 +758,25 @@ ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shade
 	make_vertex_shader_from_source(default_vertex_shader, &vs);
 	make_fragment_shader(path_to_fragment_shader, &fs);
 	shader.id = glCreateProgram();
-     glAttachShader(shader.id, vs);
-     glAttachShader(shader.id, fs);
-     glLinkProgram(shader.id);
-     int success;
-     glGetProgramiv(shader.id, GL_LINK_STATUS, &success);
-     if( success == GL_FALSE){
-          printf("Could not link the shader program \n");
-          exit(1);
-     }
+	glAttachShader(shader.id, vs);
+	glAttachShader(shader.id, fs);
+	glLinkProgram(shader.id);
+	int success;
+	glGetProgramiv(shader.id, GL_LINK_STATUS, &success);
+	if( success == GL_FALSE){
+	  printf("Could not link the shader program \n");
+	  exit(1);
+	}
 
-     glDetachShader(shader.id, vs);
-     glDetachShader(shader.id, fs);
-     glDeleteShader(vs);
-     glDeleteShader(fs);
-	 
-	 printf("SHADER PROGRAM %s\n", shader.name);
-     printf("Succesfully compiled\n\n");
-	 load_mvp_to_shader(renderer, shader);
+	glDetachShader(shader.id, vs);
+	glDetachShader(shader.id, fs);
+	glDeleteShader(vs);
+	glDeleteShader(fs);
+
+	printf("SHADER PROGRAM %s\n", shader.name);
+	printf("Succesfully compiled\n\n");
+	initialize_texture_sampler(shader);
+	load_mvp_to_shader(renderer, shader);
 	return shader;
 }
 

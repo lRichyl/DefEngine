@@ -21,7 +21,7 @@ namespace RendererInfo{
 
 
 struct ShaderProgram{
-     unsigned int id;
+     unsigned int id = -1;
      const char *name;
 };
 struct Batch{
