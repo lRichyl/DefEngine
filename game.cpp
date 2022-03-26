@@ -99,38 +99,40 @@ void Game::UpdateGame(float dt){
 				}
 			}
 			
-			if(mouse.wheel == ScrollWheelState::WHEEL_FORWARDS){
-				zoom(&camera);
-			}
-			else if (mouse.wheel == ScrollWheelState::WHEEL_BACKWARDS){
-				zoom(&camera, true);
-			}
-			
-			V2 movement = {0,0};
-			if(IsKeyPressed(renderer->window, GLFW_KEY_RIGHT)){
-				movement.x = camera.speed * Game::dt;
-				pos.x += movement.x;
-				set_camera_position(&Game::camera, pos);
-				camera.movement = movement;
-			}
-			else if(IsKeyPressed(renderer->window, GLFW_KEY_LEFT)){
-				movement.x = -(camera.speed * Game::dt);
-				pos.x += movement.x;
-				set_camera_position(&Game::camera, pos);
-				camera.movement = movement;
-			}
-			
-			if(IsKeyPressed(renderer->window, GLFW_KEY_UP)){
-				movement.y = camera.speed * Game::dt;
-				pos.y += movement.y;
-				set_camera_position(&Game::camera, pos);
-				camera.movement = movement;
-			}
-			else if(IsKeyPressed(renderer->window, GLFW_KEY_DOWN)){
-				movement.y = -(camera.speed * Game::dt);
-				pos.y += movement.y;
-				set_camera_position(&Game::camera, pos);
-				camera.movement = movement;
+			if(level_editor.state != EditorState::EDITOR_TEST){
+				if(mouse.wheel == ScrollWheelState::WHEEL_FORWARDS){
+					zoom(&camera);
+				}
+				else if (mouse.wheel == ScrollWheelState::WHEEL_BACKWARDS){
+					zoom(&camera, true);
+				}
+				
+				V2 movement = {0,0};
+				if(IsKeyPressed(renderer->window, GLFW_KEY_RIGHT)){
+					movement.x = camera.speed * Game::dt;
+					pos.x += movement.x;
+					set_camera_position(&Game::camera, pos);
+					camera.movement = movement;
+				}
+				else if(IsKeyPressed(renderer->window, GLFW_KEY_LEFT)){
+					movement.x = -(camera.speed * Game::dt);
+					pos.x += movement.x;
+					set_camera_position(&Game::camera, pos);
+					camera.movement = movement;
+				}
+				
+				if(IsKeyPressed(renderer->window, GLFW_KEY_UP)){
+					movement.y = camera.speed * Game::dt;
+					pos.y += movement.y;
+					set_camera_position(&Game::camera, pos);
+					camera.movement = movement;
+				}
+				else if(IsKeyPressed(renderer->window, GLFW_KEY_DOWN)){
+					movement.y = -(camera.speed * Game::dt);
+					pos.y += movement.y;
+					set_camera_position(&Game::camera, pos);
+					camera.movement = movement;
+				}
 			}
 			update_level_editor(renderer, &level_editor);
 			break;

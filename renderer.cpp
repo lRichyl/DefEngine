@@ -2,6 +2,7 @@
 #include "utilities.h"
 #include "renderer.h"
 #include "texture.h"
+#include "game.h"
 // #include "math.h"
 
 #include <assert.h>
@@ -440,78 +441,86 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
           V2::SwitchYComponents(&top_right_clip, &bottom_right_clip);
      }
 
-     //We do this so that if we try to draw outside the window we don't add data to the vertex buffer.
-     if((final_position.x + final_position.w >= 0) && (final_position.x <= win->internalWidth) && (final_position.y >= 0) && (final_position.y - final_position.h <= win->internalHeight)){
-			float texture_slot_id = 0;
-			if(texture){
-				if(check_if_texture_is_not_registered(*texture, batch)){
-				   batch->registered_textures_ids[batch->texture_index] = texture->id;
-				   bind_texture(batch->texture_index, texture->id);
-				   texture_slot_id = (float)batch->texture_index;
-				   batch->texture_index++;
-				}else{
-				   for(int i = 0; i < RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH; i++){
-						if(texture->id == batch->registered_textures_ids[i]){
-							 texture_slot_id = i;
-							 break;
-						}
-				   }
-				}
+     // We do this so that if we try to draw outside the window we don't add data to the vertex buffer.
+	 bool should_render;
+	 if(batch->shader_program.id == renderer->default_shader_program.id){
+		should_render = (final_position.x + final_position.w + Game::camera.position.x >= 0) && (final_position.x + Game::camera.position.x<= Game::camera.size.x) && (final_position.y + Game::camera.position.y >= 0) && (final_position.y + Game::camera.position.y - final_position.h <= Game::camera.size.y);
+	 }
+	 else{
+		should_render = (final_position.x + final_position.w >= 0) && (final_position.x <= win->internalWidth) && (final_position.y >= 0) && (final_position.y - final_position.h <= win->internalHeight);
+	 }
+	 
+     if(should_render){
+		float texture_slot_id = 0;
+		if(texture){
+			if(check_if_texture_is_not_registered(*texture, batch)){
+			   batch->registered_textures_ids[batch->texture_index] = texture->id;
+			   bind_texture(batch->texture_index, texture->id);
+			   texture_slot_id = (float)batch->texture_index;
+			   batch->texture_index++;
 			}else{
-				texture_slot_id = -1;
+			   for(int i = 0; i < RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH; i++){
+					if(texture->id == batch->registered_textures_ids[i]){
+						 texture_slot_id = i;
+						 break;
+					}
+			   }
 			}
-          assert(batch->texture_index <= RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH);
+		}else{
+			texture_slot_id = -1;
+		}
+		assert(batch->texture_index <= RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH);
 
 		// printf("%d\n", layer);
-          batch->vertex_buffer[batch->vertices_index] = final_position.x;
-          batch->vertex_buffer[batch->vertices_index + 1] = final_position.y;
-		  // batch->vertex_buffer[batch->vertices_index + 2] = final_layer;
-          batch->vertex_buffer[batch->vertices_index + 2] = top_left_clip.x;
-          batch->vertex_buffer[batch->vertices_index + 3] = top_left_clip.y;
-          batch->vertex_buffer[batch->vertices_index + 4] = texture_slot_id;
-          batch->vertex_buffer[batch->vertices_index + 5] = normalized_alpha_value;
-          batch->vertex_buffer[batch->vertices_index + 6] = normalized_color.x;
-          batch->vertex_buffer[batch->vertices_index + 7] = normalized_color.y;
-          batch->vertex_buffer[batch->vertices_index + 8] = normalized_color.z;
+		batch->vertex_buffer[batch->vertices_index] = final_position.x;
+		batch->vertex_buffer[batch->vertices_index + 1] = final_position.y;
+		// batch->vertex_buffer[batch->vertices_index + 2] = final_layer;
+		batch->vertex_buffer[batch->vertices_index + 2] = top_left_clip.x;
+		batch->vertex_buffer[batch->vertices_index + 3] = top_left_clip.y;
+		batch->vertex_buffer[batch->vertices_index + 4] = texture_slot_id;
+		batch->vertex_buffer[batch->vertices_index + 5] = normalized_alpha_value;
+		batch->vertex_buffer[batch->vertices_index + 6] = normalized_color.x;
+		batch->vertex_buffer[batch->vertices_index + 7] = normalized_color.y;
+		batch->vertex_buffer[batch->vertices_index + 8] = normalized_color.z;
 
-          batch->vertex_buffer[batch->vertices_index + 9] = final_position.x;
-          batch->vertex_buffer[batch->vertices_index + 10] = final_position.y - final_position.h;
-		  // batch->vertex_buffer[batch->vertices_index + 12] = final_layer;
-          batch->vertex_buffer[batch->vertices_index + 11] = bottom_left_clip.x;
-          batch->vertex_buffer[batch->vertices_index + 12] = bottom_left_clip.y;
-          batch->vertex_buffer[batch->vertices_index + 13] = texture_slot_id;
-          batch->vertex_buffer[batch->vertices_index + 14] = normalized_alpha_value;
-          batch->vertex_buffer[batch->vertices_index + 15] = normalized_color.x;
-          batch->vertex_buffer[batch->vertices_index + 16] = normalized_color.y;
-          batch->vertex_buffer[batch->vertices_index + 17] = normalized_color.z;
+		batch->vertex_buffer[batch->vertices_index + 9] = final_position.x;
+		batch->vertex_buffer[batch->vertices_index + 10] = final_position.y - final_position.h;
+		// batch->vertex_buffer[batch->vertices_index + 12] = final_layer;
+		batch->vertex_buffer[batch->vertices_index + 11] = bottom_left_clip.x;
+		batch->vertex_buffer[batch->vertices_index + 12] = bottom_left_clip.y;
+		batch->vertex_buffer[batch->vertices_index + 13] = texture_slot_id;
+		batch->vertex_buffer[batch->vertices_index + 14] = normalized_alpha_value;
+		batch->vertex_buffer[batch->vertices_index + 15] = normalized_color.x;
+		batch->vertex_buffer[batch->vertices_index + 16] = normalized_color.y;
+		batch->vertex_buffer[batch->vertices_index + 17] = normalized_color.z;
 
-          batch->vertex_buffer[batch->vertices_index + 18] = final_position.x + final_position.w;
-          batch->vertex_buffer[batch->vertices_index + 19] = final_position.y - final_position.h;
-		  // batch->vertex_buffer[batch->vertices_index + 22] = final_layer;
-          batch->vertex_buffer[batch->vertices_index + 20] = bottom_right_clip.x;
-          batch->vertex_buffer[batch->vertices_index + 21] = bottom_right_clip.y;
-          batch->vertex_buffer[batch->vertices_index + 22] = texture_slot_id;
-          batch->vertex_buffer[batch->vertices_index + 23] = normalized_alpha_value;
-          batch->vertex_buffer[batch->vertices_index + 24] = normalized_color.x;
-          batch->vertex_buffer[batch->vertices_index + 25] = normalized_color.y;
-          batch->vertex_buffer[batch->vertices_index + 26] = normalized_color.z;
+		batch->vertex_buffer[batch->vertices_index + 18] = final_position.x + final_position.w;
+		batch->vertex_buffer[batch->vertices_index + 19] = final_position.y - final_position.h;
+		// batch->vertex_buffer[batch->vertices_index + 22] = final_layer;
+		batch->vertex_buffer[batch->vertices_index + 20] = bottom_right_clip.x;
+		batch->vertex_buffer[batch->vertices_index + 21] = bottom_right_clip.y;
+		batch->vertex_buffer[batch->vertices_index + 22] = texture_slot_id;
+		batch->vertex_buffer[batch->vertices_index + 23] = normalized_alpha_value;
+		batch->vertex_buffer[batch->vertices_index + 24] = normalized_color.x;
+		batch->vertex_buffer[batch->vertices_index + 25] = normalized_color.y;
+		batch->vertex_buffer[batch->vertices_index + 26] = normalized_color.z;
 
-          batch->vertex_buffer[batch->vertices_index + 27] = final_position.x + final_position.w;
-          batch->vertex_buffer[batch->vertices_index + 28] = final_position.y;
-		  // batch->vertex_buffer[batch->vertices_index + 32] = final_layer;
-          batch->vertex_buffer[batch->vertices_index + 29] = top_right_clip.x;
-          batch->vertex_buffer[batch->vertices_index + 30] = top_right_clip.y;
-          batch->vertex_buffer[batch->vertices_index + 31] = texture_slot_id;
-          batch->vertex_buffer[batch->vertices_index + 32] = normalized_alpha_value;
-          batch->vertex_buffer[batch->vertices_index + 33] = normalized_color.x;
-          batch->vertex_buffer[batch->vertices_index + 34] = normalized_color.y;
-          batch->vertex_buffer[batch->vertices_index + 35] = normalized_color.z;
+		batch->vertex_buffer[batch->vertices_index + 27] = final_position.x + final_position.w;
+		batch->vertex_buffer[batch->vertices_index + 28] = final_position.y;
+		// batch->vertex_buffer[batch->vertices_index + 32] = final_layer;
+		batch->vertex_buffer[batch->vertices_index + 29] = top_right_clip.x;
+		batch->vertex_buffer[batch->vertices_index + 30] = top_right_clip.y;
+		batch->vertex_buffer[batch->vertices_index + 31] = texture_slot_id;
+		batch->vertex_buffer[batch->vertices_index + 32] = normalized_alpha_value;
+		batch->vertex_buffer[batch->vertices_index + 33] = normalized_color.x;
+		batch->vertex_buffer[batch->vertices_index + 34] = normalized_color.y;
+		batch->vertex_buffer[batch->vertices_index + 35] = normalized_color.z;
 
-          batch->vertices_index += RendererInfo::FLOATS_PER_QUAD;
-          batch->number_of_quads_to_copy++;
-          batch->total_indices_to_draw += RendererInfo::INDICES_PER_QUAD;
+		batch->vertices_index += RendererInfo::FLOATS_PER_QUAD;
+		batch->number_of_quads_to_copy++;
+		batch->total_indices_to_draw += RendererInfo::INDICES_PER_QUAD;
 
-          assert(batch->number_of_quads_to_copy <= RendererInfo::QUADS_PER_BATCH);
+		assert(batch->number_of_quads_to_copy <= RendererInfo::QUADS_PER_BATCH);
 
 
      }

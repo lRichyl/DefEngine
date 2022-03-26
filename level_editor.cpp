@@ -147,6 +147,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 				
 				if(selection->entity_index != -1 && selection->prototype_list){
 					V2 tile_position                    = get_tile(world_pos);
+					V2 tile_pixel_pos = {(int)tile_position.x * TILE_SIZE, (int)tile_position.y * TILE_SIZE};
 					int index                           = (int)tile_position.x * LEVEL_SIZE + (int)tile_position.y;
 					EntitySelection *entity_on_location = &tile_map[index].selected_entity;
 					Entity *entity                      = get_selection_entity(selection);
@@ -156,10 +157,10 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 					if(entity->type == EntityType::ENTITY_COLLIDER){
 						static bool is_phase_one = true;
 						static V2 start_pos;
-						V2 tile_screen_pos = {(int)tile_position.x * TILE_SIZE, (int)tile_position.y * TILE_SIZE}; 
+						 
 						if(is_phase_one){
 							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&editor->current_level, world_pos)){
-								start_pos    = tile_screen_pos;
+								start_pos    = tile_pixel_pos;
 								is_phase_one = false;
 							}
 							// If we right click on an entity collider if gets removed. At the moment we can only delete collision regions if
@@ -177,31 +178,31 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 							// This code determines the corner positions of the collision region depending on where the second click is pressed.
 							Rect collision_region;
 							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&editor->current_level, world_pos)){
-								if(start_pos.x == tile_screen_pos.x && start_pos.y == tile_screen_pos.y){
-									V2 final_pos     = {tile_screen_pos.x + editor->icon_size.x, tile_screen_pos.y - editor->icon_size.y};
+								if(start_pos.x == tile_pixel_pos.x && start_pos.y == tile_pixel_pos.y){
+									V2 final_pos     = {tile_pixel_pos.x + editor->icon_size.x, tile_pixel_pos.y - editor->icon_size.y};
 									collision_region = {start_pos.x, start_pos.y, abs(final_pos.x - start_pos.x), abs(final_pos.y - start_pos.y)};
 								}
-								else if (start_pos.x <= tile_screen_pos.x && start_pos.y >= tile_screen_pos.y){
-									V2 final_pos     = {tile_screen_pos.x + editor->icon_size.x, tile_screen_pos.y - editor->icon_size.y};
+								else if (start_pos.x <= tile_pixel_pos.x && start_pos.y >= tile_pixel_pos.y){
+									V2 final_pos     = {tile_pixel_pos.x + editor->icon_size.x, tile_pixel_pos.y - editor->icon_size.y};
 									collision_region = {start_pos.x, start_pos.y, abs(final_pos.x - start_pos.x), abs(final_pos.y - start_pos.y)};
 								}
-								else if (start_pos.x <= tile_screen_pos.x && start_pos.y < tile_screen_pos.y){
+								else if (start_pos.x <= tile_pixel_pos.x && start_pos.y < tile_pixel_pos.y){
 									V2 bottom_left   = {start_pos.x, start_pos.y - editor->icon_size.y};
-									V2 top_right     = {tile_screen_pos.x + editor->icon_size.x, tile_screen_pos.y};
+									V2 top_right     = {tile_pixel_pos.x + editor->icon_size.x, tile_pixel_pos.y};
 									int width        = top_right.x - bottom_left.x;
 									int height       = top_right.y - bottom_left.y;
 									collision_region = {bottom_left.x, bottom_left.y + height, width, height};
 								}
-								else if (start_pos.x >= tile_screen_pos.x && start_pos.y >= tile_screen_pos.y){
-									V2 bottom_left   = {tile_screen_pos.x, tile_screen_pos.y - editor->icon_size.y};
+								else if (start_pos.x >= tile_pixel_pos.x && start_pos.y >= tile_pixel_pos.y){
+									V2 bottom_left   = {tile_pixel_pos.x, tile_pixel_pos.y - editor->icon_size.y};
 									V2 top_right     = {start_pos.x + editor->icon_size.x, start_pos.y};
 									int width        = top_right.x - bottom_left.x;
 									int height       = top_right.y - bottom_left.y;
 									collision_region = {bottom_left.x, bottom_left.y + height, width, height};
 								}
-								else if (start_pos.x >= tile_screen_pos.x && start_pos.y < tile_screen_pos.y){
+								else if (start_pos.x >= tile_pixel_pos.x && start_pos.y < tile_pixel_pos.y){
 									V2 bottom_right  = {start_pos.x + editor->icon_size.x, start_pos.y - editor->icon_size.y};
-									V2 top_left      = {tile_screen_pos.x, tile_screen_pos.y};
+									V2 top_left      = {tile_pixel_pos.x, tile_pixel_pos.y};
 									int width        = bottom_right.x - top_left.x;
 									int height       = top_left.y - bottom_right.y;
 									collision_region = {top_left.x, top_left.y, width, height};
@@ -215,7 +216,11 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 						return;
 					}
 					
-					if(tile_position.x >= 0 && tile_position.x < LEVEL_SIZE && tile_position.y >= 0 && tile_position.y < LEVEL_SIZE){
+					
+					// printf("%f, %f", tile_position.x, tile_position.y);
+					// printf("         %d\n", LEVEL_SIZE * TILE_SIZE);
+
+					if(tile_position.x >= 0 && tile_position.x < LEVEL_SIZE && tile_position.y > 0 && tile_position.y < LEVEL_SIZE){
 						// If we are within bounds and the current tile is not occupied insert the new tile in the current layer.
 						if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index == -1) {
 							// Insert the tile only if the entity on the selected tile is not part of a multi tile object.
@@ -283,6 +288,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 			
 			if(editor->test_level){
 				editor->state = EditorState::EDITOR_TEST;
+				reset_camera(&Game::camera);
 				init_level_entity_manager(&editor->current_level, &Game::em);
 			} 
 			break;
@@ -293,7 +299,10 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 		case EDITOR_TEST:{
 			update_level(renderer, &editor->current_level, &Game::em);
 			check_collisions(&Game::em, &editor->current_level);
-			if(!editor->test_level) editor->state = EditorState::EDITOR_EDIT;
+			if(!editor->test_level){
+				editor->state = EditorState::EDITOR_EDIT;
+				reset_camera(&Game::camera);
+			} 
 			break;
 		}
 	}
@@ -330,7 +339,8 @@ static void render_editor_level(Renderer *renderer, LevelEditor *editor){
 }
 
 void render_level_editor(Renderer *renderer, LevelEditor *editor){
-	static Rect tileable_area = {0, renderer->window->internalHeight, renderer->window->internalWidth, renderer->window->internalHeight};
+	static float level_size_in_pixels = LEVEL_SIZE * TILE_SIZE;
+	static Rect tileable_area = {0, level_size_in_pixels - TILE_SIZE ,level_size_in_pixels, level_size_in_pixels - TILE_SIZE};
 	render_colored_rect(renderer, &tileable_area, V3{120,120,120});
 	
 	editor->selected_entity = get_current_tab(&editor->menu)->e_selector->selected_entity;
@@ -349,7 +359,7 @@ void render_level_editor(Renderer *renderer, LevelEditor *editor){
 			char layer_string[] = "Layer: ";
 			const char *number_string    = to_string(editor->current_layer);
 			const char *complete_string  = strcat(layer_string, number_string);
-			render_text(renderer, get_font(&Game::asset_manager, "default"), complete_string, {0,0});
+			render_text(renderer, get_font(&Game::asset_manager, "default"), complete_string, {0,0}, {255,255,255}, false,  get_shader_ptr(&Game::asset_manager, "Gui_shader"));
 			
 			if(Game::console.show_console){
 				render_console(&Game::console, renderer);

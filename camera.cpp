@@ -5,6 +5,7 @@
 void init_camera(Camera *camera, Renderer *renderer){
 	camera->renderer = renderer;
 	camera->position = {0,0};
+	camera->size     = {renderer->window->internalWidth, renderer->window->internalHeight};
 }
 
 void set_camera_position(Camera *camera, V2 position){
@@ -37,6 +38,8 @@ void zoom(Camera *camera, bool zoom_out){
 		int projection_uniform_id = glGetUniformLocation(shader.id, ("u_projection"));
 		glUniformMatrix4fv(projection_uniform_id, 1, GL_FALSE, glm::value_ptr(projection));
 		glUseProgram(0);
+		
+		camera->size = {x, y};
 	}
 	else{
 		glUseProgram(shader.id);
@@ -48,13 +51,19 @@ void zoom(Camera *camera, bool zoom_out){
 		int projection_uniform_id = glGetUniformLocation(shader.id, ("u_projection"));
 		glUniformMatrix4fv(projection_uniform_id, 1, GL_FALSE, glm::value_ptr(projection));
 		glUseProgram(0);
+		
+		camera->size = {x, y};
 	}
 }
 
 V2 get_world_position(Camera *camera, V2 position){
 	V2 world_pos;
+	V2 scale  = {camera->size.x / camera->renderer->window->internalWidth, camera->size.y / camera->renderer->window->internalHeight};
+	position.x *= scale.x;
+	position.y *= scale.y;
 	world_pos = {position.x - camera->position.x, position.y - camera->position.y};
-	// TODO: Modify this to take into account the camera zoom.
+	
+	// printf("%f, %f : %f, %f\n", world_pos.x, world_pos.y, scale.x, scale.y);
 	return world_pos;
 }
 
@@ -74,4 +83,6 @@ void reset_camera(Camera *camera){
 	glUniformMatrix4fv(view_uniform_id, 1, GL_FALSE, glm::value_ptr(camera->view));
 	
 	glUseProgram(0);
+	
+	camera->size = {window->internalWidth, window->internalHeight};
 }

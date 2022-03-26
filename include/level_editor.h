@@ -5,7 +5,7 @@
 
 const int TILES_AMOUNT          = 50;
 const int ENTITIES_AMOUNT       = 50;
-const int LEVEL_SIZE            = 100;
+const int LEVEL_SIZE            = 30;
 const int LEVEL_LAYERS          = 5;
 const int TILE_SIZE             = 32;  
 const int MAX_COLLISION_REGIONS = 100;
