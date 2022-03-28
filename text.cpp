@@ -2,24 +2,13 @@
 #include "renderer.h"
 #include "string.h"
 #include <cmath>
-
+#include "console.h"
+#include "game.h"
 
 
 static int BUFFER_SIZE = 1 << 20;
 
-int utf8_to_unicode(unsigned short c){
-	unsigned short unicode = 0x0000;
-	
-	if(c < 128){
-		unicode = c;
-	}
-	else if(c < 65536){
-		unsigned char low  = c & 0x003F;
-		unsigned char high = (c & 0x1F00) >> 8;
-		unicode = low | (high << 6);
-	}
-	return unicode;
-}
+
 
 Font::Font(const char *path, float size){
 	texture.width = texture_size;
@@ -130,6 +119,43 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 
 }
 
+void render_text(Renderer* renderer, Font *font, EditableString *string, V2 position, V3 color, bool center, ShaderProgram *shader){
+	if(center){
+		float whole_text_size = 0;
+		float tallest = 0;
+		for(int i = 0; i < string->cursor; i++){
+			int char_index = string->data[i];
+			char_index    -= 32;
+			CharacterInfo *character = &font->characters[char_index];
+			whole_text_size += character->advance;
+			if(character->height - character->down_padding > tallest){
+				tallest = character->height - character->down_padding;
+			}
+		}
+		float middle_x_pos = whole_text_size / 2.f;
+		position.x -= middle_x_pos;
+		position.y -= tallest / 2.f;
+	}
+	
+	
+	for(int i = 0; i < string->cursor; i++){
+		
+		// For the moment we only take into account 2 byte wide Utf-8 characters, which is enough to represent most of the 
+		// alphabets.
+		int char_index = string->data[i];
+		char_index    -= 32;
+		CharacterInfo *character = &font->characters[char_index];
+		// Rect boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
+		Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
+		position.x += character->advance;
+		
+		if(!shader)
+			render_quad(renderer, &bounding_box, &font->texture, &character->clipping_box, false, 255, color, true);
+		else
+			render_quad_with_shader(renderer, &bounding_box, &font->texture, *shader, &character->clipping_box, false, 255, color, true);
+	}
+}
+
 float get_text_width(Font *font, const char *text){
 	float whole_text_size = 0;
 	int length = strlen(text);
@@ -145,4 +171,42 @@ float get_text_width(Font *font, const char *text){
 		whole_text_size += character->advance;
 	}
 	return whole_text_size;
+}
+
+int utf8_to_unicode(unsigned short c){
+	unsigned short unicode = 0x0000;
+	
+	if(c < 128){
+		unicode = c;
+	}
+	else if(c < 65536){
+		unsigned char low  = c & 0x003F;
+		unsigned char high = (c & 0x1F00) >> 8;
+		unicode = low | (high << 6);
+	}
+	return unicode;
+}
+
+
+
+char *unicode_array_to_string(EditableString *e_string){
+	char *string = allocate_array_from_arena<char>(&Game::main_arena, e_string->cursor + 1);
+	for(int i = 0; i < e_string->cursor + 1; i++){
+		unsigned short code_point = e_string->data[i];
+		if(code_point < 128){
+			string[i] = e_string->data[i];
+		}
+		else if(code_point < 1920){
+			char byte_1 = 0b11000000;
+			byte_1      = byte_1 |(code_point >> 6);
+			char byte_2 = 0b10000000;
+			byte_2      = byte_2 | (code_point & 0b00111111);
+			
+			string[i]     = byte_1;
+			string[i + 1] = byte_2;
+			i++;
+		}
+		// We do not handle 3 nor 4 byte unicode codepoints.
+	}
+	return string;
 }

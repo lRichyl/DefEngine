@@ -183,7 +183,8 @@ obj/Debug/collision.o: collision.cpp include/collision.h include/math.h \
  dependencies/glm/gtc/../gtc/../ext/vector_uint1_sized.hpp \
  dependencies/glm/gtc/type_ptr.inl include/window.h \
  dependencies/glfw/include/GLFW/glfw3.h include/text.h \
- dependencies/stb/stb_truetype.h include/def_table.h include/console.h
+ dependencies/stb/stb_truetype.h include/def_table.h include/console.h \
+ include/level.h
 
 include/collision.h:
 
@@ -582,3 +583,5 @@ dependencies/stb/stb_truetype.h:
 include/def_table.h:
 
 include/console.h:
+
+include/level.h:

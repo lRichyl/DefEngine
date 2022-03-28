@@ -71,6 +71,7 @@ GENERATED += $(OBJDIR)/game.o
 GENERATED += $(OBJDIR)/glad.o
 GENERATED += $(OBJDIR)/gui.o
 GENERATED += $(OBJDIR)/input.o
+GENERATED += $(OBJDIR)/level.o
 GENERATED += $(OBJDIR)/level_editor.o
 GENERATED += $(OBJDIR)/main.o
 GENERATED += $(OBJDIR)/math.o
@@ -92,6 +93,7 @@ OBJECTS += $(OBJDIR)/game.o
 OBJECTS += $(OBJDIR)/glad.o
 OBJECTS += $(OBJDIR)/gui.o
 OBJECTS += $(OBJDIR)/input.o
+OBJECTS += $(OBJDIR)/level.o
 OBJECTS += $(OBJDIR)/level_editor.o
 OBJECTS += $(OBJDIR)/main.o
 OBJECTS += $(OBJDIR)/math.o
@@ -196,6 +198,9 @@ $(OBJDIR)/gui.o: gui.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/input.o: input.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/level.o: level.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/level_editor.o: level_editor.cpp

@@ -3,6 +3,11 @@
 #include "GLFW/glfw3.h"
 #include "window.h"
 #include "math.h"
+#include "def_array.h"
+
+struct Input{
+	static DefArray<unsigned int> unicode_array;
+};
 
 struct Event{
      int key;
@@ -42,6 +47,7 @@ void SetKeyboardCallback(Window *window);
 void SetCursorCallback(Window *window);
 void SetMouseButtonCallback(Window *window);
 void set_scroll_wheel_callback(Window *window);
+void set_character_callback(Window *window);
 void PrintMouseInfo(MouseInfo *mouse);
 void PrintEvents();
 bool GetNextEvent(Event *event);

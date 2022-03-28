@@ -186,7 +186,8 @@ obj/Debug/asset_manager.o: asset_manager.cpp include/asset_manager.h \
  dependencies/glfw/include/GLFW/glfw3.h dependencies/stb/stb_truetype.h \
  include/game.h include/input.h include/audio.h \
  dependencies/OpenAL/include/AL/al.h dependencies/OpenAL/include/AL/alc.h \
- include/gui.h include/level_editor.h include/console.h include/camera.h
+ include/gui.h include/level_editor.h include/console.h include/level.h \
+ include/camera.h
 
 include/asset_manager.h:
 
@@ -597,5 +598,7 @@ include/gui.h:
 include/level_editor.h:
 
 include/console.h:
+
+include/level.h:
 
 include/camera.h:

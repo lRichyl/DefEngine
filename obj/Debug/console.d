@@ -187,7 +187,8 @@ obj/Debug/console.o: console.cpp include/console.h include/renderer.h \
  include/asset_manager.h include/def_table.h include/input.h \
  include/audio.h dependencies/OpenAL/include/AL/al.h \
  dependencies/OpenAL/include/AL/alc.h include/gui.h \
- include/level_editor.h include/camera.h
+ include/level_editor.h include/level.h include/camera.h \
+ include/utilities.h
 
 include/console.h:
 
@@ -599,4 +600,8 @@ include/gui.h:
 
 include/level_editor.h:
 
+include/level.h:
+
 include/camera.h:
+
+include/utilities.h:

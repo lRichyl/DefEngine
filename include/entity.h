@@ -9,7 +9,8 @@ struct PrototypeList;
 struct EntitySelection{
 	int entity_index = -1;
 	PrototypeList *prototype_list;
-	int index = -1;
+	int tile_map_index  = -1;
+	// int origin_index = -1;
 };
 
 

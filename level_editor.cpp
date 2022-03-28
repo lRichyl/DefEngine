@@ -6,6 +6,8 @@
 #include "utilities.h"
 #include <cmath>
 
+const char *HEADER = "LVLDAT";
+
 static void add_tile_prototype(LevelEditor *editor, Texture texture, Rect clipping_box, V2 area = {1,1}){
 	Tile *tile                = allocate_from_arena<Tile>(&Game::main_arena);
 	tile->sprite = Sprite();
@@ -24,24 +26,7 @@ static void add_entity_prototype(LevelEditor *editor, Entity *entity){
 	add_prototype(&editor->entities, entity);
 }
 
-static void init_level(Level *level){
-	// level->current_layer = 0;
-	for(int i = 0; i < LEVEL_LAYERS; i++){
-		level->layers[i] = allocate_array_from_arena<MapObject>(&Game::main_arena, LEVEL_SIZE * LEVEL_SIZE);
-	}
-	
-	// level->collision_region_sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
-	// level->collision_region_sprite.info.alpha     = 100;
-	// level->collision_region_sprite.info.size      = icon_size;
-	// level->collision_region_sprite.clipping_box   = {128, 0, 32, 32}; 
-	
-	// for(int i = 0; i < LEVEL_LAYERS; i++){
-		// MapObject *level = level->layers[i];
-		// for(int j = 0; j < LEVEL_SIZE*LEVEL_SIZE; j++){
-			// level[j].entity_index = -1;
-		// }
-	// }
-}
+
 
 template<typename T>
 void add_entity_prototype(LevelEditor *editor){
@@ -130,7 +115,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 	switch(editor->state){
 		case EDITOR_EDIT:{
 			if(Game::console.show_console){
-				update_console(&Game::console);
+				update_console(&Game::console, editor, renderer);
 				// The console should interrupt any editing so we always return when the console is active.
 				return;
 			}
@@ -166,10 +151,10 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 							// If we right click on an entity collider if gets removed. At the moment we can only delete collision regions if
 							// the collider entity is selected. Maybe we should change this ????
 							else if(mouse.right.state == MouseButtonState::MOUSE_PRESSED){
-								int index = -1;
-								if(is_mouse_on_collision_region(&editor->current_level, world_pos, &index)){
-									assert(index > -1);
-									erase_from_array(&editor->current_level.collision_regions, index);
+								int collision_region_index = -1;
+								if(is_mouse_on_collision_region(&editor->current_level, world_pos, &collision_region_index)){
+									assert(collision_region_index > -1);
+									erase_from_array(&editor->current_level.collision_regions, collision_region_index);
 									return;
 								}
 							}
@@ -225,9 +210,10 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 						if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index == -1) {
 							// Insert the tile only if the entity on the selected tile is not part of a multi tile object.
 							if(entity->area.x == 1 && entity->area.y == 1){
-								tile_map[index].selected_entity       = *selection;
-								tile_map[index].selected_entity.index = index;
-								tile_map[index].origin                = &tile_map[index].selected_entity;
+								tile_map[index].selected_entity              = *selection;
+								tile_map[index].selected_entity.tile_map_index  = index;
+								tile_map[index].origin_index = index;
+								tile_map[index].origin                       = &tile_map[index].selected_entity;
 							}
 							else{
 								// If it's multi tile we first check that there's not an object already in its area.
@@ -241,15 +227,18 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 								
 								// If the entity or tile occuppies an area bigger than 1x1 we set the corresponding tiles to the correct entity index
 								// and set the origin to the tile where we clicked.
-								tile_map[index].selected_entity       = *selection;
-								tile_map[index].selected_entity.index = index;
-								tile_map[index].origin                = &tile_map[index].selected_entity;
+								tile_map[index].selected_entity              = *selection;
+								tile_map[index].selected_entity.tile_map_index  = index;
+								tile_map[index].origin_index = index;
+								tile_map[index].origin                       = &tile_map[index].selected_entity;
 								for(int j = 0; j < entity->area.y; j++){
 									for(int i = 0; i < entity->area.x; i++){
 										if(j == 0 && i == 0) continue;
 										int multi_tile_index = index - i + (j * LEVEL_SIZE) ;
-										tile_map[multi_tile_index].selected_entity = *selection;
-										tile_map[multi_tile_index].origin          = &tile_map[index].selected_entity;
+										tile_map[multi_tile_index].selected_entity              = *selection;
+										tile_map[multi_tile_index].selected_entity.tile_map_index  = multi_tile_index;
+										tile_map[multi_tile_index].origin_index = index;
+										tile_map[multi_tile_index].origin                       = &tile_map[index].selected_entity;
 									}
 								}
 							}
@@ -266,7 +255,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 								tile_map[index].selected_entity = empty_selection;
 							}
 							else{
-								int origin_index = map_object->origin->index;
+								int origin_index = map_object->origin_index;
 								// assert(origin_index > -1);
 								EntitySelection empty_selection;
 								for(int j = 0; j < entity_to_erase->area.y; j++){
@@ -294,8 +283,6 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 			break;
 		}
 		
-		
-		
 		case EDITOR_TEST:{
 			update_level(renderer, &editor->current_level, &Game::em);
 			check_collisions(&Game::em, &editor->current_level);
@@ -309,7 +296,7 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 	
 }
 
-static void render_tile_map(Renderer *renderer, MapObject *tile_map){
+void render_tile_map(Renderer *renderer, MapObject *tile_map){
 	for(int j = 0; j < LEVEL_SIZE; j++){
 		for(int i = 0; i < LEVEL_SIZE; i++){
 			V2 position = {i * TILE_SIZE, j * TILE_SIZE};
@@ -375,10 +362,6 @@ void render_level_editor(Renderer *renderer, LevelEditor *editor){
 			break;
 		}
 	}
-	
-	
-	
-	
 }
 
 void init_prototype_list(PrototypeList *list, int size, const char *name){
@@ -390,60 +373,46 @@ void add_prototype(PrototypeList *list, Entity *e){
     e->prototype_id = list->entities.size;
 	add_array(&list->entities, e);
 }
-    
-void init_level_entity_manager(Level *level, EntityManager *em){
-	clear_entity_manager(em);
-	MapObject *entities_layer = level->layers[2];
-	for(int j = 0; j < LEVEL_SIZE; j++){
-		for(int i = 0; i < LEVEL_SIZE; i++){
-			V2 position = {i * TILE_SIZE, j * TILE_SIZE};
-			int index = i * LEVEL_SIZE + j;
-			EntitySelection *selection = &entities_layer[index].selected_entity;
-			if(selection->entity_index == -1) continue;
-			Entity *entity = selection->prototype_list->entities[selection->entity_index];
-			
-			switch(entity->type){
-				case ENTITY_PLAYER:{
-					Player *player = (Player*)entity;
-					em->player = *player;
-					em->player.position = position;
-					em->player.is_on_level = true;
-					break;
-				}
-				case ENTITY_SLIME: Slime new_slime = cast_and_position_entity<Slime>(entity, position); add_array(&em->slimes, new_slime); break;
-				
-			}
-		}
-	}
-	// Collision regions can be used directly, as they are not dynamic entities like the background and foreground tiles and do not require initialization.
-}
 
-void update_level(Renderer *renderer, Level *level, EntityManager *em){
-	update_entities(em, renderer);
-}
+bool save_level(LevelEditor *editor, const char *name){
+	if(!check_if_file_exists(name)) return false;
+	FILE *file;
+	file = fopen(name, "w+");
+	if(!file) return false;
+	
+	fprintf(file, "%s\n", HEADER);
+	fprintf(file, "%s\n", editor->current_level.name);
 
-void render_level(Renderer *renderer, Level *level, EntityManager *em){
-	// We first render the first to layers(background).
-	for(int k = 0; k < 2; k++){
-		MapObject *layer = level->layers[k];
-		render_tile_map(renderer, layer);
+	// Data from the 5 layers of the level.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		fwrite((void*)&editor->current_level.layers[i], sizeof(MapObject), LEVEL_SIZE * LEVEL_SIZE, file);
 	}
 	
-	render_entities(em, renderer); 
+	// Collision regions data.
+	fwrite((void*)editor->current_level.collision_regions.data, sizeof(Rect), editor->current_level.collision_regions.size, file);
 	
-	// Render the last two layers(foreground).
-	for(int k = 3; k < 5; k++){
-		MapObject *layer = level->layers[k];
-		render_tile_map(renderer, layer);
-	}
+	fclose(file);
+	return true;
 }
 
-void render_collision_regions(Renderer *renderer, Level *level){
-	static Texture col_reg_tex = get_texture(&Game::asset_manager, "test_tiles");
-	static Rect    clip_reg    = {128,0,32,32};
-	for(int i = 0; i < level->collision_regions.size; i++){
-		Rect *col_reg = &level->collision_regions[i];
-		// printf("Col regs: %f, %f, %f, %f\n", col_reg->x, col_reg->y, col_reg->w, col_reg->h);
-		render_quad(renderer, col_reg, &col_reg_tex, &clip_reg, false, 100);
+bool save_new_level(LevelEditor *editor, const char *name){
+	if(check_if_file_exists(name)) return false;
+	FILE *file;
+	file = fopen(name, "w");
+	if(!file) return false;
+	
+	fprintf(file, "%s\n", HEADER);
+	fprintf(file, "%s\n", editor->current_level.name);
+
+	// Data from the 5 layers of the level.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		fwrite((void*)&editor->current_level.layers[i], sizeof(MapObject), LEVEL_SIZE * LEVEL_SIZE, file);
 	}
+	
+	// Collision regions data.
+	fwrite((void*)editor->current_level.collision_regions.data, sizeof(Rect), editor->current_level.collision_regions.size, file);
+	
+	
+	fclose(file);
+	return true;
 }

@@ -19,3 +19,6 @@ const char *to_string(T number){
 	return result;
 }
 
+int check_if_file_exists(const char * filename);
+int get_word_count(const char *string);
+void get_first_two_words(const char *string, char *first, char *second);

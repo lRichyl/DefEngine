@@ -187,7 +187,8 @@ obj/Debug/main.o: main.cpp include/timer.h include/renderer.h \
  include/asset_manager.h include/def_table.h include/input.h \
  include/audio.h dependencies/OpenAL/include/AL/al.h \
  dependencies/OpenAL/include/AL/alc.h include/gui.h \
- include/level_editor.h include/console.h include/camera.h
+ include/level_editor.h include/console.h include/level.h \
+ include/camera.h
 
 include/timer.h:
 
@@ -600,5 +601,7 @@ include/gui.h:
 include/level_editor.h:
 
 include/console.h:
+
+include/level.h:
 
 include/camera.h:

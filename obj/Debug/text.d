@@ -183,7 +183,11 @@ obj/Debug/text.o: text.cpp include/text.h include/renderer.h \
  include/entity.h include/def_array.h include/memory_arena.h \
  include/sprite.h include/texture.h dependencies/stb/stb_image.h \
  include/timer.h include/window.h dependencies/glfw/include/GLFW/glfw3.h \
- dependencies/stb/stb_truetype.h
+ dependencies/stb/stb_truetype.h include/console.h include/game.h \
+ include/asset_manager.h include/def_table.h include/input.h \
+ include/audio.h dependencies/OpenAL/include/AL/al.h \
+ dependencies/OpenAL/include/AL/alc.h include/gui.h \
+ include/level_editor.h include/level.h include/camera.h
 
 include/text.h:
 
@@ -574,3 +578,27 @@ include/window.h:
 dependencies/glfw/include/GLFW/glfw3.h:
 
 dependencies/stb/stb_truetype.h:
+
+include/console.h:
+
+include/game.h:
+
+include/asset_manager.h:
+
+include/def_table.h:
+
+include/input.h:
+
+include/audio.h:
+
+dependencies/OpenAL/include/AL/al.h:
+
+dependencies/OpenAL/include/AL/alc.h:
+
+include/gui.h:
+
+include/level_editor.h:
+
+include/level.h:
+
+include/camera.h:

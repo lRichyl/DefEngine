@@ -10,24 +10,31 @@
 #include <stdlib.h>
 
 
-AssetManager  Game::asset_manager;
-MemoryArena   Game::main_arena;
-MouseInfo     Game::mouse;
-EntityManager Game::em;
-float         Game::dt;
-Camera        Game::camera;
-Console       Game::console;
+AssetManager           Game::asset_manager;
+MemoryArena            Game::main_arena;
+MouseInfo              Game::mouse;
+EntityManager          Game::em;
+float                  Game::dt;
+Camera                 Game::camera;
+Console                Game::console;
 
+static EditableString e_string;
 Game::Game(Renderer *r, Window *w){
     init_memory_arena(&main_arena, 10000000);
 	init_entity_manager(&em);
 	init_asset_manager(&asset_manager);
+	init_array(&Input::unicode_array, &Game::main_arena, UNICODE_BUFFER_SIZE);
     renderer = r;
     window = w;
 	
+	// add_to_string(&e_string, 'A');
+	// add_to_string(&e_string, 'B');
+	// add_to_string(&e_string, 'C');
+	// add_to_string(&e_string, 0xE1);
+	
 	add_font(&asset_manager, "default", "assets/fonts/Simvoni.ttf", 40); 
 	add_font(&asset_manager, "tabs_font", "assets/fonts/Simvoni.ttf", 16);
-	add_font(&asset_manager, "console_font", "assets/fonts/Simvoni.ttf", 16);
+	add_font(&asset_manager, "console_font", "assets/fonts/Simvoni.ttf", 18);
 	add_font(&asset_manager, "prototype_list_font", "assets/fonts/Simvoni.ttf", 32);
 	
 	// frame_texture = make_texture("assets/textures/4.png");
@@ -53,7 +60,6 @@ Game::Game(Renderer *r, Window *w){
 	load_prototype_lists(&level_editor);
 	
 }
-
 void Game::UpdateGame(float dt){
 	mouse = GetMouseInfo(renderer->window); // Only call this funtion once per frame. To get mouse info reference the static 'mouse' variable. 
 	Game::dt = dt;
@@ -75,31 +81,42 @@ void Game::UpdateGame(float dt){
 		case GAME_EDITOR:{
 			Event e;
 			static V2 pos = {0,0};
+			
 			while(GetNextEvent(&e)){
 				
-				if(e.key == GLFW_KEY_TAB && e.action == GLFW_PRESS){
-					state = GameState::GAME_PLAY;
+				if(!Game::console.show_console){
+					if(e.key == GLFW_KEY_TAB && e.action == GLFW_PRESS){
+						state = GameState::GAME_PLAY;
+					}
+					else if(e.key == GLFW_KEY_T && e.action == GLFW_PRESS){
+						level_editor.test_level = !level_editor.test_level;
+					}
+					else if(e.key == GLFW_KEY_E && e.action == GLFW_PRESS){
+						level_editor.show_entity_selector = !level_editor.show_entity_selector;
+					}
+					else if(e.key == GLFW_KEY_X && e.action == GLFW_PRESS){
+						level_editor.current_layer++;
+						if(level_editor.current_layer >= LEVEL_LAYERS) level_editor.current_layer = 0;
+					}
+					else if(e.key == GLFW_KEY_Z && e.action == GLFW_PRESS){
+						level_editor.current_layer--;
+						if(level_editor.current_layer < 0) level_editor.current_layer = LEVEL_LAYERS - 1;
+					}
 				}
-				else if(e.key == GLFW_KEY_T && e.action == GLFW_PRESS){
-					level_editor.test_level = !level_editor.test_level;
-				}
-				else if(e.key == GLFW_KEY_E && e.action == GLFW_PRESS){
-					level_editor.show_entity_selector = !level_editor.show_entity_selector;
-				}
-				else if(e.key == GLFW_KEY_X && e.action == GLFW_PRESS){
-					level_editor.current_layer++;
-					if(level_editor.current_layer >= LEVEL_LAYERS) level_editor.current_layer = 0;
-				}
-				else if(e.key == GLFW_KEY_Z && e.action == GLFW_PRESS){
-					level_editor.current_layer--;
-					if(level_editor.current_layer < 0) level_editor.current_layer = LEVEL_LAYERS - 1;
-				}
-				else if(e.key == GLFW_KEY_ESCAPE && e.action == GLFW_PRESS){
-					console.show_console = !console.show_console;
-				}
+				
 			}
 			
 			if(level_editor.state != EditorState::EDITOR_TEST){
+				if(e.key == GLFW_KEY_ESCAPE && e.action == GLFW_PRESS){
+					console.show_console = !console.show_console;
+				
+				}
+				// if(Game::console.show_console){
+					// if(e.key == GLFW_KEY_BACKSPACE && e.action == GLFW_PRESS){
+						// backspace_string(&Game::console.string);
+					// }
+				// }
+				
 				if(mouse.wheel == ScrollWheelState::WHEEL_FORWARDS){
 					zoom(&camera);
 				}
@@ -169,8 +186,8 @@ void Game::DrawGame(float dt, float fps){
 		}
 	}
 	
-    
-	
+    // const char *string = unicode_array_to_string(&e_string);
+	// render_text(renderer, get_font(&asset_manager, "default"), string, {450, 450}, V3{255,255,255});
     renderer_draw(renderer);
     swap_buffers(window);
 }
@@ -181,5 +198,6 @@ void Game::GameLoop(float dt, float fps){
     DrawGame(dt, fps);
 	Game::camera.moved = false;
 	clear_mouse_info();
+	clear_array(&Input::unicode_array);
     poll_events();
 }

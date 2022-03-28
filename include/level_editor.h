@@ -2,11 +2,10 @@
 #include "gui.h"
 #include "def_array.h"
 #include "console.h"
+#include "level.h"
 
 const int TILES_AMOUNT          = 50;
 const int ENTITIES_AMOUNT       = 50;
-const int LEVEL_SIZE            = 30;
-const int LEVEL_LAYERS          = 5;
 const int TILE_SIZE             = 32;  
 const int MAX_COLLISION_REGIONS = 100;
 
@@ -16,25 +15,6 @@ enum EditorState{
 	EDITOR_TEST
 };
 
-
-
-struct MapObject{
-	EntitySelection selected_entity;
-	EntitySelection *origin = NULL;// This is used when we wanna place and delete multi tile entities.
-	// int index = -1;
-};
-
-struct Level{
-	const char *name;
-	MapObject      *layers[LEVEL_LAYERS];
-	DefArray<Rect> collision_regions;
-	// Sprite collision_region_sprite;
-};
-
-void init_level_entity_manager(Level *level, EntityManager *em);
-void update_level(Renderer *renderer, Level *level, EntityManager *em);
-void render_level(Renderer *renderer, Level *level, EntityManager *em);
-void render_collision_regions(Renderer *renderer, Level *level); // Collision regions are only drawn when in edit mode.
 
 struct PrototypeList{
 	const char *name;
@@ -66,3 +46,7 @@ void load_prototype_lists(LevelEditor *editor); // Call this after adding all th
 void set_level_editor_tab_font(LevelEditor *editor, Font *font);
 void update_level_editor(Renderer *renderer, LevelEditor *editor);
 void render_level_editor(Renderer *renderer, LevelEditor *editor);
+void render_tile_map(Renderer *renderer, MapObject *tile_map);
+
+bool save_level(LevelEditor *editor, const char *name);
+bool save_new_level(LevelEditor *editor, const char *name);

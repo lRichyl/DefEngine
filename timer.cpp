@@ -27,11 +27,11 @@ void Timer::Stop(){
      isTimeReached = false;
      timeCount = 0;
 }
-// void Timer::Reset(){
-//      Stop();
-//      isTimeReached = false;
-//      timeCount = 0;
-// }
+
+void Timer::Reset(){
+     isTimeReached = false;
+     timeCount = 0;
+}
 
 void Timer::Resume(){
      isPaused = false;

@@ -14,7 +14,7 @@ struct Timer{
      void Pause();
      void Stop();
      void Resume();
-     // void Reset();
+     void Reset();
 };
 
 

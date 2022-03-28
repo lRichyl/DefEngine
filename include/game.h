@@ -12,6 +12,8 @@
 
 #define DEV
 
+const int UNICODE_BUFFER_SIZE = 10;
+
 enum GameState{
 	GAME_PLAY,
 	GAME_EDITOR
@@ -29,13 +31,13 @@ struct Game{
 	bool showEditor = false;
 	GameState state = GameState::GAME_PLAY;
 	
-	static MouseInfo     mouse;
-	static AssetManager  asset_manager;
-	static MemoryArena   main_arena;
-	static EntityManager em;
-	static float         dt;
-	static Console       console;
-	static Camera        camera;
+	static MouseInfo              mouse;
+	static AssetManager           asset_manager;
+	static MemoryArena            main_arena;
+	static EntityManager          em;
+	static float                  dt;
+	static Console                console;
+	static Camera                 camera;
 	
 	Font font  = Font("assets/fonts/Simvoni.ttf", 16);
 	// Frame frame;

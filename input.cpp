@@ -2,6 +2,7 @@
 #include <queue>
 #include <stdio.h>
 
+DefArray<unsigned int> Input::unicode_array;
 static std::queue<Event> events; 
 
 static MouseInfo mouseInfo;
@@ -66,6 +67,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 	} 
 }
 
+void character_callback(GLFWwindow* window, unsigned int codepoint){
+	add_array(&Input::unicode_array, codepoint);
+}
+
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods){
 	if(button == GLFW_MOUSE_BUTTON_LEFT){
 		mouseInfo.left.gl_key_state = action;
@@ -94,6 +99,10 @@ void SetMouseButtonCallback(Window *window){
 
 void set_scroll_wheel_callback(Window *window){
 	glfwSetScrollCallback(window->GLFWInstance, scroll_callback);
+}
+
+void set_character_callback(Window *window){
+	glfwSetCharCallback(window->GLFWInstance, character_callback);
 }
 
 

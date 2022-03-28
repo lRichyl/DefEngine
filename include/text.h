@@ -4,6 +4,7 @@
 #include "glad/glad.h"
 #include <unordered_map>
 
+struct EditableString;
 static const int FIRST_CHARACTER      = 32;
 // We should change this if we want to support more characters. Don't forget to increase the texture size
 // to fit all the characters.
@@ -34,5 +35,8 @@ struct Font{
 int utf8_to_unicode(unsigned short c);
 void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {255, 255, 255}
                , bool center = false, ShaderProgram *shader = NULL);
-float get_text_width(Font *font, const char *text);			
+void render_text(Renderer* renderer, Font *font, EditableString *string, V2 position, V3 color = {255, 255, 255}
+               , bool center = false, ShaderProgram *shader = NULL);
+float get_text_width(Font *font, const char *text);		
+char *unicode_array_to_string(EditableString *e_string);
 

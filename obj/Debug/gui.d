@@ -186,7 +186,8 @@ obj/Debug/gui.o: gui.cpp include/gui.h include/math.h include/renderer.h \
  dependencies/stb/stb_truetype.h include/def_table.h include/input.h \
  include/asset_manager.h include/game.h include/audio.h \
  dependencies/OpenAL/include/AL/al.h dependencies/OpenAL/include/AL/alc.h \
- include/level_editor.h include/console.h include/camera.h
+ include/level_editor.h include/console.h include/level.h \
+ include/camera.h
 
 include/gui.h:
 
@@ -597,5 +598,7 @@ dependencies/OpenAL/include/AL/alc.h:
 include/level_editor.h:
 
 include/console.h:
+
+include/level.h:
 
 include/camera.h:
