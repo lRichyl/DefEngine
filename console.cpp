@@ -73,7 +73,18 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 				if(save_new_level(editor, level_path))
 					add_array(&console->buffer, "Succesfully saved.");
 				else 
-					add_array(&console->buffer, "A level with that name already exists.");
+					add_array(&console->buffer, "A level with that name already exist.");
+			}
+			else if(!strcmp(first, "load")){
+				char level_path[50] = {};
+				strcat(level_path, LEVELS_PATH);
+				strcat(level_path, second);
+				strcat(level_path, EXTENSION);
+				if(load_level(editor, level_path)){
+					add_array(&console->buffer, "Level loaded successfully");
+				}
+				else
+					add_array(&console->buffer, "Level could not be loaded. Possibly doesn't exist.");
 			}
 		}
 		else if (word_count == 1){

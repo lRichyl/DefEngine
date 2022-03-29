@@ -6,11 +6,14 @@
 #include "utilities.h"
 #include <cmath>
 
-const char *HEADER = "LVLDAT";
+char *HEADER = "LVLDAT";
 
 static void add_tile_prototype(LevelEditor *editor, Texture texture, Rect clipping_box, V2 area = {1,1}){
 	Tile *tile                = allocate_from_arena<Tile>(&Game::main_arena);
 	tile->sprite = Sprite();
+	if(area.x != 1 && area.y != 1){
+		tile->area_type = AreaType::AREA_MULTI;
+	}
 	tile->area   = area;
 	tile->sprite.clipping_box   = clipping_box;
 	tile->sprite.info.size      = {area.x * editor->icon_size.x, area.y * editor->icon_size.y};
@@ -18,12 +21,21 @@ static void add_tile_prototype(LevelEditor *editor, Texture texture, Rect clippi
 	tile->icon.sprite           = tile->sprite;
 	tile->icon.sprite.info.size = editor->icon_size;
 	
-	add_prototype(&editor->tiles, tile);
+	if(tile->area_type == AreaType::AREA_MULTI){
+		add_prototype(&editor->multi_tiles, tile);
+	}
+	else
+		add_prototype(&editor->tiles, tile);
+	
 }
 
 
 static void add_entity_prototype(LevelEditor *editor, Entity *entity){
-	add_prototype(&editor->entities, entity);
+	if(entity->area_type == AreaType::AREA_MULTI){
+		add_prototype(&editor->multi_entities, entity);
+	}
+	else
+		add_prototype(&editor->entities, entity);
 }
 
 
@@ -32,6 +44,7 @@ template<typename T>
 void add_entity_prototype(LevelEditor *editor){
 	T *e = allocate_from_arena<T>(&Game::main_arena);
 	init_entity(e, editor->icon_size);
+	
 	add_entity_prototype(editor, e);
 }
 
@@ -43,7 +56,6 @@ void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_tex
 	init_prototype_list(&editor->multi_entities, ENTITIES_AMOUNT, "Multi-entities");
 	
 	// TODO: This should be done when creating a new level.
-	init_array(&editor->current_level.collision_regions, &Game::main_arena, MAX_COLLISION_REGIONS);
 	init_level(&editor->current_level);
 	
 	editor->icon_size            = V2 {32,32}; // At the moment this can only be set during initialization.
@@ -210,10 +222,12 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 						if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && entity_on_location->entity_index == -1) {
 							// Insert the tile only if the entity on the selected tile is not part of a multi tile object.
 							if(entity->area.x == 1 && entity->area.y == 1){
-								tile_map[index].selected_entity              = *selection;
-								tile_map[index].selected_entity.tile_map_index  = index;
-								tile_map[index].origin_index = index;
-								tile_map[index].origin                       = &tile_map[index].selected_entity;
+								tile_map[index].selected_entity                = *selection;
+								tile_map[index].selected_entity.tile_map_index = index;
+								tile_map[index].origin_index                   = index;
+								tile_map[index].origin                         = &tile_map[index].selected_entity;
+								tile_map[index].selected_entity.entity_type    = entity->type;
+								tile_map[index].selected_entity.area_type      = entity->area_type;
 							}
 							else{
 								// If it's multi tile we first check that there's not an object already in its area.
@@ -235,10 +249,12 @@ void update_level_editor(Renderer *renderer, LevelEditor *editor){
 									for(int i = 0; i < entity->area.x; i++){
 										if(j == 0 && i == 0) continue;
 										int multi_tile_index = index - i + (j * LEVEL_SIZE) ;
-										tile_map[multi_tile_index].selected_entity              = *selection;
-										tile_map[multi_tile_index].selected_entity.tile_map_index  = multi_tile_index;
-										tile_map[multi_tile_index].origin_index = index;
-										tile_map[multi_tile_index].origin                       = &tile_map[index].selected_entity;
+										tile_map[multi_tile_index].selected_entity                = *selection;
+										tile_map[multi_tile_index].selected_entity.tile_map_index = multi_tile_index;
+										tile_map[multi_tile_index].origin_index                   = index;
+										tile_map[multi_tile_index].origin                         = &tile_map[index].selected_entity;
+										tile_map[multi_tile_index].selected_entity.entity_type    = entity->type;
+										tile_map[multi_tile_index].selected_entity.area_type      = entity->area_type;
 									}
 								}
 							}
@@ -377,18 +393,19 @@ void add_prototype(PrototypeList *list, Entity *e){
 bool save_level(LevelEditor *editor, const char *name){
 	if(!check_if_file_exists(name)) return false;
 	FILE *file;
-	file = fopen(name, "w+");
+	file = fopen(name, "wb+");
 	if(!file) return false;
 	
-	fprintf(file, "%s\n", HEADER);
-	fprintf(file, "%s\n", editor->current_level.name);
+	fwrite(HEADER, sizeof(char), 6, file);
+	fwrite(editor->current_level.name, sizeof(char), LEVEL_NAME_SIZE, file);
 
 	// Data from the 5 layers of the level.
 	for(int i = 0; i < LEVEL_LAYERS; i++){
-		fwrite((void*)&editor->current_level.layers[i], sizeof(MapObject), LEVEL_SIZE * LEVEL_SIZE, file);
+		fwrite((void*)editor->current_level.layers[i], sizeof(MapObject), LEVEL_SIZE * LEVEL_SIZE, file);
 	}
 	
 	// Collision regions data.
+	fwrite((void*)&editor->current_level.collision_regions.size, sizeof(int), 1, file);
 	fwrite((void*)editor->current_level.collision_regions.data, sizeof(Rect), editor->current_level.collision_regions.size, file);
 	
 	fclose(file);
@@ -396,21 +413,86 @@ bool save_level(LevelEditor *editor, const char *name){
 }
 
 bool save_new_level(LevelEditor *editor, const char *name){
+	// Maybe we should return an error code so that we know what to print console.
 	if(check_if_file_exists(name)) return false;
 	FILE *file;
-	file = fopen(name, "w");
+	file = fopen(name, "wb");
 	if(!file) return false;
 	
-	fprintf(file, "%s\n", HEADER);
-	fprintf(file, "%s\n", editor->current_level.name);
+	fwrite(HEADER, sizeof(char), 6, file);
+	fwrite(editor->current_level.name, sizeof(char), LEVEL_NAME_SIZE, file);
+	// fprintf(file, "%s\n", editor->current_level.name);
 
 	// Data from the 5 layers of the level.
 	for(int i = 0; i < LEVEL_LAYERS; i++){
-		fwrite((void*)&editor->current_level.layers[i], sizeof(MapObject), LEVEL_SIZE * LEVEL_SIZE, file);
+		fwrite(editor->current_level.layers[i], sizeof(MapObject), LEVEL_SIZE * LEVEL_SIZE, file);
 	}
 	
 	// Collision regions data.
+	fwrite((void*)&editor->current_level.collision_regions.size, sizeof(int), 1, file);
 	fwrite((void*)editor->current_level.collision_regions.data, sizeof(Rect), editor->current_level.collision_regions.size, file);
+	// fprintf(file, "%d", editor->current_level.collision_regions.size);
+	
+	fclose(file);
+	return true;
+}
+
+bool load_level(LevelEditor *editor, const char *name){
+	if(!check_if_file_exists(name)) return false;
+	FILE *file;
+	file = fopen(name, "rb");
+	if(!file) return false;
+	
+	Level *level = &editor->current_level;
+	// empty_level(level);
+	
+	char header[10]{};
+	// fscanf(file, "%s", header);
+	fread(header, sizeof(char), 6, file);
+	if(strcmp(header, HEADER) != 0) return false;
+	
+	char level_name[LEVEL_NAME_SIZE]{};
+	// fscanf(file, "%s", level_name);
+	fread(level_name, sizeof(char), LEVEL_NAME_SIZE, file);
+	strcpy(level->name, level_name);
+	
+	// Data from the 5 layers of the level.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		fread(level->layers[i], sizeof(MapObject), LEVEL_SIZE * LEVEL_SIZE, file);
+	}
+	
+	for(int j = 0; j < LEVEL_LAYERS; j++){
+		MapObject *layer = level->layers[j];
+		for(int i = 0; i < LEVEL_SIZE * LEVEL_SIZE; i++){
+			int origin_index = layer[i].origin_index;
+			EntitySelection *selection = &layer[origin_index].selected_entity;
+			layer[i].origin = selection;
+			
+			switch(selection->entity_type){
+				case ENTITY_TILE:{
+					if(selection->area_type == AreaType::AREA_SINGLE){
+						selection->prototype_list = &editor->tiles;
+					}
+					else
+						selection->prototype_list = &editor->multi_tiles;
+				break;
+				}
+				default:{
+					if(selection->area_type == AreaType::AREA_SINGLE){
+						selection->prototype_list = &editor->entities;
+					}
+					else
+						selection->prototype_list = &editor->multi_entities;
+				break;
+				}
+			}
+		}
+	}
+	
+	// FIX THIS.
+	// Collision regions data.
+	fread((void*)&level->collision_regions.size, sizeof(int), 1, file);
+	fread((void*)level->collision_regions.data, sizeof(Rect), level->collision_regions.size, file);
 	
 	
 	fclose(file);

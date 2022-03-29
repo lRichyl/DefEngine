@@ -21,6 +21,7 @@ void render_entities(EntityManager *em, Renderer *renderer){
 }
 
 Entity* get_selection_entity(EntitySelection *selection){
+	if(selection->entity_index == -1) return NULL;
 	Entity *entity = selection->prototype_list->entities[selection->entity_index];
 	return entity;
 }
@@ -40,6 +41,7 @@ void init_entity(Collider *collider, V2 icon_size){
 	collider->icon.sprite.clipping_box   = {128, 0, 32, 32}; 
 	
 	collider->type = EntityType::ENTITY_COLLIDER;
+	collider->area_type = AreaType::AREA_SINGLE;
 }
 
 // void update_collider(Collider *collider, Renderer *renderer){
@@ -59,6 +61,7 @@ void init_entity(Player *player, V2 icon_size){
 	player->icon.sprite.info.size      = icon_size;
 	
 	player->type = EntityType::ENTITY_PLAYER;
+	player->area_type = AreaType::AREA_SINGLE;
 	player->area = {1,1};
 	player->sprite.info.texture = get_texture(&Game::asset_manager, "test_tiles");
 	player->sprite.info.size      = {32,32};
@@ -119,6 +122,7 @@ void init_entity(Slime *slime, V2 icon_size){
 	slime->icon.sprite           = slime->sprite;
 	
 	slime->type                  = EntityType::ENTITY_SLIME;
+	slime->area_type             = AreaType::AREA_SINGLE;
 	slime->area                  = {1,1};
 	slime->sprite = slime->icon.sprite;
 }
@@ -141,7 +145,8 @@ void init_entity(Multi *multi, V2 icon_size){
 	multi->icon.sprite           = multi->sprite;
 	multi->icon.sprite.info.size = icon_size;
 
-	multi->type                  = EntityType::ENTITY_MULTI;
+	multi->type                  = EntityType::ENTITY_NONE;
+	multi->area_type             = AreaType::AREA_MULTI;
 	multi->area                  = {2,2};
 	multi->sprite = multi->icon.sprite;
 }

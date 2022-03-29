@@ -6,23 +6,32 @@
 
 struct PrototypeList;
 
+enum EntityType{
+	ENTITY_NONE,
+	ENTITY_TILE,
+	ENTITY_COLLIDER,
+	ENTITY_PLAYER,
+	ENTITY_SLIME
+};
+
+enum AreaType{
+	AREA_NONE,
+	AREA_SINGLE,
+	AREA_MULTI
+};
+
+
 struct EntitySelection{
 	int entity_index = -1;
 	PrototypeList *prototype_list;
+	EntityType entity_type = EntityType::ENTITY_NONE;
+	AreaType area_type     = AreaType::AREA_NONE;
 	int tile_map_index  = -1;
 	// int origin_index = -1;
 };
 
 
 
-enum EntityType{
-	ENTITY_NONE,
-	ENTITY_COLLIDER,
-	ENTITY_TILE,
-	ENTITY_PLAYER,
-	ENTITY_SLIME,
-	ENTITY_MULTI
-};
 
 struct Icon{
 	Sprite sprite;
@@ -30,7 +39,8 @@ struct Icon{
 };
 
 struct Entity{
-	EntityType type = EntityType::ENTITY_NONE;
+	EntityType type      = EntityType::ENTITY_NONE;
+	AreaType   area_type = AreaType::AREA_NONE;
 	Rect bounding_box;
 	V2 position;
 	V2 area;
@@ -56,6 +66,7 @@ void init_entity(Collider   *collider, V2 icon_size);
 struct Tile : public Entity{
 	Tile(){
 		type = EntityType::ENTITY_TILE;
+		area_type = AreaType::AREA_SINGLE;
 		area = {1,1};
 	}
 	Sprite sprite;

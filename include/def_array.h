@@ -6,7 +6,7 @@ struct DefArray{
 	T &operator[](int i){
 		if(i >= capacity){
 			printf("Array out of bounds\n");
-			exit(-1);
+			// exit(-1);
 		}
 		return data[i];
 	}
@@ -60,4 +60,9 @@ inline void clear_array(DefArray<T> *array){
 template<typename T>
 inline T* get_last_element(DefArray<T> *array){
 	return &array->data[array->size - 1];
+}
+
+template<typename T>
+void free_array(DefArray<T> *array, MemoryArena *arena){
+	free_array_from_arena(arena, array, array->capacity);
 }

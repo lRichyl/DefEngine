@@ -50,3 +50,4 @@ void render_tile_map(Renderer *renderer, MapObject *tile_map);
 
 bool save_level(LevelEditor *editor, const char *name);
 bool save_new_level(LevelEditor *editor, const char *name);
+bool load_level(LevelEditor *editor, const char *name);

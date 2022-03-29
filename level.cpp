@@ -8,6 +8,31 @@ void init_level(Level *level){
 		level->layers[i] = allocate_array_from_arena<MapObject>(&Game::main_arena, LEVEL_SIZE * LEVEL_SIZE);
 	}
 	
+	init_array(&level->collision_regions, &Game::main_arena, MAX_COLLISION_REGIONS);
+	
+}
+
+// Right now we free the current level's memory when we are loading a different level on the level editor. 
+// For the actual game we will most likely keep a certain amount of levels loaded in ram.
+void clear_level_memory(Level *level){
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		free_array_from_arena(&Game::main_arena, level->layers[i], LEVEL_SIZE * LEVEL_SIZE);
+	}
+	
+	free_array(&level->collision_regions, &Game::main_arena);
+}
+
+void empty_level(Level *level){
+	memset(level->name, 0, LEVEL_NAME_SIZE);
+	MapObject default_map_object;
+	for(int j = 0; j < LEVEL_LAYERS; j++){
+		MapObject *layer = level->layers[j];
+		for(int i = 0; i < LEVEL_SIZE * LEVEL_SIZE; i++){
+			layer[i] = default_map_object;
+		}
+	}
+	
+	clear_array(&level->collision_regions);
 }
 
 void init_level_entity_manager(Level *level, EntityManager *em){
