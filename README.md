@@ -11,6 +11,8 @@ The first entity on the list allows you to place static collision regions which 
 - Tiles and entities cam be removed by right clicking on them.
 - To go in and out of test mode press T.
 
+The gray area represents the editable area of the level which at the moment is a static 30x30 tiles. 
+
 ![image](https://user-images.githubusercontent.com/66743720/160708817-9a40b290-98df-4489-baf2-2077e759fed5.png)
 
 # Command console
