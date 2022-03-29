@@ -1,5 +1,5 @@
 # DefEngine
-A simple OpenGL based 2d game library, with batching support and simple input and collision detection.
+A simple OpenGL based 2d game engine/libray, with batching support and simple input and collision detection.
 
 # Level Editor
 A simple level editor based on layers, you can choose between 5 diferent layers, 0 being the background and 5 the foreground. It's important to note that
