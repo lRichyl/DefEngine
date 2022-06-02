@@ -19,6 +19,11 @@ Texture get_texture(AssetManager *m, const char *name){
 	return get_from_def_table(m->textures, name);
 }
 
+Texture* get_texture_ptr(AssetManager *m, const char *name){
+	// auto result = m->textures.find(name);
+	return get_pointer_from_def_table(m->textures, name);
+}
+
 Texture get_empty_texture(){
 	Texture texture;
 	return texture;

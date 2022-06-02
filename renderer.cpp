@@ -442,15 +442,19 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
      }
 
      // We do this so that if we try to draw outside the window we don't add data to the vertex buffer.
-	 bool should_render;
-	 if(batch->shader_program.id == renderer->default_shader_program.id){
-		should_render = (final_position.x + final_position.w + Game::camera.position.x >= 0) && (final_position.x + Game::camera.position.x<= Game::camera.size.x) && (final_position.y + Game::camera.position.y >= 0) && (final_position.y + Game::camera.position.y - final_position.h <= Game::camera.size.y);
-	 }
-	 else{
-		should_render = (final_position.x + final_position.w >= 0) && (final_position.x <= win->internalWidth) && (final_position.y >= 0) && (final_position.y - final_position.h <= win->internalHeight);
-	 }
+    
+     // We should find a better way to do this. For the time being we are just going to add all vertices to the vertex buffer, this could become
+     // slow if we render a lot of vertices.
+	
+     //  bool should_render;
+	//  if(batch->shader_program.id == renderer->default_shader_program.id){
+	// 	should_render = (final_position.x + final_position.w + Game::camera.position.x >= 0) && (final_position.x + Game::camera.position.x<= Game::camera.size.x) && (final_position.y + Game::camera.position.y >= 0) && (final_position.y + Game::camera.position.y - final_position.h <= Game::camera.size.y);
+	//  }
+	//  else{
+	// 	should_render = (final_position.x + final_position.w >= 0) && (final_position.x <= win->internalWidth) && (final_position.y >= 0) && (final_position.y - final_position.h <= win->internalHeight);
+	//  }
 	 
-     if(should_render){
+     if(true){
 		float texture_slot_id = 0;
 		if(texture){
 			if(check_if_texture_is_not_registered(*texture, batch)){
@@ -527,20 +531,151 @@ static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *positio
 
 }
 
-void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
-     //This is temporary and it should actually select the next available batch when the current one gets filled or the
-     //max amount of textures gets bound.
+static void render_quad_on_batch(Renderer *renderer, Batch *batch, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     Window *win = renderer->window;
+     V2 top_left_clip;
+     V2 bottom_left_clip;
+     V2 top_right_clip;
+     V2 bottom_right_clip;
+     float normalized_alpha_value = alpha_value / 255.f; // / 255.f;
+	 V3 normalized_color = {color.x/255.f, color.y/255.f, color.z/255.f};
+     Rect final_position;
+
+     //The clip_region is used to select a part of a texture that we want to render.
+     if(clip_region){
+          assert(clip_region->w <= texture->width);
+          assert(clip_region->h <= texture->height);
+
+          top_left_clip.x     = clip_region->x / texture->width;
+          top_left_clip.y     = (texture->height - clip_region->y ) / texture->height;
+          bottom_left_clip.x  = clip_region->x / texture->width;
+          bottom_left_clip.y  = (texture->height - clip_region->y - clip_region->h )/ texture->height;
+          bottom_right_clip.x = (clip_region->x + clip_region->w) / texture->width;
+          bottom_right_clip.y = (texture->height - clip_region->y - clip_region->h)/ texture->height;
+          top_right_clip.x    = (clip_region->x + clip_region->w) / texture->width;
+          top_right_clip.y    = (texture->height - clip_region->y) / texture->height;
+     }else{
+          top_left_clip.x     = 0.0f;
+          top_left_clip.y     = 1.0f;
+          bottom_left_clip.x  = 0.0f;
+          bottom_left_clip.y  = 0.0f;
+          bottom_right_clip.x = 1.0f;
+          bottom_right_clip.y = 0.0f;
+          top_right_clip.x    = 1.0f;
+          top_right_clip.y    = 1.0f;
+
+
+     }
+     if(mirrorX){
+          V2::SwitchXComponents(&top_left_clip, &top_right_clip);
+          V2::SwitchXComponents(&bottom_left_clip, &bottom_right_clip);
+     }
+
+     if(mirrorY){
+          V2::SwitchYComponents(&top_left_clip, &bottom_left_clip);
+          V2::SwitchYComponents(&top_right_clip, &bottom_right_clip);
+     }
+
+     // We do this so that if we try to draw outside the window we don't add data to the vertex buffer.
+    
+     // We should find a better way to do this. For the time being we are just going to add all vertices to the vertex buffer, this could become
+     // slow if we render a lot of vertices.
+	
+     //  bool should_render;
+	//  if(batch->shader_program.id == renderer->default_shader_program.id){
+	// 	should_render = (final_position.x + final_position.w + Game::camera.position.x >= 0) && (final_position.x + Game::camera.position.x<= Game::camera.size.x) && (final_position.y + Game::camera.position.y >= 0) && (final_position.y + Game::camera.position.y - final_position.h <= Game::camera.size.y);
+	//  }
+	//  else{
+	// 	should_render = (final_position.x + final_position.w >= 0) && (final_position.x <= win->internalWidth) && (final_position.y >= 0) && (final_position.y - final_position.h <= win->internalHeight);
+	//  }
+	 
+     if(true){
+		float texture_slot_id = 0;
+		if(texture){
+			if(check_if_texture_is_not_registered(*texture, batch)){
+			   batch->registered_textures_ids[batch->texture_index] = texture->id;
+			   bind_texture(batch->texture_index, texture->id);
+			   texture_slot_id = (float)batch->texture_index;
+			   batch->texture_index++;
+			}else{
+			   for(int i = 0; i < RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH; i++){
+					if(texture->id == batch->registered_textures_ids[i]){
+						 texture_slot_id = i;
+						 break;
+					}
+			   }
+			}
+		}else{
+			texture_slot_id = -1;
+		}
+		assert(batch->texture_index <= RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH);
+
+		// printf("%d\n", layer);
+		batch->vertex_buffer[batch->vertices_index]     = a.x;
+		batch->vertex_buffer[batch->vertices_index + 1] = a.y;
+		// batch->vertex_buffer[batch->vertices_index + 2] = final_layer;
+		batch->vertex_buffer[batch->vertices_index + 2] = top_left_clip.x;
+		batch->vertex_buffer[batch->vertices_index + 3] = top_left_clip.y;
+		batch->vertex_buffer[batch->vertices_index + 4] = texture_slot_id;
+		batch->vertex_buffer[batch->vertices_index + 5] = normalized_alpha_value;
+		batch->vertex_buffer[batch->vertices_index + 6] = normalized_color.x;
+		batch->vertex_buffer[batch->vertices_index + 7] = normalized_color.y;
+		batch->vertex_buffer[batch->vertices_index + 8] = normalized_color.z;
+
+		batch->vertex_buffer[batch->vertices_index + 9]  = a.x;
+		batch->vertex_buffer[batch->vertices_index + 10] = a.y - thickness;
+		// batch->vertex_buffer[batch->vertices_index + 12] = final_layer;
+		batch->vertex_buffer[batch->vertices_index + 11] = bottom_left_clip.x;
+		batch->vertex_buffer[batch->vertices_index + 12] = bottom_left_clip.y;
+		batch->vertex_buffer[batch->vertices_index + 13] = texture_slot_id;
+		batch->vertex_buffer[batch->vertices_index + 14] = normalized_alpha_value;
+		batch->vertex_buffer[batch->vertices_index + 15] = normalized_color.x;
+		batch->vertex_buffer[batch->vertices_index + 16] = normalized_color.y;
+		batch->vertex_buffer[batch->vertices_index + 17] = normalized_color.z;
+
+		batch->vertex_buffer[batch->vertices_index + 18] = b.x + thickness;
+		batch->vertex_buffer[batch->vertices_index + 19] = b.y - thickness;
+		// batch->vertex_buffer[batch->vertices_index + 22] = final_layer;
+		batch->vertex_buffer[batch->vertices_index + 20] = bottom_right_clip.x;
+		batch->vertex_buffer[batch->vertices_index + 21] = bottom_right_clip.y;
+		batch->vertex_buffer[batch->vertices_index + 22] = texture_slot_id;
+		batch->vertex_buffer[batch->vertices_index + 23] = normalized_alpha_value;
+		batch->vertex_buffer[batch->vertices_index + 24] = normalized_color.x;
+		batch->vertex_buffer[batch->vertices_index + 25] = normalized_color.y;
+		batch->vertex_buffer[batch->vertices_index + 26] = normalized_color.z;
+
+		batch->vertex_buffer[batch->vertices_index + 27] = b.x + thickness;
+		batch->vertex_buffer[batch->vertices_index + 28] = b.y;
+		// batch->vertex_buffer[batch->vertices_index + 32] = final_layer;
+		batch->vertex_buffer[batch->vertices_index + 29] = top_right_clip.x;
+		batch->vertex_buffer[batch->vertices_index + 30] = top_right_clip.y;
+		batch->vertex_buffer[batch->vertices_index + 31] = texture_slot_id;
+		batch->vertex_buffer[batch->vertices_index + 32] = normalized_alpha_value;
+		batch->vertex_buffer[batch->vertices_index + 33] = normalized_color.x;
+		batch->vertex_buffer[batch->vertices_index + 34] = normalized_color.y;
+		batch->vertex_buffer[batch->vertices_index + 35] = normalized_color.z;
+
+		batch->vertices_index += RendererInfo::FLOATS_PER_QUAD;
+		batch->number_of_quads_to_copy++;
+		batch->total_indices_to_draw += RendererInfo::INDICES_PER_QUAD;
+
+		assert(batch->number_of_quads_to_copy <= RendererInfo::QUADS_PER_BATCH);
+
+
+     }
+
+}
+
+static Batch* should_change_batch(Renderer *renderer){
      if(renderer->current_shader.id != renderer->default_shader_program.id) {
           // renderer->current_shader = renderer->default_shader_program;
           // renderer->current_batch->shader_program = renderer->current_shader;
-		  
-		   renderer->batch_index++;
+          renderer->batch_index++;
           renderer->current_batch = &renderer->batches[renderer->batch_index];
           renderer->current_shader = renderer->default_shader_program;
           renderer->current_batch->shader_program = renderer->current_shader;
      }
      else if(renderer->current_batch->number_of_quads_to_copy == RendererInfo::QUADS_PER_BATCH || renderer->current_batch->texture_index == RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH){
-
           // renderer->current_batch->texture_index = 0;
           renderer->batch_index++;
           renderer->current_batch = &renderer->batches[renderer->batch_index];
@@ -549,10 +684,20 @@ void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *cli
           // if(renderer->batch_index > 4) renderer->batch_index = 0;
      }
      // printf("Batch: %d,  Texture Index: %d\n", renderer->batch_index, renderer->current_batch->texture_index);
-      assert(renderer->batch_index < RendererInfo::NUMBER_OF_BATCHES);
-     Batch *batch = renderer->current_batch;
+     assert(renderer->batch_index < RendererInfo::NUMBER_OF_BATCHES);
+     Batch *batch = renderer->current_batch; 
+     return batch;
+}
+
+void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
+     Batch *batch = should_change_batch(renderer);
 
      render_quad_on_batch(renderer, batch, position, texture, clip_region, mirrorX, alpha_value, color, mirrorY);
+}
+
+void render_quad(Renderer *renderer, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     Batch *batch = should_change_batch(renderer);
+     render_quad_on_batch(renderer, batch, a, b, thickness, texture, clip_region, mirrorX, alpha_value, color, mirrorY);
 }
 
 void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alpha_value, ShaderProgram *shader){

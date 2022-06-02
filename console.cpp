@@ -57,7 +57,7 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 		}
 	}
 	else{
-		char *string = unicode_array_to_string(&console->string);
+		char *string = unicode_array_to_string(&console->string, &Game::main_arena);
 		char first[50] {}; // This is the command. 
 		char second[50]{}; // This is the command's argument.
 		get_first_two_words(string, first, second);
@@ -119,7 +119,7 @@ void render_console(Console *console, Renderer *renderer){
 	for(int i = 0; i < console->buffer.size; i++){
 		V2 position = buffer_origin_position;
 		position.y += i * console->font->size;
-		render_text(renderer, console->font, console->buffer[i], position, {255,255,255}, false, &console->shader);
+		render_text(renderer, console->font, console->buffer[console->buffer.size - 1 - i], position, {255,255,255}, false, &console->shader);
 	}
 }
 

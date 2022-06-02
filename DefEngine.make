@@ -26,7 +26,7 @@ INCLUDES += -Iinclude -Idependencies/glfw/include -Idependencies/OpenAL/include 
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-LIBS += -lglfw3 -lmingw32 -lOpenAL32 -lopengl32 -lgdi32
+LIBS += -lglfw3 -lgdi32 -lOpenAL32 -lmingw32
 LDDEPS +=
 LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
 define PREBUILDCMDS
@@ -38,14 +38,14 @@ endef
 
 ifeq ($(config),debug)
 OBJDIR = obj/Debug
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -g -O0
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -g -O0
 ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib
 
 else ifeq ($(config),release)
 OBJDIR = obj/Release
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0
 ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib -s
 
 endif

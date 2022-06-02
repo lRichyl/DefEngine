@@ -19,6 +19,7 @@ struct AssetManager{
 void init_asset_manager(AssetManager *m);
 void add_texture(AssetManager *m, const char *name, const char *path);
 Texture get_texture(AssetManager *m, const char *name);
+Texture* get_texture_ptr(AssetManager *m, const char *name);
 Texture get_empty_texture();
 void add_shader(AssetManager *m, Renderer *renderer, const char *name, const char *path);
 ShaderProgram get_shader(AssetManager *m, const char *name);

@@ -128,7 +128,7 @@ void init_entity(Slime *slime, V2 icon_size){
 }
 
 void update_slime(Slime *slime, Renderer *renderer){
-	slime->bounding_box = Rect{slime->position.x, slime->position.y, slime->sprite.info.size.x, slime->sprite.info.size.y};
+	// slime->bounding_box = Rect{slime->position.x, slime->position.y, slime->sprite.info.size.x, slime->sprite.info.size.y}; // Why was this done ? 
 	// printf("%f, %f\n", slime->position.x, slime->position.y);
 }
 

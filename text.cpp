@@ -189,8 +189,8 @@ int utf8_to_unicode(unsigned short c){
 
 
 
-char *unicode_array_to_string(EditableString *e_string){
-	char *string = allocate_array_from_arena<char>(&Game::main_arena, e_string->cursor + 1);
+char *unicode_array_to_string(EditableString *e_string,MemoryArena *arena){
+	char *string = allocate_array_from_arena<char>(arena, e_string->cursor + 1);
 	for(int i = 0; i < e_string->cursor + 1; i++){
 		unsigned short code_point = e_string->data[i];
 		if(code_point < 128){

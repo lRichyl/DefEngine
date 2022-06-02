@@ -65,7 +65,12 @@ T get_from_def_table(DefTable<T> *table, const char *key){
 template<typename T>
 T* get_pointer_from_def_table(DefTable<T> *table, const char *key){
 	int hash = calculate_hash(table->size, key);
-	while( 0 != strcmp(table->entries[hash].key, key)){
+	const char *key_target = table->entries[hash].key;
+	if(!key_target){
+		printf("Texture: %s doesn't exist\n");
+		return NULL;
+	}
+	while( 0 != strcmp(key_target, key)){
 		hash++;
 		if(hash >= table->size) return NULL;
 	}

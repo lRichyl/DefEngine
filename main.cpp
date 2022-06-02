@@ -99,7 +99,7 @@ int main(){
 	// float realfps ;
      while(!glfwWindowShouldClose(window->GLFWInstance)){
 
-
+		 
 		//This is done because when we select the window it stops the execution of
 		//the program so the next time we get the current time and calculate dt
 		//it will be so big that physics break.
