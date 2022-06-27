@@ -48,9 +48,10 @@ void init_level_entity_manager(Level *level, EntityManager *em){
 			
 			switch(entity->type){
 				case ENTITY_PLAYER:{
-					Player *player = (Player*)entity;
-					em->player = *player;
-					em->player.position = position;
+					// Player *player = (Player*)entity;
+					// em->player = *player;
+					// em->player.position = position;
+					em->player = cast_and_position_entity<Player>(entity, position);
 					em->player.is_on_level = true;
 					break;
 				}

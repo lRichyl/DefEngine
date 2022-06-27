@@ -99,10 +99,10 @@ void set_pixel(Texture *texture, V4 color, V2 location){
 	int index = (location.y * texture->width + location.x) * (texture->channels);
 	// printf("%d , %d\n", index, texture->size);
 	assert(index <= texture->size);
-	unsigned char pixel_data[4] = {color.x, color.y, color.z, color.w} ;
-	glBindTexture(GL_TEXTURE_2D, texture->id);
-	glTexSubImage2D (GL_TEXTURE_2D, 0, location.x, location.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixel_data);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	// unsigned char pixel_data[4] = {color.x, color.y, color.z, color.w} ;
+	// glBindTexture(GL_TEXTURE_2D, texture->id);
+	// glTexSubImage2D (GL_TEXTURE_2D, 0, location.x, location.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixel_data);
+	// glBindTexture(GL_TEXTURE_2D, 0);
 	
 	// This is done to update the texture data reference on CPU side.
 	texture->data_buffer[index] = color.x;

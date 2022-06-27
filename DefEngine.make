@@ -38,15 +38,15 @@ endef
 
 ifeq ($(config),debug)
 	OBJDIR = obj/Debug
-	ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
-	ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
+	ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -g -O0 
+	ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -g -O0 
 	ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib
 else 
 	ifeq ($(config),release)
 		OBJDIR = obj/Release
-		ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
-		ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
-		ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib 
+		ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 
+		ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 
+		ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib -s
 	endif
 endif
 

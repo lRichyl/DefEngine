@@ -38,5 +38,5 @@ void render_text(Renderer* renderer, Font *font, const char *text, V2 position, 
 void render_text(Renderer* renderer, Font *font, EditableString *string, V2 position, V3 color = {255, 255, 255}
                , bool center = false, ShaderProgram *shader = NULL);
 float get_text_width(Font *font, const char *text);		
-char *unicode_array_to_string(EditableString *e_string);
+char *unicode_array_to_string(EditableString *e_string, MemoryArena *arena);
 

@@ -188,6 +188,12 @@ void Game::DrawGame(float dt, float fps){
 	
     // const char *string = unicode_array_to_string(&e_string);
 	// render_text(renderer, get_font(&asset_manager, "default"), string, {450, 450}, V3{255,255,255});
+
+	// Prueba.
+	// static Texture tex = get_texture(&Game::asset_manager, "frame_texture");
+	render_quad(renderer, V2 {0.0, 300}, V2 {400, 0.0}, 10, get_texture_ptr(&Game::asset_manager, "frame_texture"));
+	// Final de prueba.
+
     renderer_draw(renderer);
     swap_buffers(window);
 }
