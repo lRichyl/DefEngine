@@ -26,7 +26,7 @@ INCLUDES += -Iinclude -Idependencies/glfw/include -Idependencies/OpenAL/include 
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-LIBS += -lglfw3 -lOpenAL32 -lopengl32 -lgdi32
+LIBS += -lglfw3 -lmingw32 -lOpenAL32 -lopengl32 -lgdi32
 LDDEPS +=
 LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
 define PREBUILDCMDS
@@ -37,17 +37,17 @@ define POSTBUILDCMDS
 endef
 
 ifeq ($(config),debug)
-	OBJDIR = obj/Debug
-	ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
-	ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
-	ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib
-else 
-	ifeq ($(config),release)
-		OBJDIR = obj/Release
-		ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
-		ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
-		ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib 
-	endif
+OBJDIR = obj/Debug
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
+ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib
+
+else ifeq ($(config),release)
+OBJDIR = obj/Release
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
+ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib -s
+
 endif
 
 # Per File Configurations
@@ -149,19 +149,18 @@ prebuild: | $(OBJDIR)
 	$(PREBUILDCMDS)
 
 ifneq (,$(PCH))
-	$(OBJECTS): $(GCH) | $(PCH_PLACEHOLDER)
-	$(GCH): $(PCH) | prebuild
+$(OBJECTS): $(GCH) | $(PCH_PLACEHOLDER)
+$(GCH): $(PCH) | prebuild
 	@echo $(notdir $<)
-	$(SILENT) $(CXX) -x c++-header $(ALL_CXXFLAGS) -o "$@" -MF "$(@:%.gch=%.d)" -s "$<"
-	$(PCH_PLACEHOLDER): $(GCH) | $(OBJDIR)
-else 
-	#ifeq (posix,$(SHELLTYPE))
-	#	$(SILENT) touch "$@"
-	#else
-	#	$(SILENT) echo $null >> "$@"
-	#endif
-# else
-	$(OBJECTS): | prebuild
+	$(SILENT) $(CXX) -x c++-header $(ALL_CXXFLAGS) -o "$@" -MF "$(@:%.gch=%.d)" -c "$<"
+$(PCH_PLACEHOLDER): $(GCH) | $(OBJDIR)
+ifeq (posix,$(SHELLTYPE))
+	$(SILENT) touch "$@"
+else
+	$(SILENT) echo $null >> "$@"
+endif
+else
+$(OBJECTS): | prebuild
 endif
 
 
@@ -192,7 +191,7 @@ $(OBJDIR)/entity_collision.o: entity_collision.cpp
 $(OBJDIR)/game.o: game.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/glad.o: glad.c
+$(OBJDIR)/glad.o: glad.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/gui.o: gui.cpp

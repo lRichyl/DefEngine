@@ -9,7 +9,6 @@
 #include "gui.h"
 #include "level_editor.h"
 #include "camera.h"
-#include "console.h"
 
 #define DEV
 
