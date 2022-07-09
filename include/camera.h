@@ -14,7 +14,9 @@ struct Camera{
 };
 
 void init_camera(Camera *camera, Renderer *renderer);
-V2 get_world_position(Camera *camera, V2 position);
-void set_camera_position(Camera *camera, V2 position);
-void zoom(Camera *camera, bool zoom_out = false);
+V2 get_world_position(V2 position);
+V2 get_screen_position(V2 world_pos);
+void set_camera_position();
+void zoom(bool zoom_out = false);
 void reset_camera(Camera *camera);
+void update_camera();

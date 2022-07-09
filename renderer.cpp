@@ -344,17 +344,18 @@ static void compile_shader_program_from_source(ShaderProgram *shader_program, co
 
 
 void initialize_renderer(Renderer *renderer, Window *window){
-	// init_memory_arena(&Renderer::main_arena, 1000000); // Allocate an arena of 10MB.
      renderer->projection = glm::ortho(0.0f, (float)window->internalWidth, 0.0f, (float)window->internalHeight, 0.0f, -100.f);
      renderer->view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Modify this in real time to move the camera.
      renderer->drawing_resolution.x = window->internalWidth;
      renderer->drawing_resolution.y = window->internalHeight;
      renderer->current_batch = &renderer->batches[0];
 
+
      renderer->default_shader_program.name = "Batch shader";
      renderer->framebuffer_shader_program.name = "Framebuffer shader";
      compile_shader_program_from_source(&renderer->default_shader_program, default_vertex_shader, default_fragment_shader);
      compile_shader_program_from_source(&renderer->framebuffer_shader_program, framebuffer_vertex_shader, framebuffer_fragment_shader);
+     renderer->current_shader = renderer->default_shader_program;
 
      create_framebuffer_buffers(renderer);
      initialize_framebuffer(renderer);
@@ -705,18 +706,18 @@ void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alp
 		render_quad(renderer, position, NULL, NULL, false, alpha_value, color);
 	}
 	else{
-		render_quad_with_shader(renderer, position, NULL, *shader, NULL, false, alpha_value, color);
+		render_quad_with_shader(renderer, position, NULL, shader, NULL, false, alpha_value, color);
 	}
 }
 
-void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture,ShaderProgram shader , Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
-     if(renderer->current_batch->number_of_quads_to_copy == RendererInfo::QUADS_PER_BATCH || renderer->current_batch->texture_index == RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH || renderer->current_shader.id != shader.id){
+void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture,ShaderProgram *shader , Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
+     if(renderer->current_batch->number_of_quads_to_copy == RendererInfo::QUADS_PER_BATCH || renderer->current_batch->texture_index == RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH || renderer->current_shader.id != shader->id){
 
           // renderer->current_batch->texture_index = 0;
           renderer->batch_index++;
           renderer->current_batch = &renderer->batches[renderer->batch_index];
-          renderer->current_shader = shader;
-          renderer->current_batch->shader_program = shader;
+          renderer->current_shader = *shader;
+          renderer->current_batch->shader_program = *shader;
           // if(renderer->batch_index > 4) renderer->batch_index = 0;
      }
      // printf("Batch: %d,  Texture Index: %d\n", renderer->batch_index, renderer->current_batch->texture_index);
@@ -750,6 +751,31 @@ void print_batching_info(Renderer *renderer){
           printf("Quads: %d\n", renderer->batches[i].number_of_quads_to_copy);
           printf("Textures: %d\n", renderer->batches[i].texture_index);
           printf("Shader: %s\n\n", renderer->batches[i].shader_program.name);
+     }
+}
+
+void render_queued_commands(DefArray<RenderCommand> *commands){
+     Renderer *renderer = array_at(commands, 0).renderer;
+     for(int i = 0; i < commands->size; i++){
+          RenderCommand command = array_at(commands, i);
+          switch(command.render_type){
+               case RENDER_TEXTURED_QUAD:{
+                    render_quad(renderer, &command.bounding_box, command.texture, &command.clip_region, command.mirrorX, command.alpha_value, command.color , command.mirrorY);
+                    break;
+               }
+               case RENDER_TEXTURED_LINE:{
+                    render_quad(renderer, command.a, command.b, command.thickness, command.texture, &command.clip_region,command.mirrorX, command.alpha_value, command.color, command.mirrorY);
+                    break;
+               }
+               case RENDER_COLORED_RECT:{
+                    render_colored_rect(renderer, &command.bounding_box, command.color, command.alpha_value, command.shader);
+                    break;
+               }
+               case RENDER_WITH_SHADER:{
+                    render_quad_with_shader(renderer, &command.bounding_box, command.texture, command.shader, &command.clip_region, command.mirrorX, command.alpha_value, command.color , command.mirrorY);
+                    break;
+               }
+          }
      }
 }
 
@@ -973,4 +999,56 @@ static void rebind_registered_texture_ids(Batch *batch){
 
 void print_rect(Rect *rect){
 	printf("x: %f, y: %f, w: %f, h: %f\n", rect->x, rect->y, rect->w, rect->h);
+}
+
+void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     RenderCommand command;
+     command.renderer = renderer;
+     command.render_type = RenderType::RENDER_TEXTURED_QUAD;
+     command.bounding_box = *position;
+     command.texture = texture;
+     command.clip_region = *clip_region;
+     command.mirrorX = mirrorX;
+     command.alpha_value = alpha_value;
+     command.color = color;
+     command.mirrorY = mirrorY;
+     add_array(commands_list, command);
+}
+void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     RenderCommand command;
+     command.renderer = renderer;
+     command.render_type = RenderType::RENDER_TEXTURED_LINE;
+     command.a = a;
+     command.b = b;
+     command.texture = texture;
+     command.clip_region = *clip_region;
+     command.mirrorX = mirrorX;
+     command.alpha_value = alpha_value;
+     command.color = color;
+     command.mirrorY = mirrorY;
+     add_array(commands_list, command);
+}
+void render_queue_colored_rect(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, V3 color, float alpha_value, ShaderProgram *shader){
+     RenderCommand command;
+     command.renderer = renderer;
+     command.render_type = RenderType::RENDER_COLORED_RECT;
+     command.bounding_box = *position;
+     command.color = color;
+     command.alpha_value = alpha_value;
+     command.shader = shader;
+     add_array(commands_list, command);
+}
+void render_queue_quad_with_shader(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, Texture *texture, ShaderProgram *shader, Rect *clip_region , bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     RenderCommand command;
+     command.renderer = renderer;
+     command.render_type = RenderType::RENDER_WITH_SHADER;
+     command.bounding_box = *position;
+     command.texture = texture;
+     command.shader = shader;
+     command.clip_region = *clip_region;
+     command.mirrorX = mirrorX;
+     command.alpha_value = alpha_value;
+     command.color = color;
+     command.mirrorY = mirrorY;
+     add_array(commands_list, command);
 }

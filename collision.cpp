@@ -61,24 +61,25 @@ bool DoRectContainsPoint(Rect b, V2 point){
 
 
 
-void check_collision_between_player_and_collision_regions(Player *player, DefArray<Rect> *collision_regions){
-	for(int i = 0; i < collision_regions->size; i++){
+void check_collision_between_player_and_collision_regions(Player *player, Collider *collision_regions){
+	for(int i = 0; i < ENTITIES_PER_TYPE; i++){
+		if(!collision_regions[i].is_active) continue;
 		V2 penetration;
-		Rect col_reg = array_at(collision_regions, i);
+		Rect col_reg = collision_regions[i].bounding_box;
 		// printf("Col regs: %f, %f, %f, %f\n", col_reg.x, col_reg.y, col_reg.w, col_reg.h);
 
 		if(DoRectsCollide(col_reg, player->bounding_box, &penetration)){
 			player->position.x += penetration.x;
 			player->position.y += penetration.y;
-			update_position(player);
+			update_bounding_box(player);
 		}
 	}
 }
 
-void check_collisions(EntityManager *em, Level *current_level){
+void check_collisions(EntityManager *em){
 	if(em->player.is_on_level){
-		check_collision_between_player_and_entities(&em->player, &em->slimes);
-		check_collision_between_player_and_collision_regions(&em->player, &current_level->collision_regions);
+		check_collision_between_player_and_entities(&em->player, em->slimes);
+		check_collision_between_player_and_collision_regions(&em->player, em->collision_regions);
 	}
 }
 

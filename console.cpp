@@ -29,84 +29,84 @@ void init_console(Console *console, Renderer *renderer){
 }
 
 void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
-	if(!IsKeyPressed(renderer->window, GLFW_KEY_ENTER)){
-		for(int i = 0; i < Input::unicode_array.size; i++){
-			add_unicode_to_string(&console->string, Input::unicode_array[i]);
-		}
+	// if(!is_key_being_pressed(renderer->window, GLFW_KEY_ENTER)){
+	// 	for(int i = 0; i < Input::unicode_array.size; i++){
+	// 		add_unicode_to_string(&console->string, Input::unicode_array[i]);
+	// 	}
 		
-		static bool delete_first = true;
-		static bool multi_delete = false;
-		if(IsKeyPressed(renderer->window, GLFW_KEY_BACKSPACE)){
-			console->backspace_timer.Tick();
-			if(delete_first){
-				backspace_string(&console->string);
-				delete_first = false;
-			}
-			else if(console->backspace_timer.isTimeReached) multi_delete = true;
-			if(multi_delete){
-				console->multi_delete_timer.Tick();
-				if(console->multi_delete_timer.isTimeReached) backspace_string(&console->string);
-			}
-		}
-		else{
-			// printf("NOT PRESSED\n");
-			console->backspace_timer.Reset();
-			console->multi_delete_timer.Reset();
-			delete_first = true;
-			multi_delete = false;
-		}
-	}
-	else{
-		char *string = unicode_array_to_string(&console->string, &Game::main_arena);
-		char first[50] {}; // This is the command. 
-		char second[50]{}; // This is the command's argument.
-		get_first_two_words(string, first, second);
-		int word_count = get_word_count(string);
-		if(word_count == 2){
+	// 	static bool delete_first = true;
+	// 	static bool multi_delete = false;
+	// 	if(is_key_being_pressed(renderer->window, GLFW_KEY_BACKSPACE)){
+	// 		console->backspace_timer.Tick();
+	// 		if(delete_first){
+	// 			backspace_string(&console->string);
+	// 			delete_first = false;
+	// 		}
+	// 		else if(console->backspace_timer.isTimeReached) multi_delete = true;
+	// 		if(multi_delete){
+	// 			console->multi_delete_timer.Tick();
+	// 			if(console->multi_delete_timer.isTimeReached) backspace_string(&console->string);
+	// 		}
+	// 	}
+	// 	else{
+	// 		// printf("NOT PRESSED\n");
+	// 		console->backspace_timer.Reset();
+	// 		console->multi_delete_timer.Reset();
+	// 		delete_first = true;
+	// 		multi_delete = false;
+	// 	}
+	// }
+	// else{
+	// 	char *string = unicode_array_to_string(&console->string, &Game::main_arena);
+	// 	char first[50] {}; // This is the command. 
+	// 	char second[50]{}; // This is the command's argument.
+	// 	get_first_two_words(string, first, second);
+	// 	int word_count = get_word_count(string);
+	// 	if(word_count == 2){
 				
-			if(!strcmp(first, "save_new")){
-				strcpy(editor->current_level.name, second);
-				char level_path[50] = {};
-				strcat(level_path, LEVELS_PATH);
-				strcat(level_path, second);
-				strcat(level_path, EXTENSION);
-				if(save_new_level(editor, level_path))
-					add_array(&console->buffer, "Succesfully saved.");
-				else 
-					add_array(&console->buffer, "A level with that name already exist.");
-			}
-			else if(!strcmp(first, "load")){
-				char level_path[50] = {};
-				strcat(level_path, LEVELS_PATH);
-				strcat(level_path, second);
-				strcat(level_path, EXTENSION);
-				if(load_level(editor, level_path)){
-					add_array(&console->buffer, "Level loaded successfully");
-				}
-				else
-					add_array(&console->buffer, "Level could not be loaded. Possibly doesn't exist.");
-			}
-		}
-		else if (word_count == 1){
-			if(!strcmp(first, "save")){
-				char level_path[50] = {};
-				if(!editor->current_level.name){
-					add_array(&console->buffer, "There's currently no level loaded.");
-					console->string.cursor = 0;
-					return;
-				} 
-				strcat(level_path, LEVELS_PATH);
-				strcat(level_path, editor->current_level.name);
-				strcat(level_path, EXTENSION);
-				if(save_level(editor, level_path)){
-					add_array(&console->buffer, "Level succesfully overwritten.");
-				}
-				else add_array(&console->buffer, "The current level is not saved. Use save_new LEVEL_NAME");
-			}
-		}
-		free_from_arena(&Game::main_arena, string);
-		clear_string(&console->string);
-	}
+	// 		if(!strcmp(first, "save_new")){
+	// 			strcpy(editor->current_level.name, second);
+	// 			char level_path[50] = {};
+	// 			strcat(level_path, LEVELS_PATH);
+	// 			strcat(level_path, second);
+	// 			strcat(level_path, EXTENSION);
+	// 			if(save_new_level(editor, level_path))
+	// 				add_array(&console->buffer, "Succesfully saved.");
+	// 			else 
+	// 				add_array(&console->buffer, "A level with that name already exist.");
+	// 		}
+	// 		else if(!strcmp(first, "load")){
+	// 			char level_path[50] = {};
+	// 			strcat(level_path, LEVELS_PATH);
+	// 			strcat(level_path, second);
+	// 			strcat(level_path, EXTENSION);
+	// 			if(load_level(editor, level_path)){
+	// 				add_array(&console->buffer, "Level loaded successfully");
+	// 			}
+	// 			else
+	// 				add_array(&console->buffer, "Level could not be loaded. Possibly doesn't exist.");
+	// 		}
+	// 	}
+	// 	else if (word_count == 1){
+	// 		if(!strcmp(first, "save")){
+	// 			char level_path[50] = {};
+	// 			if(!editor->current_level.name){
+	// 				add_array(&console->buffer, "There's currently no level loaded.");
+	// 				console->string.cursor = 0;
+	// 				return;
+	// 			} 
+	// 			strcat(level_path, LEVELS_PATH);
+	// 			strcat(level_path, editor->current_level.name);
+	// 			strcat(level_path, EXTENSION);
+	// 			if(save_level(editor, level_path)){
+	// 				add_array(&console->buffer, "Level succesfully overwritten.");
+	// 			}
+	// 			else add_array(&console->buffer, "The current level is not saved. Use save_new LEVEL_NAME");
+	// 		}
+	// 	}
+	// 	free_from_arena(&Game::main_arena, string);
+	// 	clear_string(&console->string);
+	// }
 }
 
 void render_console(Console *console, Renderer *renderer){

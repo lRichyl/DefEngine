@@ -1,6 +1,7 @@
 #pragma once
 #include "renderer.h"
 #include "text.h"
+#include "timer.h"
 // #include "level_editor.h"
 struct LevelEditor;
 // Console color 120,130,50.
@@ -10,7 +11,7 @@ const float MULTIBACKSPACE_TIME    = 0.7;
 const float MULTI_DELETE_TIME      = 0.05;
 
 struct EditableString{
-	// This string uses unicode data NOT utf8.
+	// This string uses unicode data, NOT utf8.
 	int cursor = 0;
 	unsigned int data[200] = {};
 };

@@ -1,9 +1,10 @@
 #include "input.h"
 #include <queue>
-#include <stdio.h>
+#include <memory.h>
 
 DefArray<unsigned int> Input::unicode_array;
-static std::queue<Event> events; 
+// static std::queue<Event> events; 
+unsigned int           Input::keys_state[KEYS_AMOUNT];
 
 static MouseInfo mouseInfo;
 
@@ -29,26 +30,41 @@ static void get_mouse_button_state(MouseButton *mb_info){
 
 }
 
-bool GetNextEvent(Event *event){
+// bool GetNextEvent(Event *event){
      // Event e = {};
-     if(events.size() == 0) return false;
+     // if(events.size() == 0) return false;
 
-     Event e = events.front();
-     event->key = e.key;
-     event->action = e.action;
-     events.pop();
-     return true;
+     // Event e = events.front();
+     // event->key = e.key;
+     // event->action = e.action;
+     // events.pop();
+     // return true;
 
-}
+// }
 
-bool IsKeyPressed(Window *window, int key){
+bool is_key_being_pressed(Window *window, int key){
 	int state = glfwGetKey(window->GLFWInstance, key);
 	return state == GLFW_PRESS;
 }
 
+bool was_key_pressed(int key){
+	int state = Input::keys_state[key];
+	return state == GLFW_PRESS;
+}
+
+bool was_key_released(int key){
+	int state = Input::keys_state[key];
+	return state == GLFW_RELEASE;
+}
+
+void clear_keys_state(){
+	memset(Input::keys_state, 3, sizeof(unsigned int) * KEYS_AMOUNT);
+}
+
 void PollKeyboardEvents(GLFWwindow* window, int key, int scancode, int action, int mods){
-	Event e = {key , action};
-	events.push(e);
+	// Event e = {key , action};
+	Input::keys_state[key] = action;
+	// events.push(e);
 }
 
 void CursorCallback(GLFWwindow* window, double xpos, double ypos){
@@ -155,12 +171,12 @@ void PrintMouseInfo(MouseInfo *mouse){
 	}
 }
 
-void PrintEvents(){
-     for(int i = 0; i < events.size(); i++){
-          Event e = events.front();
-          printf("%d\n", e.key);
-          printf("%d\n", e.action);
-          printf("\n\n");
-          events.pop();
-     }
-}
+// void PrintEvents(){
+     // for(int i = 0; i < events.size(); i++){
+          // Event e = events.front();
+          // printf("%d\n", e.key);
+          // printf("%d\n", e.action);
+          // printf("\n\n");
+          // events.pop();
+     // }
+// }

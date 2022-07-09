@@ -1,53 +1,36 @@
 #pragma once
-#include "gui.h"
-#include "def_array.h"
-#include "console.h"
 #include "level.h"
+#include "window.h"
+#include "entity.h"
 
-const int TILES_AMOUNT          = 50;
-const int ENTITIES_AMOUNT       = 50;
-const int TILE_SIZE             = 32;  
-const int MAX_COLLISION_REGIONS = 100;
+#define MAX_TILE_PROTOTYPE 100
 
 enum EditorState{
 	EDITOR_EDIT,
-	EDITOR_CONSOLE,
 	EDITOR_TEST
 };
 
-
-struct PrototypeList{
-	const char *name;
-	DefArray<Entity*> entities;
+struct EntitySelector{
+	int entities_per_row = 5;
+	Rect area;
+	V2 entity_area_offset;
 };
 
-void init_prototype_list(PrototypeList *list, int size, const char *name);
-void add_prototype(PrototypeList *list, Entity *e);
+void init_entity_selector(EntitySelector *e_selector, Window *window);
+void render_entity_selector(EntitySelector *e_selector, LevelEditor *editor, Renderer *renderer);
 
 struct LevelEditor{
-	EditorState state = EditorState::EDITOR_EDIT;
-	EntitySelection selected_entity;
-	TabbedMenu menu;
-	V2 icon_size;
-	PrototypeList tiles;
-	PrototypeList entities;
-	PrototypeList multi_tiles;
-	PrototypeList multi_entities;
-	Level current_level;
-	// Console console;
-	bool show_entity_selector;
-	bool test_level;
-	// bool show_console;
-	int current_layer;
+	int current_layer = 0;
+	bool is_entity_selector_opened = false;
+	bool is_phase_one_collider_placement = true;
+	EntitySpecifier selected_entity;
+	Level edited_level;
+	Rect work_area;
+	EditorState state;
+
+	EntitySelector entity_selector;
 };
 
-void init_level_editor(LevelEditor *editor, Rect bounding_box, Texture frame_texture, Texture tab_texture, Renderer *renderer);
-void load_prototype_lists(LevelEditor *editor); // Call this after adding all the tabs.
-void set_level_editor_tab_font(LevelEditor *editor, Font *font);
-void update_level_editor(Renderer *renderer, LevelEditor *editor);
-void render_level_editor(Renderer *renderer, LevelEditor *editor);
-void render_tile_map(Renderer *renderer, MapObject *tile_map);
-
-bool save_level(LevelEditor *editor, const char *name);
-bool save_new_level(LevelEditor *editor, const char *name);
-bool load_level(LevelEditor *editor, const char *name);
+void init_level_editor(LevelEditor *editor, Window *window);
+void update_level_editor(LevelEditor *editor, Renderer *renderer);
+void render_level_editor(LevelEditor *editor, Renderer *renderer);

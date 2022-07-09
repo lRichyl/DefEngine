@@ -11,7 +11,7 @@
 #include "camera.h"
 #include "console.h"
 
-#define DEV
+#define DEV 1
 
 const int UNICODE_BUFFER_SIZE = 10;
 
@@ -25,11 +25,12 @@ struct Game{
 	void DrawGame(float dt, float fps);
 	void GameLoop(float dt, float fps);
 	Game(Renderer *r, Window *w);
+
+	static void clear_render_lists();
 	
 	Renderer *renderer;
 	Window *window;
 	bool showFPS = true;
-	bool showEditor = false;
 	GameState state = GameState::GAME_PLAY;
 	
 	static MouseInfo              mouse;
@@ -39,13 +40,10 @@ struct Game{
 	static float                  dt;
 	static Console                console;
 	static Camera                 camera;
-	
-	Font font  = Font("assets/fonts/Simvoni.ttf", 16);
+	static DefArray<RenderCommand> layers_render_commands[LEVEL_LAYERS];
+
+	// Font font  = Font("assets/fonts/Simvoni.ttf", 16);
 	// Frame frame;
 
 	LevelEditor level_editor;
-	Texture texture;
-	Texture smiley;
-	Texture link;
-	Texture frame_texture;
 };

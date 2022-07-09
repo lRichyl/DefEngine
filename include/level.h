@@ -1,32 +1,22 @@
 #pragma once
-#include "def_array.h"
 #include "entity.h"
 #include "renderer.h"
 
-const int LEVEL_SIZE      = 30;
-const int LEVEL_LAYERS    = 5;
-const int LEVEL_NAME_SIZE = 50;
+#define LEVEL_WIDTH 100
+#define LEVEL_HEIGHT 100
+#define LEVEL_LAYERS 5
+#define TILE_SIZE 32
 
-
-struct MapObject{
-	EntitySelection selected_entity;
-	EntitySelection *origin = NULL;// This is used when we wanna place and delete multi tile entities.
-	int origin_index = -1;
+struct EntitySpecifier{
+	EntityType type = EntityType::ENTITY_NONE;
+	// The id is only used if the type is ENTITY_TILE. It is used to get the correct tile from a list.
+	int id = -1; 
 };
 
 struct Level{
-	char name[LEVEL_NAME_SIZE]{};
-	MapObject      *layers[LEVEL_LAYERS];
-	DefArray<Rect> collision_regions;
-	// Sprite collision_region_sprite;
+	EntitySpecifier *map_layers[LEVEL_LAYERS];
 };
 
 void init_level(Level *level);
-void init_level_entity_manager(Level *level, EntityManager *em);
-void update_level(Renderer *renderer, Level *level, EntityManager *em);
-void render_level(Renderer *renderer, Level *level, EntityManager *em);
-void render_collision_regions(Renderer *renderer, Level *level); // Collision regions are only drawn when in edit mode.
-void clear_level_memory(Level *level); // This function deallocate all the level's memory.
-void empty_level(Level *level); // This function resets the level memory to its default state.
-
+void load_entities_to_level(Level *level, EntityManager *em);
 

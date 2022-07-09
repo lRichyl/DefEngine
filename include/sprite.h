@@ -1,13 +1,14 @@
 #pragma once
 #include "math.h"
 #include "texture.h"
-// #include "renderer.h"
+#include "renderer.h"
 #include "timer.h"
 
 #include <vector>
 
-struct Renderer;
-struct ShaderProgram;
+// struct Renderer;
+// struct ShaderProgram;
+// struct RenderCommand;
 // Clipping boxes values are based on the top left corner of the texture. 
 // Position is the position of the top left corner of the sprite. The origin of world coordinates is on the
 // bottom left corner of the screen.
@@ -31,6 +32,7 @@ struct Sprite{
 };
 
 void render_sprite(Renderer *renderer, Sprite *spr, V2 position, ShaderProgram *shader = NULL);
+void render_queue_sprite(DefArray<RenderCommand> *command_list, Renderer *renderer, Sprite *spr, V2 position, ShaderProgram *shader = NULL);
 // void render_sprite_with_transparency(Renderer *renderer, Sprite *spr, V2 position, )
 void render_sprite_as_background(Renderer *renderer, Sprite *spr);
 
@@ -44,3 +46,4 @@ struct AnimatedSprite{
 
 void add_animation_frame(AnimatedSprite *animation, Rect clipping_box);
 void render_animation(Renderer *renderer, AnimatedSprite *anim_spr, V2 position);
+void render_queue_animation(DefArray<RenderCommand> *command_list, Renderer *renderer, AnimatedSprite *anim_spr, V2 position);

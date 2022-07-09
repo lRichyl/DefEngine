@@ -2,11 +2,12 @@
 #include "glad/glad.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "collision.h"
+// #include "collision.h"
 #include "window.h"
 #include "math.h"
 #include "texture.h"
 #include "memory_arena.h"
+#include "def_array.h"
 
 
 namespace RendererInfo{
@@ -16,6 +17,7 @@ namespace RendererInfo{
      static const int TOTAL_INDICES =  QUADS_PER_BATCH * INDICES_PER_QUAD;
      static int MAX_TEXTURE_UNITS_PER_BATCH;
      static const int NUMBER_OF_BATCHES = 30;
+     static const int MAX_RENDER_COMMANDS = 1000;
 }
 
 
@@ -39,6 +41,9 @@ struct Batch{
      //                           0.8f, 0.8f};
      float vertex_buffer[RendererInfo::QUADS_PER_BATCH * RendererInfo::FLOATS_PER_QUAD] = {};
 };
+
+
+
 struct Renderer{
      unsigned int ibo;
      unsigned int fbo;
@@ -66,9 +71,34 @@ struct Renderer{
      Batch *current_batch;
      ShaderProgram default_shader_program;
      ShaderProgram current_shader;
-	 
 };
 
+enum RenderType{
+     RENDER_NONE,
+     RENDER_TEXTURED_QUAD,
+     RENDER_TEXTURED_LINE,
+     RENDER_COLORED_RECT,
+     RENDER_WITH_SHADER
+};
+
+struct RenderCommand{
+     Renderer *renderer;
+     RenderType render_type = RenderType::RENDER_NONE;
+     Rect bounding_box;
+     Texture *texture = NULL;
+     Rect clip_region;
+     bool mirrorX = false;
+     float alpha_value = 255.0f;
+     V3 color = {255.f,255.f,255.f};
+     bool mirrorY = false;
+
+     // For rendering textured lines.
+     V2 a;
+     V2 b;
+     float thickness;
+
+     ShaderProgram *shader = NULL;
+};
 
 
 
@@ -86,7 +116,7 @@ void initialize_texture_sampler(ShaderProgram shader);
 // Loads the default MVP matrix to the passed shader program's vertex shader, as long as it has two mat4 uniforms called "u_projection" and "u_view"
 void load_mvp_to_shader(Renderer *renderer, ShaderProgram shader);
 
-// Renders a textured quad in the specified position with no rotation. Usin the default shader program.
+// Renders a textured quad in the specified position with no rotation. Using the default shader program.
 void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
 
 // This function renders a textured quad from point A to point B. As if it was a line.
@@ -96,7 +126,7 @@ void render_quad(Renderer *renderer, V2 a, V2 b, float thickness, Texture *textu
 void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alpha_value = 255, ShaderProgram *shader = NULL);
 
 // Works the same as render_quad but you can provide a different shader program.
-void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture, ShaderProgram shader, Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
+void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture, ShaderProgram *shader, Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
 
 // Use this to change the rendering resolution at runtime.
 void change_drawing_resolution(Renderer *renderer, int width, int height);
@@ -107,3 +137,11 @@ ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shade
 void renderer_draw(Renderer *renderer);
 void destroy_renderer(Renderer *renderer);
 void print_rect(Rect *rect);
+
+
+// This functions queue up render commands that will later be rendered using the render functions above.
+void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
+void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
+void render_queue_colored_rect(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, V3 color, float alpha_value = 255, ShaderProgram *shader = NULL);
+void render_queue_quad_with_shader(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, Texture *texture, ShaderProgram *shader, Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
+void render_queued_commands(DefArray<RenderCommand> *commands);

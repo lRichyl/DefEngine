@@ -1,6 +1,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "camera.h"
+#include "input.h"
+#include "game.h"
+
+#define CAMERA_SPEED 100
 
 void init_camera(Camera *camera, Renderer *renderer){
 	camera->renderer = renderer;
@@ -8,11 +12,11 @@ void init_camera(Camera *camera, Renderer *renderer){
 	camera->size     = {renderer->window->internalWidth, renderer->window->internalHeight};
 }
 
-void set_camera_position(Camera *camera, V2 position){
-	camera->position = position;
+void set_camera_position(){
+	// camera->position = position;
 	// When we move the camera we change the view matrix for all the batches that are using the default shader. 
 	// If we for example wanna use a special shader for the player we have to update its view matrix to the same as the default matrix. 
-	
+	Camera *camera = &Game::camera;
 	// Turn this into a function when we need to update other shaders.
 	ShaderProgram shader = camera->renderer->default_shader_program;
 	glUseProgram(shader.id);
@@ -26,7 +30,8 @@ void set_camera_position(Camera *camera, V2 position){
 	camera->moved = true;
 }
 
-void zoom(Camera *camera, bool zoom_out){
+void zoom(bool zoom_out){
+	Camera  *camera = &Game::camera;
 	ShaderProgram shader = camera->renderer->default_shader_program;
 	if(zoom_out){
 		glUseProgram(shader.id);
@@ -56,7 +61,8 @@ void zoom(Camera *camera, bool zoom_out){
 	}
 }
 
-V2 get_world_position(Camera *camera, V2 position){
+V2 get_world_position(V2 position){
+	Camera *camera = &Game::camera;
 	V2 world_pos;
 	V2 scale  = {camera->size.x / camera->renderer->window->internalWidth, camera->size.y / camera->renderer->window->internalHeight};
 	position.x *= scale.x;
@@ -67,7 +73,18 @@ V2 get_world_position(Camera *camera, V2 position){
 	return world_pos;
 }
 
-void reset_camera(Camera *camera){
+V2 get_screen_position(V2 world_pos){
+	Camera *camera = &Game::camera;
+	V2 screen_pos;
+	V2 scale  = {camera->size.x / camera->renderer->window->internalWidth, camera->size.y / camera->renderer->window->internalHeight};
+	world_pos.x /= scale.x;
+	world_pos.y /= scale.y;
+	screen_pos = {world_pos.x - camera->position.x, world_pos.y - camera->position.y};
+	return screen_pos;
+}
+
+void reset_camera(){
+	Camera *camera = &Game::camera;
 	camera->position = {0,0};
 	ShaderProgram shader = camera->renderer->default_shader_program;
 	glUseProgram(shader.id);
@@ -85,4 +102,39 @@ void reset_camera(Camera *camera){
 	glUseProgram(0);
 	
 	camera->size = {window->internalWidth, window->internalHeight};
+}
+
+// This function is used for updating the camera while editing a level.
+void update_camera(){
+	Camera *camera = &Game::camera;
+	Window *w = camera->renderer->window;
+	MouseInfo mouse = Game::mouse;
+	if(!camera->renderer){
+		printf("No renderer attached to the camera\n");
+		return;	
+	} 
+
+	if(is_key_being_pressed(w, GLFW_KEY_D)){
+		camera->position.x += CAMERA_SPEED * Game::dt;
+		set_camera_position();
+	}
+	if(is_key_being_pressed(w, GLFW_KEY_A)){
+		camera->position.x -= CAMERA_SPEED * Game::dt;
+		set_camera_position();
+	}
+	if(is_key_being_pressed(w, GLFW_KEY_W)){
+		camera->position.y += CAMERA_SPEED * Game::dt;
+		set_camera_position();
+	}
+	if(is_key_being_pressed(w, GLFW_KEY_S)){
+		camera->position.y -= CAMERA_SPEED * Game::dt;
+		set_camera_position();
+	}
+
+	if(mouse.wheel == ScrollWheelState::WHEEL_FORWARDS){
+		zoom();
+	}
+	else if (mouse.wheel == ScrollWheelState::WHEEL_BACKWARDS){
+		zoom(true);
+	}
 }

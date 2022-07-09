@@ -17,7 +17,7 @@ struct DefArray{
 
 template<typename T>
 inline T array_at(DefArray<T> *array, int i){
-	return array->data[i];
+	return *(array->data + i);
 }
 
 // template<typename T>
@@ -32,14 +32,14 @@ inline void init_array(DefArray<T> *array, MemoryArena *arena, int capacity){
 }
 
 template<typename T>
-inline void add_array(DefArray<T> *array, T data){
+inline T* add_array(DefArray<T> *array, T data){
 	if(array->size >= array->capacity - 1){
 		printf("Array full\n");
-		return;
+		return NULL;
 	}
 	array->data[array->size] = data;
 	array->size++;
-	
+	return &array->data[array->size - 1];
 }
 
 template<typename T>

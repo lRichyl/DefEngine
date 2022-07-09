@@ -5,7 +5,7 @@ workspace "DefEngine"
 	libdirs { "dependencies/glfw/lib", "dependencies/OpenAL/lib" }
 	links {"glfw3", "gdi32", "OpenAL32", "mingw32"}
 	includedirs { "include", "dependencies/glfw/include", "dependencies/OpenAL/include", "dependencies/glad/include", "dependencies", "dependencies/stb/" }
-	buildoptions { "-g", "-O0"}
+	buildoptions { "-g", "-O0" ,"-w"}
 	
 project "DefEngine"
    -- kind "WindowedApp"

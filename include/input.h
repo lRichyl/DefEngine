@@ -5,8 +5,11 @@
 #include "math.h"
 #include "def_array.h"
 
+#define KEYS_AMOUNT 100
+
 struct Input{
 	static DefArray<unsigned int> unicode_array;
+	static unsigned int keys_state[KEYS_AMOUNT];
 };
 
 struct Event{
@@ -41,7 +44,10 @@ struct MouseInfo{
 };
 
 
-bool IsKeyPressed(Window *window, int key);
+bool is_key_being_pressed(Window *window, int key);
+bool was_key_pressed(int key);
+bool was_key_released(int key);
+void clear_keys_state();
 void PollKeyboardEvents();
 void SetKeyboardCallback(Window *window);
 void SetCursorCallback(Window *window);
@@ -49,8 +55,8 @@ void SetMouseButtonCallback(Window *window);
 void set_scroll_wheel_callback(Window *window);
 void set_character_callback(Window *window);
 void PrintMouseInfo(MouseInfo *mouse);
-void PrintEvents();
-bool GetNextEvent(Event *event);
+// void PrintEvents();
+// bool GetNextEvent(Event *event);
 
 MouseInfo GetMouseInfo(Window *window);
 void clear_mouse_info();

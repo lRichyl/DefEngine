@@ -10,12 +10,12 @@ endif
 
 ifeq ($(config),debug)
   DefEngine_config = debug
-else 
-	ifeq ($(config),release)
-		DefEngine_config = release
-	else
-  		$(error "invalid configuration $(config)")
-	endif	
+
+else ifeq ($(config),release)
+  DefEngine_config = release
+
+else
+  $(error "invalid configuration $(config)")
 endif
 
 PROJECTS := DefEngine

@@ -96,6 +96,7 @@ int main(){
 	
 	
 	Game game = Game(renderer, window);
+	clear_keys_state();
 	// float realfps ;
      while(!glfwWindowShouldClose(window->GLFWInstance)){
 
