@@ -15,8 +15,10 @@ struct EntitySpecifier{
 
 struct Level{
 	EntitySpecifier *map_layers[LEVEL_LAYERS];
+	DefArray<Collider> collision_regions;
 };
 
 void init_level(Level *level);
 void load_entities_to_level(Level *level, EntityManager *em);
+void save_collision_regions_to_level(Level *level, EntityManager *em);
 

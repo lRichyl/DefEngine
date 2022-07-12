@@ -5,6 +5,7 @@ void init_level(Level *level){
 	for(int i = 0; i < LEVEL_LAYERS; i++){
 		level->map_layers[i] = allocate_array_from_arena<EntitySpecifier>(&Game::main_arena, LEVEL_WIDTH * LEVEL_HEIGHT);
 	}	
+	init_array(&level->collision_regions, &Game::main_arena, ENTITIES_PER_TYPE);
 }
 
 void load_entities_to_level(Level *level, EntityManager *em){
@@ -22,5 +23,21 @@ void load_entities_to_level(Level *level, EntityManager *em){
 				e_spec->id = e->id;
 			}
 		}
+	}
+
+	
+	for(int i = 0; i < level->collision_regions.size; i++){
+		Collider collider  = level->collision_regions[i];
+		Collider *added = (Collider*)add_entity(EntityType::ENTITY_COLLIDER, em, collider.position, i);
+		added->sprite = collider.sprite;
+	}
+}
+
+void save_collision_regions_to_level(Level *level, EntityManager *em){
+	clear_array(&level->collision_regions);
+	for(int i = 0; i < ENTITIES_PER_TYPE; i++){
+		Collider c = em->collision_regions[i];
+		if(!c.is_active) continue;
+		add_array(&level->collision_regions, c);
 	}
 }

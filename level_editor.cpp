@@ -86,6 +86,13 @@ void init_level_editor(LevelEditor *editor, Window *window){
 	editor->selected_entity.type = EntityType::ENTITY_PLAYER;
 	init_prototypes(&Game::em);
 	update_entity_prototypes_positions(&editor->entity_selector);
+
+	init_button(&editor->button, "TEST");
+	set_button_position(&editor->button, {100,100});
+	set_button_size(&editor->button, {32,32});
+	editor->button.sprite.info.texture = get_texture(&Game::asset_manager, "test_tiles");
+	editor->button.sprite.clipping_box = {0,0,32,32};
+
 }
 
 void init_entity_selector(EntitySelector *e_selector, Window *window){
@@ -97,8 +104,10 @@ void init_entity_selector(EntitySelector *e_selector, Window *window){
 
 void update_level_editor(LevelEditor *editor, Renderer *renderer){
 	if(editor->state == EditorState::EDITOR_EDIT){
+		
 		if(was_key_pressed(GLFW_KEY_SPACE)){
 			editor->state = EditorState::EDITOR_TEST;
+			save_collision_regions_to_level(&editor->edited_level, &Game::em);
 			return;
 		}
 
@@ -143,64 +152,67 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 							int index = V2_coords_to_array_index(player_tile_pos);
 							previous_player_layer[index].type = EntityType::ENTITY_NONE;						}
 					}
-					else if(editor->selected_entity.type == EntityType::ENTITY_COLLIDER){
-							// static bool is_phase_one = true;
-							static V2 start_pos;
-							 
-						if(editor->is_phase_one_collider_placement){
-							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&Game::em, world_pos)){
-								start_pos    = floored_tile_pos;
-								editor->is_phase_one_collider_placement = false;
-							}
-						}
-						else{
-							// This code determines the corner positions of the collision region depending on where the second click is pressed.
-							Rect collision_region;
-							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&Game::em, world_pos)){
-								if(start_pos.x == floored_tile_pos.x && start_pos.y == floored_tile_pos.y){
-									V2 final_pos     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y - TILE_SIZE};
-									collision_region = {start_pos.x, start_pos.y, std::abs(final_pos.x - start_pos.x), std::abs(final_pos.y - start_pos.y)};
-								}
-								else if (start_pos.x <= floored_tile_pos.x && start_pos.y >= floored_tile_pos.y){
-									V2 final_pos     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y - TILE_SIZE};
-									collision_region = {start_pos.x, start_pos.y, std::abs(final_pos.x - start_pos.x), std::abs(final_pos.y - start_pos.y)};
-								}
-								else if (start_pos.x <= floored_tile_pos.x && start_pos.y < floored_tile_pos.y){
-									V2 bottom_left   = {start_pos.x, start_pos.y - TILE_SIZE};
-									V2 top_right     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y};
-									int width        = top_right.x - bottom_left.x;
-									int height       = top_right.y - bottom_left.y;
-									collision_region = {bottom_left.x, bottom_left.y + height, width, height};
-								}
-								else if (start_pos.x >= floored_tile_pos.x && start_pos.y >= floored_tile_pos.y){
-									V2 bottom_left   = {floored_tile_pos.x, floored_tile_pos.y - TILE_SIZE};
-									V2 top_right     = {start_pos.x + TILE_SIZE, start_pos.y};
-									int width        = top_right.x - bottom_left.x;
-									int height       = top_right.y - bottom_left.y;
-									collision_region = {bottom_left.x, bottom_left.y + height, width, height};
-								}
-								else if (start_pos.x >= floored_tile_pos.x && start_pos.y < floored_tile_pos.y){
-									V2 bottom_right  = {start_pos.x + TILE_SIZE, start_pos.y - TILE_SIZE};
-									V2 top_left      = {floored_tile_pos.x, floored_tile_pos.y};
-									int width        = bottom_right.x - top_left.x;
-									int height       = top_left.y - bottom_right.y;
-									collision_region = {top_left.x, top_left.y, width, height};
-								}
+					
 
-								editor->is_phase_one_collider_placement = true;
-								V2 position = {collision_region.x, collision_region.y};
-								Collider *c = (Collider*)add_entity(editor->selected_entity.type, &Game::em, position, 2);
-								c->bounding_box = collision_region;
-								c->sprite.info.size = {collision_region.w, collision_region.h};
-								return;
-							}
-						}
-					}
-
-					if(!(editor->selected_entity.type == EntityType::ENTITY_COLLIDER)){
+					if((editor->selected_entity.type != EntityType::ENTITY_COLLIDER) && editor->selected_entity.type != EntityType::ENTITY_TILE){
 						Entity *e = add_entity(editor->selected_entity.type, &Game::em, floored_tile_pos, editor->current_layer);
 						e_spec->type = editor->selected_entity.type;
 						e_spec->id   = e->id;
+					}
+					else if(editor->selected_entity.type != EntityType::ENTITY_TILE){
+
+					}
+				}
+				if(editor->selected_entity.type == EntityType::ENTITY_COLLIDER){
+						// static bool is_phase_one = true;
+						static V2 start_pos;
+						 
+					if(editor->is_phase_one_collider_placement){
+						if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&Game::em, world_pos)){
+							start_pos    = floored_tile_pos;
+							editor->is_phase_one_collider_placement = false;
+						}
+					}
+					else{
+						// This code determines the corner positions of the collision region depending on where the second click is pressed.
+						Rect collision_region;
+						if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&Game::em, world_pos)){
+							if(start_pos.x == floored_tile_pos.x && start_pos.y == floored_tile_pos.y){
+								V2 final_pos     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y - TILE_SIZE};
+								collision_region = {start_pos.x, start_pos.y, std::abs(final_pos.x - start_pos.x), std::abs(final_pos.y - start_pos.y)};
+							}
+							else if (start_pos.x <= floored_tile_pos.x && start_pos.y >= floored_tile_pos.y){
+								V2 final_pos     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y - TILE_SIZE};
+								collision_region = {start_pos.x, start_pos.y, std::abs(final_pos.x - start_pos.x), std::abs(final_pos.y - start_pos.y)};
+							}
+							else if (start_pos.x <= floored_tile_pos.x && start_pos.y < floored_tile_pos.y){
+								V2 bottom_left   = {start_pos.x, start_pos.y - TILE_SIZE};
+								V2 top_right     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y};
+								int width        = top_right.x - bottom_left.x;
+								int height       = top_right.y - bottom_left.y;
+								collision_region = {bottom_left.x, bottom_left.y + height, width, height};
+							}
+							else if (start_pos.x >= floored_tile_pos.x && start_pos.y >= floored_tile_pos.y){
+								V2 bottom_left   = {floored_tile_pos.x, floored_tile_pos.y - TILE_SIZE};
+								V2 top_right     = {start_pos.x + TILE_SIZE, start_pos.y};
+								int width        = top_right.x - bottom_left.x;
+								int height       = top_right.y - bottom_left.y;
+								collision_region = {bottom_left.x, bottom_left.y + height, width, height};
+							}
+							else if (start_pos.x >= floored_tile_pos.x && start_pos.y < floored_tile_pos.y){
+								V2 bottom_right  = {start_pos.x + TILE_SIZE, start_pos.y - TILE_SIZE};
+								V2 top_left      = {floored_tile_pos.x, floored_tile_pos.y};
+								int width        = bottom_right.x - top_left.x;
+								int height       = top_left.y - bottom_right.y;
+								collision_region = {top_left.x, top_left.y, width, height};
+							}
+
+							editor->is_phase_one_collider_placement = true;
+							V2 position = {collision_region.x, collision_region.y};
+							Collider *c = (Collider*)add_entity(editor->selected_entity.type, &Game::em, position, 2);
+							c->bounding_box = collision_region;
+							c->sprite.info.size = {collision_region.w, collision_region.h};
+						}
 					}
 				}
 
@@ -239,6 +251,7 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 		update_camera();
 	}
 	else if(editor->state == EditorState::EDITOR_TEST){
+		update_button(&editor->button);
 		if(was_key_pressed(GLFW_KEY_SPACE)){
 			editor->state = EditorState::EDITOR_EDIT;
 			clear_entity_manager(&Game::em);
@@ -252,6 +265,8 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 void render_level_editor(LevelEditor *editor, Renderer *renderer){
 	// Render the background color of the level editor.
 	render_queue_colored_rect(&Game::layers_render_commands[0], renderer, &editor->work_area, V3 {0 , 159, 255});
+
+	render_button(&editor->button, renderer);
 
 	// We always render the entities, no matter the state.
 	render_entities(&Game::em, renderer);

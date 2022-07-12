@@ -5,6 +5,7 @@
 
 #define ENTITIES_PER_TYPE 50
 #define MAX_COLLIDERS 100
+#define MAX_TILES_PER_LEVEL 50000 // 10,000 tiles per layer.
 
 #define GET_AVAILABLE_ENTITY(entity_list, entity_manager) {\
 	int i = 0;\
@@ -57,12 +58,12 @@ enum AreaType{
 
 struct Entity{
 	EntityType type      = EntityType::ENTITY_NONE;
-	AreaType   area_type = AreaType::AREA_NONE;
+	// AreaType   area_type = AreaType::AREA_NONE;
 	bool is_active = false;
 	bool is_disabled = false;
 	Rect bounding_box;
 	V2 position;
-	V2 area;
+	// V2 area;
 	Sprite icon;
 	// Texture texture;
 	int id = -1;
@@ -87,11 +88,18 @@ void render_collider(Collider *collider, Renderer *renderer);
 struct Tile : public Entity{
 	Tile(){
 		type = EntityType::ENTITY_TILE;
-		area_type = AreaType::AREA_SINGLE;
-		area = {1,1};
+		// area_type = AreaType::AREA_SINGLE;
+		// area = {1,1};
 	}
 	Sprite sprite;
 };
+
+struct TileSpecifier : public Entity{
+	Tile *tile = NULL;
+	V2 position;
+};
+
+void init_entity(TileSpecifier *tile_e);
 
 struct Player : public Entity{
 	float speed;
@@ -123,6 +131,8 @@ void render_multi(Multi *multi, Renderer *renderer);
 struct EntityManager{
 	Player player;
 	Slime slimes[ENTITIES_PER_TYPE];
+
+	TileSpecifier tiles[MAX_TILES_PER_LEVEL];
 	// When adding a new entity type DO NOT FORGET to call the UPDATE_ENTITES, RENDER_ENTITIES and CLEAR_ENTITIES macros for that entity type in 
 	// the entity manager's update, render and clear functions.
 	

@@ -62,9 +62,11 @@ void render_entities(EntityManager *em, Renderer *renderer){
 }
 
 void clear_entity_manager(EntityManager *em){
-	// Do not clear the player and other entities that persist between levels.
+	// We use this function when we want to completely clear the entity manager, like when we want to
+	// load a different level.
 	em->player.is_on_level = false;
 	CLEAR_ENTITIES(slimes);
+	CLEAR_ENTITIES(tiles);
 	CLEAR_ENTITIES(collision_regions);
 }
 
@@ -79,13 +81,13 @@ void init_entity(Collider *collider){
 	collider->sprite = Sprite();
 	collider->sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
 	collider->sprite.info.alpha     = 100;
-	collider->sprite.info.size      = {TILE_SIZE, TILE_SIZE};
+	// collider->sprite.info.size      = {TILE_SIZE, TILE_SIZE};
 	collider->sprite.clipping_box   = {128, 0, 32, 32}; 
 
 	collider->icon = collider->sprite;
 	
 	collider->type = EntityType::ENTITY_COLLIDER;
-	collider->area_type = AreaType::AREA_SINGLE;
+	// collider->area_type = AreaType::AREA_SINGLE;
 }
 
 // void update_collider(Collider *collider, Renderer *renderer){
@@ -98,8 +100,8 @@ void render_collider(Collider *collider, Renderer *renderer){
 
 void init_entity(Player *player){
 	player->type = EntityType::ENTITY_PLAYER;
-	player->area_type = AreaType::AREA_SINGLE;
-	player->area = {1,1};
+	// player->area_type = AreaType::AREA_SINGLE;
+	// player->area = {1,1};
 	player->sprite.info.texture = get_texture(&Game::asset_manager, "test_tiles");
 	player->sprite.info.size      = {TILE_SIZE, TILE_SIZE};
 	player->sprite.clipping_box   = {96, 0, 32, 32};
@@ -158,8 +160,8 @@ void init_entity(Slime *slime){
 	slime->icon                  = slime->sprite;
 	
 	slime->type                  = EntityType::ENTITY_SLIME;
-	slime->area_type             = AreaType::AREA_SINGLE;
-	slime->area                  = {1,1};
+	// slime->area_type             = AreaType::AREA_SINGLE;
+	// slime->area                  = {1,1};
 	// slime->sprite = slime->icon.sprite;
 }
 
@@ -182,8 +184,8 @@ void init_entity(Multi *multi){
 	// multi->icon.info.size = icon_size;
 
 	multi->type                  = EntityType::ENTITY_NONE;
-	multi->area_type             = AreaType::AREA_MULTI;
-	multi->area                  = {2,2};
+	// multi->area_type             = AreaType::AREA_MULTI;
+	// multi->area                  = {2,2};
 }
 void update_multi(Multi *multi, Renderer *renderer);
 void render_multi(Multi *multi, Renderer *renderer);
@@ -197,6 +199,11 @@ void update_bounding_box(Entity *entity){
 	entity->bounding_box.h = TILE_SIZE;
 }
 
+void init_entity(TileSpecifier *tile_e){
+	assert(tile_e);
+	init_entity(tile_e);
+}
+
 Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer){
 	switch(e_type){
 		case ENTITY_PLAYER:{
@@ -207,8 +214,9 @@ Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer)
 			break;
 		}
 		// We run the init_entity function outside the ADD_ENTITY macro for each entity because it may be different.
-		case ENTITY_SLIME:   { ADD_ENTITY(slimes,Slime);  break;}
-		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions,Collider); break;}
+		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime);  break;}
+		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions, Collider); break;}
+		case ENTITY_TILE:    { ADD_ENTITY(tiles, TileSpecifier); break;}
 		case ENTITY_NONE:
 			printf("Invalid entity type\n");
 		default:

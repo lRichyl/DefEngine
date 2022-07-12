@@ -2,6 +2,7 @@
 #include "level.h"
 #include "window.h"
 #include "entity.h"
+#include "gui.h"
 
 #define MAX_TILE_PROTOTYPE 100
 
@@ -29,6 +30,8 @@ struct LevelEditor{
 	EditorState state;
 
 	EntitySelector entity_selector;
+
+	Button button;
 };
 
 void init_level_editor(LevelEditor *editor, Window *window);
