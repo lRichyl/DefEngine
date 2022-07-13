@@ -1007,7 +1007,7 @@ void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *rendere
      command.render_type = RenderType::RENDER_TEXTURED_QUAD;
      command.bounding_box = *position;
      command.texture = texture;
-     command.clip_region = *clip_region;
+     if(clip_region) command.clip_region = *clip_region; else command.clip_region = {0,0,0,0};
      command.mirrorX = mirrorX;
      command.alpha_value = alpha_value;
      command.color = color;
@@ -1021,7 +1021,7 @@ void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *rendere
      command.a = a;
      command.b = b;
      command.texture = texture;
-     command.clip_region = *clip_region;
+     if(clip_region) command.clip_region = *clip_region; else command.clip_region = {0,0,0,0};
      command.mirrorX = mirrorX;
      command.alpha_value = alpha_value;
      command.color = color;
@@ -1045,7 +1045,7 @@ void render_queue_quad_with_shader(DefArray<RenderCommand> *commands_list, Rende
      command.bounding_box = *position;
      command.texture = texture;
      command.shader = shader;
-     command.clip_region = *clip_region;
+     if(clip_region) command.clip_region = *clip_region; else command.clip_region = {0,0,0,0};
      command.mirrorX = mirrorX;
      command.alpha_value = alpha_value;
      command.color = color;

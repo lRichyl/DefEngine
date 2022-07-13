@@ -29,7 +29,7 @@ void load_entities_to_level(Level *level, EntityManager *em){
 	for(int i = 0; i < level->collision_regions.size; i++){
 		Collider collider  = level->collision_regions[i];
 		Collider *added = (Collider*)add_entity(EntityType::ENTITY_COLLIDER, em, collider.position, i);
-		added->sprite = collider.sprite;
+		// added->sprite = collider.sprite;
 	}
 }
 

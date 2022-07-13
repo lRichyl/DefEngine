@@ -33,6 +33,7 @@ void eliminate_entity(EntityManager *em, EntityType type ,int id){
 		}
 		// We run the init_entity function outside the ADD_ENTITY macro for each entity because it may be different.
 		case ENTITY_SLIME:   { ELIMINATE_ENTITY(slimes); break;}
+		case ENTITY_TILE:    { ELIMINATE_ENTITY(tiles); break;}
 		case ENTITY_COLLIDER:{ ELIMINATE_ENTITY(collision_regions); break;}
 		case ENTITY_NONE:
 			printf("Invalid entity type\n");
@@ -59,6 +60,7 @@ void render_entities(EntityManager *em, Renderer *renderer){
 	if(em->player.is_on_level)
 		render_player(&em->player, renderer);
 	RENDER_ENTITIES(Slime, slimes);
+	for(int i = 0; i < MAX_TILES_PER_LEVEL; i++){ TileSpecifier *t = &em->tiles[i]; if(t->is_active) render_entity(t, renderer);}
 }
 
 void clear_entity_manager(EntityManager *em){
@@ -67,6 +69,7 @@ void clear_entity_manager(EntityManager *em){
 	em->player.is_on_level = false;
 	CLEAR_ENTITIES(slimes);
 	CLEAR_ENTITIES(tiles);
+	for(int  i = 0; i < MAX_TILES_PER_LEVEL; i++) {em->tiles[i].is_active = false; em->tiles[i].is_disabled = false;}
 	CLEAR_ENTITIES(collision_regions);
 }
 
@@ -78,7 +81,6 @@ void render_colliders(EntityManager *em, Renderer *renderer){
 
 
 void init_entity(Collider *collider){
-	collider->sprite = Sprite();
 	collider->sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
 	collider->sprite.info.alpha     = 100;
 	// collider->sprite.info.size      = {TILE_SIZE, TILE_SIZE};
@@ -199,9 +201,24 @@ void update_bounding_box(Entity *entity){
 	entity->bounding_box.h = TILE_SIZE;
 }
 
+void init_entity(Tile *tile){
+	tile->type = EntityType::ENTITY_TILE;
+	tile->icon = tile->sprite;
+}
+
+void set_tile_sprite(Tile *tile, Texture texture, Rect clip_region){
+	tile->sprite.info.texture = texture;
+	tile->sprite.clipping_box = clip_region;
+}
+
 void init_entity(TileSpecifier *tile_e){
-	assert(tile_e);
-	init_entity(tile_e);
+	tile_e->type = EntityType::ENTITY_TILE;
+	// assert(tile_e->tile);
+	// init_entity(tile_e->tile);
+}
+
+void render_entity(TileSpecifier *tile_e, Renderer *renderer){
+	render_queue_sprite(get_render_list_for_layer(tile_e->layer), renderer, &tile_e->tile->sprite, tile_e->position);
 }
 
 Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer){
@@ -214,9 +231,24 @@ Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer)
 			break;
 		}
 		// We run the init_entity function outside the ADD_ENTITY macro for each entity because it may be different.
-		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime);  break;}
-		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions, Collider); break;}
-		case ENTITY_TILE:    { ADD_ENTITY(tiles, TileSpecifier); break;}
+		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime);  return e;}
+		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions, Collider); return e;}
+		case ENTITY_TILE:    { 
+			TileSpecifier *e;
+			int i = 0;
+			for(i; i < MAX_TILES_PER_LEVEL; i++){ 
+				if(!em->tiles[i].is_active){
+					e = &em->tiles[i];
+					e->id = i;
+					break;
+				} 
+			}
+			init_entity(e);
+			e->is_active = true;
+			e->position = position;
+			e->layer = layer;
+		 	TileSpecifier *t = (TileSpecifier*)e;
+		  	return t;}
 		case ENTITY_NONE:
 			printf("Invalid entity type\n");
 		default:

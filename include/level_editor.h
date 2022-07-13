@@ -6,12 +6,14 @@
 
 #define MAX_TILE_PROTOTYPE 100
 
-enum EditorState{
-	EDITOR_EDIT,
-	EDITOR_TEST
+enum SelectorTab{
+	SELECTOR_TILES,
+	SELECTOR_ENTITIES
 };
 
+
 struct EntitySelector{
+	SelectorTab tab = SelectorTab::SELECTOR_TILES;
 	int entities_per_row = 5;
 	Rect area;
 	V2 entity_area_offset;
@@ -19,6 +21,12 @@ struct EntitySelector{
 
 void init_entity_selector(EntitySelector *e_selector, Window *window);
 void render_entity_selector(EntitySelector *e_selector, LevelEditor *editor, Renderer *renderer);
+void update_entity_selector(EntitySelector *e_selector, LevelEditor *editor);
+
+enum EditorState{
+	EDITOR_EDIT,
+	EDITOR_TEST
+};
 
 struct LevelEditor{
 	int current_layer = 0;

@@ -7,7 +7,7 @@
 #define MAX_COLLIDERS 100
 #define MAX_TILES_PER_LEVEL 50000 // 10,000 tiles per layer.
 
-#define GET_AVAILABLE_ENTITY(entity_list, entity_manager) {\
+#define GET_AVAILABLE_ENTITY(entity_list, entity_manager) \
 	int i = 0;\
 	for(i; i < ENTITIES_PER_TYPE; i++){ \
 		if(!entity_manager->entity_list[i].is_active){\
@@ -18,16 +18,18 @@
 	}\
 	if (i == ENTITIES_PER_TYPE)\
 		printf("No remaining %s entities\n", #entity_list);\
-}
 
-#define ADD_ENTITY(entity_list, type)  \
-	type *e;\
+
+#define ADD_ENTITY(entity_list, entity_type)  \
+	entity_type *e;\
 	GET_AVAILABLE_ENTITY(entity_list, em);\
+	init_entity(e);\
+	// if(e->type != EntityType::ENTITY_TILE){\
+	// 	e->id = i;\
+	// }\
 	e->is_active = true;\
 	e->position = position;\
 	e->layer = layer;\
-	init_entity(e);\
-	return e;\
 
 #define ELIMINATE_ENTITY(entity_list)\
 	em->entity_list[id].is_active = false;\
@@ -86,20 +88,24 @@ void init_entity(Collider   *collider);
 void render_collider(Collider *collider, Renderer *renderer);
 
 struct Tile : public Entity{
-	Tile(){
-		type = EntityType::ENTITY_TILE;
-		// area_type = AreaType::AREA_SINGLE;
-		// area = {1,1};
-	}
+	// Tile(){
+	// 	type = EntityType::ENTITY_TILE;
+	// 	// area_type = AreaType::AREA_SINGLE;
+	// 	// area = {1,1};
+	// }
 	Sprite sprite;
 };
 
+void init_entity(Tile *tile);
+void set_tile_sprite(Tile *tile, Texture texture, Rect clip_region);
+
 struct TileSpecifier : public Entity{
 	Tile *tile = NULL;
-	V2 position;
+	int tile_id = -1;
 };
 
 void init_entity(TileSpecifier *tile_e);
+void render_entity(TileSpecifier *tile_e, Renderer *renderer);
 
 struct Player : public Entity{
 	float speed;
@@ -140,7 +146,7 @@ struct EntityManager{
 	// Not every entity will be here, only the entities that need to be sorted, like any moving entities (enemies, habilities, etc).
 	// DefArray<Entity*> entities_draw_list;
 	// TODO:     !!!!!DO NOT FORGET TO CALL clear_array() FOR THIS LIST AFTER DRAWING !!!!!!!!!!
-	Collider collision_regions[MAX_COLLIDERS]; // This will be used for collision with solid objects.
+	Collider collision_regions[MAX_COLLIDERS]; // This is used for collision with solid objects.
 
 	DefArray<Tile*> tiles_prototypes;
 	DefArray<Entity*> entities_prototypes;

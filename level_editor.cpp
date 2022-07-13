@@ -31,21 +31,33 @@ static bool is_mouse_on_collision_region(EntityManager *em, V2 mouse_pos, int *i
 	return false;
 }
 
-static void add_entity_prototype(EntityManager *em, Entity *entity, EntityType type){
-	em->entities_prototypes[type] = entity;
+template<typename T>
+static void add_entity_prototype(EntityManager *em, EntityType type){
+	T *e = allocate_from_arena<T>(&Game::main_arena);
+	init_entity(e);
+	em->entities_prototypes[type] = e;
+}
+
+static void add_tile_prototype(EntityManager *em, Texture texture, Rect clip_region){
+	Tile *tile = allocate_from_arena<Tile>(&Game::main_arena);
+	set_tile_sprite(tile, texture, clip_region);
+	init_entity(tile);
+	tile->id = em->tiles_prototypes.size;
+	add_array(&em->tiles_prototypes, tile);
 }
 
 static void init_prototypes(EntityManager *em){
-	em->entities_prototypes.size = em->entities_prototypes.capacity;
+	em->entities_prototypes.size = em->entities_prototypes.capacity; // HACK.
 	// When we add an entity to the level we copy from this entities prototypes.
-	Collider *collider = allocate_from_arena<Collider>(&Game::main_arena); init_entity(collider); add_entity_prototype(em, collider,  ENTITY_COLLIDER);
-	Player   *player   = allocate_from_arena<Player>  (&Game::main_arena); init_entity(player);   add_entity_prototype(em, player  ,  ENTITY_PLAYER);
-	Slime    *slime    = allocate_from_arena<Slime>   (&Game::main_arena); init_entity(slime);    add_entity_prototype(em, slime   ,  ENTITY_SLIME);
+	add_entity_prototype<Collider>(em, EntityType::ENTITY_COLLIDER);
+	add_entity_prototype<Player>(em, EntityType::ENTITY_PLAYER);
+	add_entity_prototype<Slime>(em, EntityType::ENTITY_SLIME);
 
+	add_tile_prototype(em, get_texture(&Game::asset_manager, "test_tiles"), {0,0,32,32});
 }
 
 // We will use this function to update the position of the entity prototypes which are shown in the entity selector. In the future we may add the ability
-// to scroll so we will need to call this function when using the scrollwheel. AT THE MOMENT WE WILL ONLY CALL IT AT INITIALIZATION.
+// to scroll so we will need to call this function when using the scrollwheel. AT THE MOMENT WE ONLY CALL IT AT INITIALIZATION.
 static void update_entity_prototypes_positions(EntitySelector *selector){
 	int j = 0;
 	int k = 0;
@@ -71,9 +83,86 @@ static void render_entity_prototypes(LevelEditor *editor, Renderer *renderer){
 	}
 }
 
+static void update_tile_prototypes_positions(EntitySelector *selector){
+	int j = 0;
+	int k = 0;
+	for(int i = 0; i < Game::em.tiles_prototypes.size; i++){
+		Tile *e = Game::em.tiles_prototypes[i];
+		assert(e);
+		// if(e->type == EntityType::ENTITY_NONE || e->type == EntityType::ENTITY_TILE) continue;
+		e->position.x = selector->area.x + selector->entity_area_offset.x + (j * TILE_SIZE);
+		e->position.y = selector->area.y - selector->entity_area_offset.y - (k * TILE_SIZE);
+		update_bounding_box(e);
+
+		j++;
+		if(j == 5) k++;
+	}
+}
+
+static void render_tiles_prototypes(LevelEditor *editor, Renderer *renderer){
+	for(int i = 0; i < Game::em.tiles_prototypes.size; i++){
+		Tile *e = Game::em.tiles_prototypes[i];
+		assert(e);
+		// if(e->type == EntityType::ENTITY_NONE || e->type == EntityType::ENTITY_TILE) continue;
+		render_queue_sprite(get_render_list_for_layer(LEVEL_LAYERS - 1), renderer, &e->icon, e->position, get_shader_ptr(&Game::asset_manager, "gui_shader"));
+	}
+}
+
+
+void init_entity_selector(EntitySelector *e_selector, Window *window){
+	e_selector->entity_area_offset = {15, 64};
+	float width = e_selector->entities_per_row * TILE_SIZE + (e_selector->entity_area_offset.x * 2);
+	e_selector->area = {window->internalWidth - width, window->internalHeight, width, window->internalHeight};
+}
+
+void update_entity_selector(EntitySelector *e_selector, LevelEditor *editor){
+	// If we click on an entity in the entity selector we set the selected entity type to the one we clicked on.
+	MouseInfo mouse = Game::mouse;
+	switch(e_selector->tab){
+		case SELECTOR_TILES:{
+			if(mouse.left.state == MouseButtonState::MOUSE_PRESSED){
+				for(int i = 0; i < Game::em.tiles_prototypes.size; i++){
+					Tile *e = Game::em.tiles_prototypes[i];
+					assert(e);
+					if(DoRectContainsPoint(e->bounding_box, mouse.position)){
+						editor->selected_entity.type = e->type;
+						editor->selected_entity.id   = e->id;
+					}
+				}
+			}
+
+			break;
+		}
+		case SELECTOR_ENTITIES:{
+			if(mouse.left.state == MouseButtonState::MOUSE_PRESSED){
+				for(int i = EntityType::ENTITY_COLLIDER; i < ENTITY_AMOUNT; i++){
+					Entity *e = get_entity_prototype(&Game::em, (EntityType)i);
+					if(!e) continue;
+					if(DoRectContainsPoint(e->bounding_box, mouse.position)){
+						editor->selected_entity.type = e->type;
+						editor->selected_entity.id   = e->id;
+					}
+				}
+			}
+			break;
+		}
+	}
+	
+}
+
 void render_entity_selector(EntitySelector *e_selector, LevelEditor *editor, Renderer *renderer){
 	render_queue_colored_rect(get_render_list_for_layer(LEVEL_LAYERS - 1), renderer, &e_selector->area, V3{0,0,0}, 255, get_shader_ptr(&Game::asset_manager, "gui_shader"));
-	render_entity_prototypes(editor, renderer);
+	switch(e_selector->tab){
+		case SELECTOR_TILES:{
+			render_tiles_prototypes(editor, renderer);
+			break;
+		}
+		case SELECTOR_ENTITIES:{
+			render_entity_prototypes(editor, renderer);
+			break;
+		}
+	}
+	
 }
 
 void init_level_editor(LevelEditor *editor, Window *window){
@@ -86,6 +175,7 @@ void init_level_editor(LevelEditor *editor, Window *window){
 	editor->selected_entity.type = EntityType::ENTITY_PLAYER;
 	init_prototypes(&Game::em);
 	update_entity_prototypes_positions(&editor->entity_selector);
+	update_tile_prototypes_positions(&editor->entity_selector);
 
 	init_button(&editor->button, "TEST");
 	set_button_position(&editor->button, {100,100});
@@ -93,12 +183,6 @@ void init_level_editor(LevelEditor *editor, Window *window){
 	editor->button.sprite.info.texture = get_texture(&Game::asset_manager, "test_tiles");
 	editor->button.sprite.clipping_box = {0,0,32,32};
 
-}
-
-void init_entity_selector(EntitySelector *e_selector, Window *window){
-	e_selector->entity_area_offset = {15, 64};
-	float width = e_selector->entities_per_row * TILE_SIZE + (e_selector->entity_area_offset.x * 2);
-	e_selector->area = {window->internalWidth - width, window->internalHeight, width, window->internalHeight};
 }
 
 
@@ -141,6 +225,7 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 				EntitySpecifier *e_spec       = &e_spec_layer[index];
 				// printf("%d\n", e_spec->type);
 				assert(e_spec);
+
 				if(e_spec->type == EntityType::ENTITY_NONE){
 					if(editor->selected_entity.type == EntityType::ENTITY_PLAYER){
 						// Because the player is always present in memory and there can only be one, we must set the previous location of the player
@@ -152,16 +237,21 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 							int index = V2_coords_to_array_index(player_tile_pos);
 							previous_player_layer[index].type = EntityType::ENTITY_NONE;						}
 					}
+					else if(editor->selected_entity.type == EntityType::ENTITY_TILE){
+						TileSpecifier *e = (TileSpecifier*)add_entity(editor->selected_entity.type, &Game::em, floored_tile_pos, editor->current_layer);
+						e->tile_id   = editor->selected_entity.id;
+						e->tile      = Game::em.tiles_prototypes[e->tile_id];
+						e_spec->type = editor->selected_entity.type;
+						e_spec->id   = e->id;
+					}
 					
-
+					// If the selected entity is not a collider, a tile or the player it just gets added.
 					if((editor->selected_entity.type != EntityType::ENTITY_COLLIDER) && editor->selected_entity.type != EntityType::ENTITY_TILE){
 						Entity *e = add_entity(editor->selected_entity.type, &Game::em, floored_tile_pos, editor->current_layer);
 						e_spec->type = editor->selected_entity.type;
 						e_spec->id   = e->id;
 					}
-					else if(editor->selected_entity.type != EntityType::ENTITY_TILE){
-
-					}
+					
 				}
 				if(editor->selected_entity.type == EntityType::ENTITY_COLLIDER){
 						// static bool is_phase_one = true;
@@ -237,16 +327,7 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 			}
 		}
 		else{
-			// If we click on an entity in the entity selector we set the selected entity type to the one we clicked on.
-			if(mouse.left.state == MouseButtonState::MOUSE_PRESSED){
-				for(int i = EntityType::ENTITY_COLLIDER; i < ENTITY_AMOUNT; i++){
-					Entity *e = get_entity_prototype(&Game::em, (EntityType)i);
-					if(!e) continue;
-					if(DoRectContainsPoint(e->bounding_box, mouse.position)){
-						editor->selected_entity.type = e->type;
-					}
-				}
-			}
+			update_entity_selector(&editor->entity_selector, editor);
 		}
 		update_camera();
 	}

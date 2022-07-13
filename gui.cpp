@@ -35,6 +35,7 @@ void update_button(Button *button){
 		button->value = false;
 	}
 	
+	
 }
 
 void render_button(Button *button, Renderer *renderer){
