@@ -21,6 +21,10 @@ void load_entities_to_level(Level *level, EntityManager *em){
 			if(e_spec->type != EntityType::ENTITY_NONE){
 				Entity *e = add_entity(e_spec->type, em, position, i);
 				e_spec->id = e->id;
+				if(e_spec->type == EntityType::ENTITY_TILE){
+					TileSpecifier *t = (TileSpecifier*)e;
+					t->tile_id = e_spec->tile_id;
+				}		
 			}
 		}
 	}

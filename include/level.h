@@ -11,6 +11,8 @@ struct EntitySpecifier{
 	EntityType type = EntityType::ENTITY_NONE;
 	// The id is only used if the type is ENTITY_TILE. It is used to get the correct tile from a list.
 	int id = -1; 
+	int tile_id = -1;
+	V2 area;
 };
 
 struct Level{

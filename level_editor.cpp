@@ -54,6 +54,7 @@ static void init_prototypes(EntityManager *em){
 	add_entity_prototype<Slime>(em, EntityType::ENTITY_SLIME);
 
 	add_tile_prototype(em, get_texture(&Game::asset_manager, "test_tiles"), {0,0,32,32});
+	add_tile_prototype(em, get_texture(&Game::asset_manager, "test_tiles"), {32,0,32,32});
 }
 
 // We will use this function to update the position of the entity prototypes which are shown in the entity selector. In the future we may add the ability
@@ -126,7 +127,7 @@ void update_entity_selector(EntitySelector *e_selector, LevelEditor *editor){
 					assert(e);
 					if(DoRectContainsPoint(e->bounding_box, mouse.position)){
 						editor->selected_entity.type = e->type;
-						editor->selected_entity.id   = e->id;
+						editor->selected_entity.tile_id   = e->id;
 					}
 				}
 			}
@@ -235,21 +236,24 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 							
 							V2 player_tile_pos = get_tile(Game::em.player.position);
 							int index = V2_coords_to_array_index(player_tile_pos);
-							previous_player_layer[index].type = EntityType::ENTITY_NONE;						}
+							previous_player_layer[index].type = EntityType::ENTITY_NONE;						
+						}
 					}
 					else if(editor->selected_entity.type == EntityType::ENTITY_TILE){
 						TileSpecifier *e = (TileSpecifier*)add_entity(editor->selected_entity.type, &Game::em, floored_tile_pos, editor->current_layer);
-						e->tile_id   = editor->selected_entity.id;
-						e->tile      = Game::em.tiles_prototypes[e->tile_id];
+						e->tile_id   = editor->selected_entity.tile_id;
+						// e->tile      = Game::em.tiles_prototypes[e->tile_id];
 						e_spec->type = editor->selected_entity.type;
 						e_spec->id   = e->id;
+						e_spec->tile_id = e->tile_id;
+						return;
 					}
-					
 					// If the selected entity is not a collider, a tile or the player it just gets added.
 					if((editor->selected_entity.type != EntityType::ENTITY_COLLIDER) && editor->selected_entity.type != EntityType::ENTITY_TILE){
 						Entity *e = add_entity(editor->selected_entity.type, &Game::em, floored_tile_pos, editor->current_layer);
 						e_spec->type = editor->selected_entity.type;
 						e_spec->id   = e->id;
+						
 					}
 					
 				}

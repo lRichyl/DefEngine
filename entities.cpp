@@ -155,15 +155,15 @@ void render_player(Player *player, Renderer *renderer){
 }
 
 void init_entity(Slime *slime){
-	slime->sprite = Sprite();
 	slime->sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
-	slime->sprite.info.size      = {TILE_SIZE, TILE_SIZE};
+	// slime->sprite.info.size      = {TILE_SIZE, TILE_SIZE};
 	slime->sprite.clipping_box   = {64,0,32,32};
 	slime->icon                  = slime->sprite;
 	
 	slime->type                  = EntityType::ENTITY_SLIME;
-	// slime->area_type             = AreaType::AREA_SINGLE;
-	// slime->area                  = {1,1};
+
+	slime->area                  = {2,2};
+	slime->sprite.info.size      = {slime->area.x * TILE_SIZE, slime->area.y * TILE_SIZE};
 	// slime->sprite = slime->icon.sprite;
 }
 
@@ -177,7 +177,6 @@ void render_entity(Slime *slime, Renderer *renderer){
 }
 
 void init_entity(Multi *multi){
-	multi->sprite = Sprite();
 	multi->sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
 	multi->sprite.info.size      = {64,64};
 	multi->sprite.clipping_box   = {0,32,64,64};
@@ -218,7 +217,8 @@ void init_entity(TileSpecifier *tile_e){
 }
 
 void render_entity(TileSpecifier *tile_e, Renderer *renderer){
-	render_queue_sprite(get_render_list_for_layer(tile_e->layer), renderer, &tile_e->tile->sprite, tile_e->position);
+	Tile *tile = Game::em.tiles_prototypes[tile_e->tile_id];
+	render_queue_sprite(get_render_list_for_layer(tile_e->layer), renderer, &tile->sprite, tile_e->position);
 }
 
 Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer){
@@ -231,8 +231,10 @@ Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer)
 			break;
 		}
 		// We run the init_entity function outside the ADD_ENTITY macro for each entity because it may be different.
-		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime);  return e;}
-		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions, Collider); return e;}
+		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime);  
+			int a = 0;
+			break;}
+		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions, Collider); break;}
 		case ENTITY_TILE:    { 
 			TileSpecifier *e;
 			int i = 0;

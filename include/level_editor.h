@@ -13,7 +13,7 @@ enum SelectorTab{
 
 
 struct EntitySelector{
-	SelectorTab tab = SelectorTab::SELECTOR_TILES;
+	SelectorTab tab = SelectorTab::SELECTOR_ENTITIES;
 	int entities_per_row = 5;
 	Rect area;
 	V2 entity_area_offset;

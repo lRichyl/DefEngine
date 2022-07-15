@@ -5,9 +5,9 @@
 
 #define ENTITIES_PER_TYPE 50
 #define MAX_COLLIDERS 100
-#define MAX_TILES_PER_LEVEL 50000 // 10,000 tiles per layer.
+#define MAX_TILES_PER_LEVEL 50000 // This should be LEVEL_WIDTH * LEVEL_HEGIHT
 
-#define GET_AVAILABLE_ENTITY(entity_list, entity_manager) \
+#define GET_AVAILABLE_ENTITY(entity_list, entity_manager) {\
 	int i = 0;\
 	for(i; i < ENTITIES_PER_TYPE; i++){ \
 		if(!entity_manager->entity_list[i].is_active){\
@@ -18,18 +18,16 @@
 	}\
 	if (i == ENTITIES_PER_TYPE)\
 		printf("No remaining %s entities\n", #entity_list);\
-
+}\
 
 #define ADD_ENTITY(entity_list, entity_type)  \
 	entity_type *e;\
 	GET_AVAILABLE_ENTITY(entity_list, em);\
-	init_entity(e);\
-	// if(e->type != EntityType::ENTITY_TILE){\
-	// 	e->id = i;\
-	// }\
 	e->is_active = true;\
 	e->position = position;\
 	e->layer = layer;\
+	init_entity(e);\
+	return e;\
 
 #define ELIMINATE_ENTITY(entity_list)\
 	em->entity_list[id].is_active = false;\
@@ -40,6 +38,7 @@ struct LevelEditor;
 
 enum EntityType{
 	ENTITY_NONE,
+	ENTITY_EMPTY,
 	ENTITY_TILE,
 	ENTITY_COLLIDER,
 	ENTITY_PLAYER,
@@ -65,7 +64,7 @@ struct Entity{
 	bool is_disabled = false;
 	Rect bounding_box;
 	V2 position;
-	// V2 area;
+	V2 area = {1,1};
 	Sprite icon;
 	// Texture texture;
 	int id = -1;
@@ -100,7 +99,7 @@ void init_entity(Tile *tile);
 void set_tile_sprite(Tile *tile, Texture texture, Rect clip_region);
 
 struct TileSpecifier : public Entity{
-	Tile *tile = NULL;
+	// Tile *tile = NULL;
 	int tile_id = -1;
 };
 
