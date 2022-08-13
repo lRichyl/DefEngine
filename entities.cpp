@@ -231,9 +231,7 @@ Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer)
 			break;
 		}
 		// We run the init_entity function outside the ADD_ENTITY macro for each entity because it may be different.
-		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime);  
-			int a = 0;
-			break;}
+		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime); break;}
 		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions, Collider); break;}
 		case ENTITY_TILE:    { 
 			TileSpecifier *e;

@@ -25,6 +25,7 @@
 	GET_AVAILABLE_ENTITY(entity_list, em);\
 	e->is_active = true;\
 	e->position = position;\
+	update_bounding_box(e);\
 	e->layer = layer;\
 	init_entity(e);\
 	return e;\

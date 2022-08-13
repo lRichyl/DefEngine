@@ -115,7 +115,8 @@ void Game::DrawGame(float dt, float fps){
 
 void Game::GameLoop(float dt, float fps){
     UpdateGame(dt);
-	check_collisions(&Game::em);
+    if(level_editor.state != EditorState::EDITOR_EDIT)
+		check_collisions(&Game::em);
     DrawGame(dt, fps);
 	Game::camera.moved = false;
 	clear_mouse_info();
