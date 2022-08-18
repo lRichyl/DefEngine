@@ -26,7 +26,7 @@ struct Console{
 	V3 color = {120, 130, 50};
 	V3 division_color;
 	Font *font = NULL;
-	bool show_console = false;
+	bool show = false;
 	
 	// We render the console with its own shader to set individually its MVP so it will not scale and move
 	// when we move the camera.
@@ -42,4 +42,5 @@ struct Console{
 
 void init_console(Console *console, Renderer *renderer);
 void update_console(Console *console, LevelEditor *editor, Renderer *renderer);
+void toggle_console(Console *console);
 void render_console(Console *console, Renderer *renderer);

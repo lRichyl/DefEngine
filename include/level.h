@@ -16,6 +16,7 @@ struct EntitySpecifier{
 };
 
 struct Level{
+	char *name;
 	EntitySpecifier *map_layers[LEVEL_LAYERS];
 	DefArray<Collider> collision_regions;
 };

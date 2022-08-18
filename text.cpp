@@ -205,6 +205,43 @@ void render_text(Renderer* renderer, Font *font, EditableString *string, V2 posi
 	}
 }
 
+void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, EditableString *string, V2 position, V3 color, bool center, ShaderProgram *shader){
+	if(center){
+		float whole_text_size = 0;
+		float tallest = 0;
+		for(int i = 0; i < string->cursor; i++){
+			int char_index = string->data[i];
+			char_index    -= 32;
+			CharacterInfo *character = &font->characters[char_index];
+			whole_text_size += character->advance;
+			if(character->height - character->down_padding > tallest){
+				tallest = character->height - character->down_padding;
+			}
+		}
+		float middle_x_pos = whole_text_size / 2.f;
+		position.x -= middle_x_pos;
+		position.y -= tallest / 2.f;
+	}
+	
+	
+	for(int i = 0; i < string->cursor; i++){
+		
+		// For the moment we only take into account 2 byte wide Utf-8 characters, which is enough to represent most of the 
+		// alphabets.
+		int char_index = string->data[i];
+		char_index    -= 32;
+		CharacterInfo *character = &font->characters[char_index];
+		// Rect boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
+		Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
+		position.x += character->advance;
+		
+		if(!shader)
+			render_queue_quad(commands, renderer, &bounding_box, &font->texture, &character->clipping_box, false, 255, color, true);
+		else
+			render_queue_quad_with_shader(commands, renderer, &bounding_box, &font->texture, shader, &character->clipping_box, false, 255, color, true);
+	}
+}
+
 float get_text_width(Font *font, const char *text){
 	float whole_text_size = 0;
 	int length = strlen(text);

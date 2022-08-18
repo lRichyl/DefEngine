@@ -68,6 +68,15 @@ Game::Game(Renderer *r, Window *w){
 }
 void Game::UpdateGame(float dt){
 	mouse = GetMouseInfo(renderer->window); // Only call this funtion once per frame. To get mouse info reference the static 'mouse' variable. 
+	#ifdef DEV
+		if(console.show){
+			update_console(&console, &level_editor, renderer);
+		}
+		if(was_key_pressed(96)){
+			toggle_console(&console);
+		}
+
+	#endif
 	Game::dt = dt;
 	switch(state){
 		case GAME_PLAY:{
@@ -82,7 +91,8 @@ void Game::UpdateGame(float dt){
 		
 		#ifdef DEV
 		case GAME_EDITOR:{
-			update_level_editor(&level_editor, renderer);
+			if(!console.show)
+				update_level_editor(&level_editor, renderer);
 			
 			break;
 		}
@@ -106,7 +116,8 @@ void Game::DrawGame(float dt, float fps){
 			break;
 		}
 	}
-
+	if(console.show)
+		render_console(&console, renderer);
 	// render_colored_rect(renderer, &r1, V3 {0 , 159, 255});
 	render_command_lists();
     renderer_draw(renderer);

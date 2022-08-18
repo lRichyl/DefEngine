@@ -5,7 +5,7 @@
 #include "math.h"
 #include "def_array.h"
 
-#define KEYS_AMOUNT 100
+#define KEYS_AMOUNT 350
 
 struct Input{
 	static DefArray<unsigned int> unicode_array;
