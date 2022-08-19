@@ -6,6 +6,7 @@
 
 #define MAX_TILE_PROTOTYPE 100
 
+
 enum SelectorTab{
 	SELECTOR_TILES,
 	SELECTOR_ENTITIES
@@ -45,3 +46,6 @@ struct LevelEditor{
 void init_level_editor(LevelEditor *editor, Window *window);
 void update_level_editor(LevelEditor *editor, Renderer *renderer);
 void render_level_editor(LevelEditor *editor, Renderer *renderer);
+bool save_level(const char *filename);
+bool save_new_level(const char *filename);
+bool load_level_in_editor(const char *filename);

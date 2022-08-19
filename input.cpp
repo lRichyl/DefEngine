@@ -65,10 +65,7 @@ void clear_keys_state(){
 }
 
 void PollKeyboardEvents(GLFWwindow* window, int key, int scancode, int action, int mods){
-	// Event e = {key , action};
-	printf("%d\n", key);
 	Input::keys_state[key] = action;
-	// events.push(e);
 }
 
 void CursorCallback(GLFWwindow* window, double xpos, double ypos){

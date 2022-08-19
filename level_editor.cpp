@@ -372,3 +372,118 @@ void render_level_editor(LevelEditor *editor, Renderer *renderer){
 	
 	
 }
+
+char *HEADER = "LVLDAT";
+
+bool save_new_level(const char *filename){
+	LevelEditor *editor = &Game::level_editor;
+	if(check_if_file_exists(filename)) return false;
+	FILE *file;
+	file = fopen(filename, "wb");
+	if(!file) return false;
+	
+	fwrite(HEADER, sizeof(char), 6, file);
+	fwrite(editor->edited_level.name, sizeof(char), LEVEL_NAME_SIZE, file);
+
+	// Data from the 5 layers of the level.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		fwrite(editor->edited_level.map_layers[i], sizeof(EntitySpecifier), LEVEL_WIDTH * LEVEL_HEIGHT, file);
+	}
+	
+	// Collision regions data.
+	// int num_collision_regions = MAX_COLLIDERS;
+	// printf("%d\n", num_collision_regions);
+	// fwrite((void*)&num_collision_regions, sizeof(int), 1, file);
+	// for(int i = 0; i < LEVEL_LAYERS; i++){
+	fwrite((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
+	// }
+	// fprintf(file, "%d", editor->current_level.collision_regions.size);
+	
+	fclose(file);
+	return true;
+}
+
+// bool save_level(LevelEditor *level_editor, const char *level_name){
+// 	if(!check_if_file_exists(level_name)) return false;
+// 	FILE *file;
+// 	file = fopen(level_name, "wb+");
+// 	if(!file) return false;
+	
+// 	fwrite(HEADER, sizeof(char), 6, file);
+// 	fwrite(level_editor->current_level.level_name, sizeof(char), LEVEL_NAME_SIZE, file);
+
+// 	// Data from the 5 layers of the level.
+// 	for(int i = 0; i < LEVEL_LAYERS; i++){
+// 		fwrite((void*)level_editor->current_level.layers[i], sizeof(MapObject), LEVEL_SIZE * LEVEL_SIZE, file);
+// 		if(level_editor->is_entity_selector_opened) 
+// 			render_entity_selector(&level_editor->entity_selector, level_editor, renderer);
+// 	}
+	
+// 	// Collision regions data.
+// 	fwrite((void*)&level_editor->current_level.collision_regions.size, sizeof(int), 1, file);
+// 	fwrite((void*)level_editor->current_level.collision_regions.data, sizeof(Rect), level_editor->current_level.collision_regions.size, file);
+	
+// 	fclose(file);
+// 	return true;
+// }
+
+bool load_level_in_editor(const char *filename){
+	LevelEditor *editor = &Game::level_editor;
+	if(!check_if_file_exists(filename)) return false;
+	FILE *file;
+	file = fopen(filename, "rb");
+	if(!file) return false;
+	
+	Level *level = &editor->edited_level;
+	empty_level(level);
+	
+	char header[10]{};
+	// fscanf(file, "%s", header);
+	fread(header, sizeof(char), 6, file);
+	if(strcmp(header, HEADER) != 0) return false;
+	
+	char level_name[LEVEL_NAME_SIZE]{};
+	// fscanf(file, "%s", level_name);
+	fread(level_name, sizeof(char), LEVEL_NAME_SIZE, file);
+	strcpy(level->name, level_name);
+	
+	// Data from the 5 layers of the level.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		fread(editor->edited_level.map_layers[i], sizeof(EntitySpecifier), LEVEL_WIDTH * LEVEL_HEIGHT, file);
+	}
+	
+	for(int j = 0; j < LEVEL_LAYERS; j++){
+		EntitySpecifier *layer = level->map_layers[j];
+		for(int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++){
+			EntitySpecifier e_spec = layer[i];
+			// if(e_spec.type != 0){
+			// 	printf("EntityType: %d\n", e_spec.type);
+			// 	return false;
+			// }
+			int tile_x = j % LEVEL_WIDTH;
+			int tile_y = j / LEVEL_WIDTH;
+			float x_pixel_pos = tile_x * TILE_SIZE;
+			float y_pixel_pos = tile_y * TILE_SIZE;
+			V2 position = {x_pixel_pos,y_pixel_pos};
+			if(e_spec.type != EntityType::ENTITY_COLLIDER && e_spec.type != EntityType::ENTITY_NONE)
+				add_entity(e_spec.type, &Game::em, position, j);
+		}
+	}
+	
+	// Collision regions data.
+	// fread((void*)&Game::em.collision_regions.size, sizeof(int), 1, file);
+	// int num_collision_regions = Game::em.collision_regions.size;
+	// for(int i = 0; i < num_collision_regions; i++){
+		// Collider collider;
+		// init_entity(&collider);
+		// fwrite((void*)&editor->edited_level.collision_regions, sizeof(Collider), num_collision_regions, file);
+	fread((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
+	save_collision_regions_to_level(level, &Game::em);
+		// fwrite((void*)&editor->edited_level.collision_regions.data[i].bounding_box, sizeof(Rect), num_collision_regions, file);
+	// }
+	// fread((void*)level->collision_regions.data, sizeof(Rect), level->collision_regions.size, file);
+	
+	
+	fclose(file);
+	return true;
+}

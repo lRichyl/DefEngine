@@ -18,6 +18,7 @@ float                   Game::dt;
 Camera                  Game::camera;
 Console                 Game::console;
 DefArray<RenderCommand> Game::layers_render_commands[LEVEL_LAYERS];
+LevelEditor             Game::level_editor;
 
 static void render_command_lists(){
 	for(int j = 0; j < LEVEL_LAYERS; j++){
