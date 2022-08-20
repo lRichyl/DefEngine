@@ -53,6 +53,7 @@ void update_entities(EntityManager *em, Renderer *renderer){
 		update_bounding_box(&em->player);
 	}
 	UPDATE_ENTITIES(Slime , slimes);
+	// UPDATE_ENTITIES(Collider, collision_regions)
 }
 
 void render_entities(EntityManager *em, Renderer *renderer){
@@ -89,6 +90,7 @@ void init_entity(Collider *collider){
 	collider->icon = collider->sprite;
 	
 	collider->type = EntityType::ENTITY_COLLIDER;
+	// collider->bounding_box = collider
 	// collider->area_type = AreaType::AREA_SINGLE;
 }
 

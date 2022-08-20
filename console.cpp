@@ -70,7 +70,11 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 				strcat(level_path, LEVELS_PATH);
 				strcat(level_path, second);
 				strcat(level_path, EXTENSION);
-				if(save_new_level(level_path))
+
+				if(editor->state == EditorState::EDITOR_TEST){
+					console_out(console, "Cannot save a level while it is being played.");
+				}
+				else if(save_new_level(level_path))
 					console_out(console, "Succesfully saved.");
 				else 
 					console_out(console, "A level with that name already exists.");
@@ -80,7 +84,10 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 				strcat(level_path, LEVELS_PATH);
 				strcat(level_path, second);
 				strcat(level_path, EXTENSION);
-				if(load_level_in_editor(level_path)){
+				if(editor->state == EditorState::EDITOR_TEST){
+					console_out(console, "Cannot load a level while it is being played.");
+				}
+				else if(load_level_in_editor(level_path)){
 					console_out(console, "Level loaded successfully");
 				}
 				else
@@ -90,7 +97,11 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 		else if (word_count == 1){
 			if(!strcmp(first, "save")){
 				char level_path[50] = {};
-				if(!editor->edited_level.name){
+
+				if(editor->state == EditorState::EDITOR_TEST){
+					console_out(console, "Cannot save a level while it is being played.");
+				}
+				else if(!editor->edited_level.name){
 					console_out(console, "There's currently no level loaded.");
 					// console->string.cursor = 0;
 					// return;

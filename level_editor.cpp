@@ -57,7 +57,7 @@ static void init_prototypes(EntityManager *em){
 	add_tile_prototype(em, get_texture(&Game::asset_manager, "test_tiles"), {32,0,32,32});
 }
 
-// We will use this function to update the position of the entity prototypes which are shown in the entity selector. In the future we may add the ability
+// We will use this function to  the position of the entity prototypes which are shown in the entity selector. In the future we may add the ability
 // to scroll so we will need to call this function when using the scrollwheel. AT THE MOMENT WE ONLY CALL IT AT INITIALIZATION.
 static void update_entity_prototypes_positions(EntitySelector *selector){
 	int j = 0;
@@ -487,28 +487,28 @@ bool load_level_in_editor(const char *filename){
 		fread(editor->edited_level.map_layers[i], sizeof(EntitySpecifier), LEVEL_WIDTH * LEVEL_HEIGHT, file);
 	}
 	
-	for(int j = 0; j < LEVEL_LAYERS; j++){
-		EntitySpecifier *layer = level->map_layers[j];
-		for(int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++){
-			EntitySpecifier e_spec = layer[i];
-			// if(e_spec.type != 0){
-			// 	printf("EntityType: %d\n", e_spec.type);
-			// 	return false;
-			// }
-			int tile_x = j % LEVEL_WIDTH;
-			int tile_y = j / LEVEL_WIDTH;
-			float x_pixel_pos = tile_x * TILE_SIZE;
-			float y_pixel_pos = tile_y * TILE_SIZE;
-			V2 position = {x_pixel_pos,y_pixel_pos};
-			if(e_spec.type != EntityType::ENTITY_COLLIDER && e_spec.type != EntityType::ENTITY_NONE)
-				add_entity(e_spec.type, &Game::em, position, j);
-		}
-	}
+	// for(int j = 0; j < LEVEL_LAYERS; j++){
+	// 	EntitySpecifier *layer = level->map_layers[j];
+	// 	for(int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++){
+	// 		EntitySpecifier e_spec = layer[i];
+	// 		// if(e_spec.type != 0){
+	// 		// 	printf("EntityType: %d\n", e_spec.type);
+	// 		// 	return false;
+	// 		// }
+	// 		int tile_x = j % LEVEL_WIDTH;
+	// 		int tile_y = j / LEVEL_WIDTH;
+	// 		float x_pixel_pos = tile_x * TILE_SIZE;
+	// 		float y_pixel_pos = tile_y * TILE_SIZE;
+	// 		V2 position = {x_pixel_pos,y_pixel_pos};
+	// 		if(e_spec.type != EntityType::ENTITY_COLLIDER && e_spec.type != EntityType::ENTITY_NONE)
+	// 			add_entity(e_spec.type, &Game::em, position, j);
+	// 	}
+	// }
 	
 	// Collision regions data.
 	fread((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
-	// save_collision_regions_to_level(level, &Game::em);
 	load_entities_to_level(level, &Game::em);
+	// save_collision_regions_to_level(level, &Game::em);
 	
 	fclose(file);
 	return true;

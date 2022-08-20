@@ -73,6 +73,7 @@ void Game::UpdateGame(float dt){
 		if(console.show){
 			update_console(&console, &level_editor, renderer);
 		}
+		// 96 = |    Fix this.
 		if(was_key_pressed(96)){
 			toggle_console(&console);
 		}
@@ -130,7 +131,7 @@ void Game::GameLoop(float dt, float fps){
     if(level_editor.state != EditorState::EDITOR_EDIT)
 		check_collisions(&Game::em);
     DrawGame(dt, fps);
-	Game::camera.moved = false;
+	Game::camera.moved = false; // ??
 	clear_mouse_info();
 	clear_array(&Input::unicode_array);
 	clear_keys_state();
