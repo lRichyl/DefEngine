@@ -71,9 +71,9 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 				strcat(level_path, second);
 				strcat(level_path, EXTENSION);
 				if(save_new_level(level_path))
-					add_array(&console->buffer, "Succesfully saved.");
+					console_out(console, "Succesfully saved.");
 				else 
-					add_array(&console->buffer, "A level with that name already exists.");
+					console_out(console, "A level with that name already exists.");
 			}
 			else if(!strcmp(first, "load")){
 				char level_path[50] = {};
@@ -81,17 +81,17 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 				strcat(level_path, second);
 				strcat(level_path, EXTENSION);
 				if(load_level_in_editor(level_path)){
-					add_array(&console->buffer, "Level loaded successfully");
+					console_out(console, "Level loaded successfully");
 				}
 				else
-					add_array(&console->buffer, "Level could not be loaded. Possibly doesn't exist.");
+					console_out(console, "Level could not be loaded. Possibly doesn't exist.");
 			}
 		}
 		else if (word_count == 1){
 			if(!strcmp(first, "save")){
 				char level_path[50] = {};
 				if(!editor->edited_level.name){
-					add_array(&console->buffer, "There's currently no level loaded.");
+					console_out(console, "There's currently no level loaded.");
 					// console->string.cursor = 0;
 					// return;
 				}
@@ -99,10 +99,10 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 					strcat(level_path, LEVELS_PATH);
 					strcat(level_path, editor->edited_level.name);
 					strcat(level_path, EXTENSION);
-					// if(save_level(editor, level_path)){
-					// 	add_array(&console->buffer, "Level succesfully overwritten.");
-					// }
-					// else add_array(&console->buffer, "The current level is not saved. Use save_new LEVEL_NAME");					
+					if(save_level(level_path)){
+						console_out(console, "Level succesfully overwritten.");
+					}
+					else console_out(console, "The current level is not saved. Use save_new LEVEL_NAME");					
 				}
 			}
 			else if(!strcmp(first, "hi")){
@@ -133,6 +133,10 @@ void toggle_console(Console *console){
 	if(console->show){
 		clear_string(&console->string);
 	}
+}
+
+void console_out(Console *console, const char *message){
+	add_array(&console->buffer, message);
 }
 
 void add_unicode_to_string(EditableString *e_string, unsigned int unicode){

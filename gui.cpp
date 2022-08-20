@@ -4,7 +4,7 @@
 #include "game.h"
 
 void init_button(Button *button, const char *text){
-	button->value = false;
+	button->is_pressed = false;
 	button->text  = text;
 }
 
@@ -24,21 +24,23 @@ void update_button(Button *button){
 	if(DoRectContainsPoint(button->bounding_box, mouse.position)){
 		if(mouse.left.state == MouseButtonState::MOUSE_PRESSED){
 			button->sprite.info.tint = {100, 100, 100};
-			button->value = true;
-			printf("PRESSED\n");
+			button->is_pressed = true;
 			return;
 		}
 	}
 
-	if(mouse.left.state == MouseButtonState::MOUSE_NONE || mouse.left.state == MouseButtonState::MOUSE_RELEASED){
-		button->sprite.info.tint = {255, 255, 255};
-		button->value = false;
-	}
 	
-	
+	// The button value only remains true for one frame because the mouse state can't return to the PRESSED state until you release it.
+	button->sprite.info.tint = {255, 255, 255};
+	button->is_pressed = false;
 }
 
 void render_button(Button *button, Renderer *renderer){
 	V2 position = {button->bounding_box.x, button->bounding_box.y};
 	render_queue_sprite(get_render_list_for_layer(LEVEL_LAYERS - 1), renderer, &button->sprite, position, get_shader_ptr(&Game::asset_manager, "gui_shader"));
+}
+
+void set_button_sprite(Button *button, Texture texture, Rect clip_region){
+	button->sprite.info.texture = texture;
+	button->sprite.clipping_box = clip_region;
 }

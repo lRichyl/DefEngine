@@ -44,3 +44,4 @@ void init_console(Console *console, Renderer *renderer);
 void update_console(Console *console, LevelEditor *editor, Renderer *renderer);
 void toggle_console(Console *console);
 void render_console(Console *console, Renderer *renderer);
+void console_out(Console *console, const char *message);
