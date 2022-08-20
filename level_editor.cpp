@@ -471,18 +471,9 @@ bool load_level_in_editor(const char *filename){
 	}
 	
 	// Collision regions data.
-	// fread((void*)&Game::em.collision_regions.size, sizeof(int), 1, file);
-	// int num_collision_regions = Game::em.collision_regions.size;
-	// for(int i = 0; i < num_collision_regions; i++){
-		// Collider collider;
-		// init_entity(&collider);
-		// fwrite((void*)&editor->edited_level.collision_regions, sizeof(Collider), num_collision_regions, file);
 	fread((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
-	save_collision_regions_to_level(level, &Game::em);
-		// fwrite((void*)&editor->edited_level.collision_regions.data[i].bounding_box, sizeof(Rect), num_collision_regions, file);
-	// }
-	// fread((void*)level->collision_regions.data, sizeof(Rect), level->collision_regions.size, file);
-	
+	// save_collision_regions_to_level(level, &Game::em);
+	load_entities_to_level(level, &Game::em);
 	
 	fclose(file);
 	return true;
