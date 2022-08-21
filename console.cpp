@@ -88,7 +88,7 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 					console_out(console, "Cannot load a level while it is being played.");
 				}
 				else if(load_level_in_editor(level_path)){
-					console_out(console, "Level loaded successfully");
+					console_out(console, "Level loaded successfully.");
 				}
 				else
 					console_out(console, "Level could not be loaded. Possibly doesn't exist.");
@@ -113,11 +113,17 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 					if(save_level(level_path)){
 						console_out(console, "Level succesfully overwritten.");
 					}
-					else console_out(console, "The current level is not saved. Use save_new LEVEL_NAME");					
+					else console_out(console, "The current level is not saved. Use save_new LEVEL_NAME.");
 				}
 			}
-			else if(!strcmp(first, "hi")){
-				add_array(&console->buffer, "Hello!");
+			if(!strcmp(first, "new")){
+				if(editor->state == EditorState::EDITOR_TEST){
+					console_out(console, "Cannot create a new level while a level is being played.");
+				}
+				else{
+					empty_level(&editor->edited_level);
+					console_out(console, "Empty level created.");
+				}
 			}
 		}
 		free_from_arena(&Game::main_arena, string);

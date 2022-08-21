@@ -487,24 +487,6 @@ bool load_level_in_editor(const char *filename){
 		fread(editor->edited_level.map_layers[i], sizeof(EntitySpecifier), LEVEL_WIDTH * LEVEL_HEIGHT, file);
 	}
 	
-	// for(int j = 0; j < LEVEL_LAYERS; j++){
-	// 	EntitySpecifier *layer = level->map_layers[j];
-	// 	for(int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++){
-	// 		EntitySpecifier e_spec = layer[i];
-	// 		// if(e_spec.type != 0){
-	// 		// 	printf("EntityType: %d\n", e_spec.type);
-	// 		// 	return false;
-	// 		// }
-	// 		int tile_x = j % LEVEL_WIDTH;
-	// 		int tile_y = j / LEVEL_WIDTH;
-	// 		float x_pixel_pos = tile_x * TILE_SIZE;
-	// 		float y_pixel_pos = tile_y * TILE_SIZE;
-	// 		V2 position = {x_pixel_pos,y_pixel_pos};
-	// 		if(e_spec.type != EntityType::ENTITY_COLLIDER && e_spec.type != EntityType::ENTITY_NONE)
-	// 			add_entity(e_spec.type, &Game::em, position, j);
-	// 	}
-	// }
-	
 	// Collision regions data.
 	fread((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
 	load_entities_to_level(level, &Game::em);
