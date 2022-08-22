@@ -48,9 +48,12 @@ void save_collision_regions_to_level(Level *level, EntityManager *em){
 
 void empty_level(Level *level){
 	level->name[0] = '\0';
-	EntitySpecifier e_spec;
+	EntitySpecifier e_spec; // Default entity specifier.
 	for(int i = 0; i < LEVEL_LAYERS; i++){
-		memcpy(level->map_layers[i], &e_spec, LEVEL_WIDTH * LEVEL_HEIGHT);
+		for(int j = 0; j < LEVEL_WIDTH * LEVEL_HEIGHT; j++){
+			EntitySpecifier * layer = level->map_layers[i];
+			layer[j] = e_spec;
+		}
 	}
 	clear_array(&level->collision_regions);
 	clear_entity_manager(&Game::em);

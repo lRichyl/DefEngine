@@ -122,6 +122,7 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 				}
 				else{
 					empty_level(&editor->edited_level);
+					// load_entities_to_level(&editor->edited_level, &Game::em);
 					console_out(console, "Empty level created.");
 				}
 			}
