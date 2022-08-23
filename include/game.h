@@ -42,10 +42,10 @@ struct Game{
 	static Console                console;
 	static Camera                 camera;
 	static DefArray<RenderCommand> layers_render_commands[LEVEL_LAYERS];
+	static LevelEditor level_editor;
 
 	// Font font  = Font("assets/fonts/Simvoni.ttf", 16);
 	// Frame frame;
 
-	LevelEditor level_editor;
 };
 #endif

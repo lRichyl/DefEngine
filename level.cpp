@@ -30,11 +30,11 @@ void load_entities_to_level(Level *level, EntityManager *em){
 	}
 
 	
-	for(int i = 0; i < level->collision_regions.size; i++){
-		Collider collider  = level->collision_regions[i];
-		Collider *added = (Collider*)add_entity(EntityType::ENTITY_COLLIDER, em, collider.position, i);
-		// added->sprite = collider.sprite;
-	}
+		for(int i = 0; i < level->collision_regions.size; i++){
+			Collider collider  = level->collision_regions[i];
+			Collider *added = (Collider*)add_entity(EntityType::ENTITY_COLLIDER, em, collider.position, i);
+			*added = collider;
+		}
 }
 
 void save_collision_regions_to_level(Level *level, EntityManager *em){
@@ -44,4 +44,17 @@ void save_collision_regions_to_level(Level *level, EntityManager *em){
 		if(!c.is_active) continue;
 		add_array(&level->collision_regions, c);
 	}
+}
+
+void empty_level(Level *level){
+	level->name[0] = '\0';
+	EntitySpecifier e_spec; // Default entity specifier.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		for(int j = 0; j < LEVEL_WIDTH * LEVEL_HEIGHT; j++){
+			EntitySpecifier * layer = level->map_layers[i];
+			layer[j] = e_spec;
+		}
+	}
+	clear_array(&level->collision_regions);
+	clear_entity_manager(&Game::em);
 }

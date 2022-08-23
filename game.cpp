@@ -18,6 +18,7 @@ float                   Game::dt;
 Camera                  Game::camera;
 Console                 Game::console;
 DefArray<RenderCommand> Game::layers_render_commands[LEVEL_LAYERS];
+LevelEditor             Game::level_editor;
 
 static void render_command_lists(){
 	for(int j = 0; j < LEVEL_LAYERS; j++){
@@ -68,6 +69,16 @@ Game::Game(Renderer *r, Window *w){
 }
 void Game::UpdateGame(float dt){
 	mouse = GetMouseInfo(renderer->window); // Only call this funtion once per frame. To get mouse info reference the static 'mouse' variable. 
+	#ifdef DEV
+		if(console.show){
+			update_console(&console, &level_editor, renderer);
+		}
+		// 96 = |    Fix this.
+		if(was_key_pressed(96)){
+			toggle_console(&console);
+		}
+
+	#endif
 	Game::dt = dt;
 	switch(state){
 		case GAME_PLAY:{
@@ -82,7 +93,8 @@ void Game::UpdateGame(float dt){
 		
 		#ifdef DEV
 		case GAME_EDITOR:{
-			update_level_editor(&level_editor, renderer);
+			if(!console.show)
+				update_level_editor(&level_editor, renderer);
 			
 			break;
 		}
@@ -106,7 +118,8 @@ void Game::DrawGame(float dt, float fps){
 			break;
 		}
 	}
-
+	if(console.show)
+		render_console(&console, renderer);
 	// render_colored_rect(renderer, &r1, V3 {0 , 159, 255});
 	render_command_lists();
     renderer_draw(renderer);
@@ -118,7 +131,7 @@ void Game::GameLoop(float dt, float fps){
     if(level_editor.state != EditorState::EDITOR_EDIT)
 		check_collisions(&Game::em);
     DrawGame(dt, fps);
-	Game::camera.moved = false;
+	Game::camera.moved = false; // ??
 	clear_mouse_info();
 	clear_array(&Input::unicode_array);
 	clear_keys_state();

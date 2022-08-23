@@ -6,6 +6,7 @@
 #define LEVEL_HEIGHT 100
 #define LEVEL_LAYERS 5
 #define TILE_SIZE 32
+#define LEVEL_NAME_SIZE 32
 
 struct EntitySpecifier{
 	EntityType type = EntityType::ENTITY_NONE;
@@ -16,6 +17,7 @@ struct EntitySpecifier{
 };
 
 struct Level{
+	char name[LEVEL_NAME_SIZE];
 	EntitySpecifier *map_layers[LEVEL_LAYERS];
 	DefArray<Collider> collision_regions;
 };
@@ -23,4 +25,6 @@ struct Level{
 void init_level(Level *level);
 void load_entities_to_level(Level *level, EntityManager *em);
 void save_collision_regions_to_level(Level *level, EntityManager *em);
+void empty_level(Level *level);
+
 

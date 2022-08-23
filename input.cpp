@@ -48,6 +48,9 @@ bool is_key_being_pressed(Window *window, int key){
 }
 
 bool was_key_pressed(int key){
+	if(key >= KEYS_AMOUNT){
+		printf("Surpassed the maximum key index : %d\n", key);
+	}
 	int state = Input::keys_state[key];
 	return state == GLFW_PRESS;
 }
@@ -62,9 +65,7 @@ void clear_keys_state(){
 }
 
 void PollKeyboardEvents(GLFWwindow* window, int key, int scancode, int action, int mods){
-	// Event e = {key , action};
 	Input::keys_state[key] = action;
-	// events.push(e);
 }
 
 void CursorCallback(GLFWwindow* window, double xpos, double ypos){

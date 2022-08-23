@@ -6,13 +6,17 @@
 
 #define MAX_TILE_PROTOTYPE 100
 
+
 enum SelectorTab{
 	SELECTOR_TILES,
-	SELECTOR_ENTITIES
+	SELECTOR_ENTITIES,
+	SELECTOR_MAX
 };
 
 
 struct EntitySelector{
+	Button button_next;
+	Button button_previous;
 	SelectorTab tab = SelectorTab::SELECTOR_ENTITIES;
 	int entities_per_row = 5;
 	Rect area;
@@ -39,9 +43,12 @@ struct LevelEditor{
 
 	EntitySelector entity_selector;
 
-	Button button;
+	// Button button;
 };
 
 void init_level_editor(LevelEditor *editor, Window *window);
 void update_level_editor(LevelEditor *editor, Renderer *renderer);
 void render_level_editor(LevelEditor *editor, Renderer *renderer);
+bool save_level(const char *filename);
+bool save_new_level(const char *filename);
+bool load_level_in_editor(const char *filename);

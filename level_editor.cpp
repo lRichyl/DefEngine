@@ -57,7 +57,7 @@ static void init_prototypes(EntityManager *em){
 	add_tile_prototype(em, get_texture(&Game::asset_manager, "test_tiles"), {32,0,32,32});
 }
 
-// We will use this function to update the position of the entity prototypes which are shown in the entity selector. In the future we may add the ability
+// We will use this function to  the position of the entity prototypes which are shown in the entity selector. In the future we may add the ability
 // to scroll so we will need to call this function when using the scrollwheel. AT THE MOMENT WE ONLY CALL IT AT INITIALIZATION.
 static void update_entity_prototypes_positions(EntitySelector *selector){
 	int j = 0;
@@ -114,11 +114,52 @@ void init_entity_selector(EntitySelector *e_selector, Window *window){
 	e_selector->entity_area_offset = {15, 64};
 	float width = e_selector->entities_per_row * TILE_SIZE + (e_selector->entity_area_offset.x * 2);
 	e_selector->area = Rect(window->internalWidth - width, window->internalHeight, width, window->internalHeight);
+
+	init_button(&e_selector->button_next, "Next_selector_tab");
+	set_button_size(&e_selector->button_next,     {32,32});
+	set_button_sprite(&e_selector->button_next, get_texture(&Game::asset_manager, "test_tiles"), {96, 32, 32, 32});
+	V2 button_position = {e_selector->area.x + e_selector->area.w - e_selector->button_next.bounding_box.w, e_selector->area.y};
+	set_button_position(&e_selector->button_next, button_position);
+
+	init_button(&e_selector->button_previous, "Previous_selector_tab");
+	set_button_size(&e_selector->button_previous,     {32,32});
+	set_button_sprite(&e_selector->button_previous, get_texture(&Game::asset_manager, "test_tiles"), {128, 32, 32, 32});
+	button_position = {e_selector->area.x, e_selector->area.y};
+	set_button_position(&e_selector->button_previous, button_position);
+}
+
+static void change_entity_selector_tab(EntitySelector *e_selector){
+	Button *next = &e_selector->button_next;
+	Button *left = &e_selector->button_previous;
+
+	int current_tab = e_selector->tab;
+	if(next->is_pressed){
+		current_tab++;
+		if(current_tab >= SelectorTab::SELECTOR_MAX){
+			e_selector->tab = (SelectorTab)0;
+		}
+		else{
+			e_selector->tab = (SelectorTab)current_tab;
+		}
+		// e_selector->tab++;
+	}
+	else if(left->is_pressed){
+		current_tab--;
+		if(current_tab < 0){
+			e_selector->tab = SelectorTab::SELECTOR_MAX;
+		}
+		else{
+			e_selector->tab = (SelectorTab)current_tab;
+		}
+	}
 }
 
 void update_entity_selector(EntitySelector *e_selector, LevelEditor *editor){
 	// If we click on an entity in the entity selector we set the selected entity type to the one we clicked on.
 	MouseInfo mouse = Game::mouse;
+	update_button(&e_selector->button_next);
+	update_button(&e_selector->button_previous);
+	change_entity_selector_tab(e_selector);
 	switch(e_selector->tab){
 		case SELECTOR_TILES:{
 			if(mouse.left.state == MouseButtonState::MOUSE_PRESSED){
@@ -153,6 +194,8 @@ void update_entity_selector(EntitySelector *e_selector, LevelEditor *editor){
 
 void render_entity_selector(EntitySelector *e_selector, LevelEditor *editor, Renderer *renderer){
 	render_queue_colored_rect(get_render_list_for_layer(LEVEL_LAYERS - 1), renderer, &e_selector->area, V3{0,0,0}, 255, get_shader_ptr(&Game::asset_manager, "gui_shader"));
+	render_button(&e_selector->button_next, renderer);
+	render_button(&e_selector->button_previous, renderer);
 	switch(e_selector->tab){
 		case SELECTOR_TILES:{
 			render_tiles_prototypes(editor, renderer);
@@ -178,11 +221,11 @@ void init_level_editor(LevelEditor *editor, Window *window){
 	update_entity_prototypes_positions(&editor->entity_selector);
 	update_tile_prototypes_positions(&editor->entity_selector);
 
-	init_button(&editor->button, "TEST");
-	set_button_position(&editor->button, {100,100});
-	set_button_size(&editor->button, {32,32});
-	editor->button.sprite.info.texture = get_texture(&Game::asset_manager, "test_tiles");
-	editor->button.sprite.clipping_box = {0,0,32,32};
+	// init_button(&editor->button, "TEST");
+	// set_button_position(&editor->button, {100,100});
+	// set_button_size(&editor->button, {32,32});
+	// editor->button.sprite.info.texture = get_texture(&Game::asset_manager, "test_tiles");
+	// editor->button.sprite.clipping_box = {0,0,32,32};
 
 }
 
@@ -336,7 +379,7 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 		update_camera();
 	}
 	else if(editor->state == EditorState::EDITOR_TEST){
-		update_button(&editor->button);
+		// update_button(&editor->button);
 		if(was_key_pressed(GLFW_KEY_SPACE)){
 			editor->state = EditorState::EDITOR_EDIT;
 			clear_entity_manager(&Game::em);
@@ -351,7 +394,7 @@ void render_level_editor(LevelEditor *editor, Renderer *renderer){
 	// Render the background color of the level editor.
 	render_queue_colored_rect(&Game::layers_render_commands[0], renderer, &editor->work_area, V3 {0 , 159, 255});
 
-	render_button(&editor->button, renderer);
+	// render_button(&editor->button, renderer);
 
 	// We always render the entities, no matter the state.
 	render_entities(&Game::em, renderer);
@@ -373,4 +416,84 @@ void render_level_editor(LevelEditor *editor, Renderer *renderer){
 
 	
 	
+}
+
+const char *HEADER = "LVLDAT";
+
+bool save_new_level(const char *filename){
+	LevelEditor *editor = &Game::level_editor;
+	if(check_if_file_exists(filename)) return false;
+	FILE *file;
+	fopen_s(&file, filename, "wb");
+	if(!file) return false;
+	
+	fwrite(HEADER, sizeof(char), 6, file);
+	fwrite(editor->edited_level.name, sizeof(char), LEVEL_NAME_SIZE, file);
+
+	// Data from the 5 layers of the level.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		fwrite(editor->edited_level.map_layers[i], sizeof(EntitySpecifier), LEVEL_WIDTH * LEVEL_HEIGHT, file);
+	}
+	
+	// Collision regions data.
+	fwrite((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
+	
+	fclose(file);
+	return true;
+}
+
+bool save_level(const char *level_name){
+	LevelEditor *editor = &Game::level_editor;
+	if(!check_if_file_exists(level_name)) return false;
+	FILE *file;
+	fopen_s(&file, level_name, "wb+");
+	if(!file) return false;
+	
+	fwrite(HEADER, sizeof(char), 6, file);
+	fwrite(editor->edited_level.name, sizeof(char), LEVEL_NAME_SIZE, file);
+
+	// Data from the 5 layers of the level.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		fwrite(editor->edited_level.map_layers[i], sizeof(EntitySpecifier), LEVEL_WIDTH * LEVEL_HEIGHT, file);
+	}
+	
+	// Collision regions data.
+	fwrite((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
+	
+	fclose(file);
+	return true;
+}
+
+bool load_level_in_editor(const char *filename){
+	LevelEditor *editor = &Game::level_editor;
+	if(!check_if_file_exists(filename)) return false;
+	FILE *file;
+	fopen_s(&file, filename, "rb");
+	if(!file) return false;
+	
+	Level *level = &editor->edited_level;
+	empty_level(level);
+	
+	char header[10]{};
+	// fscanf(file, "%s", header);
+	fread(header, sizeof(char), 6, file);
+	if(strcmp(header, HEADER) != 0) return false;
+	
+	char level_name[LEVEL_NAME_SIZE]{};
+	// fscanf(file, "%s", level_name);
+	fread(level_name, sizeof(char), LEVEL_NAME_SIZE, file);
+	strcpy_s(level->name, level_name);
+	
+	// Data from the 5 layers of the level.
+	for(int i = 0; i < LEVEL_LAYERS; i++){
+		fread(editor->edited_level.map_layers[i], sizeof(EntitySpecifier), LEVEL_WIDTH * LEVEL_HEIGHT, file);
+	}
+	
+	// Collision regions data.
+	fread((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
+	load_entities_to_level(level, &Game::em);
+	// save_collision_regions_to_level(level, &Game::em);
+	
+	fclose(file);
+	return true;
 }
