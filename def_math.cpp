@@ -1,4 +1,4 @@
-#include "math.h"
+#include "def_math.h"
 
 // Mirror x.
 void V2::SwitchXComponents(V2 *a, V2 *b){

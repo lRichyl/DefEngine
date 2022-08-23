@@ -14,18 +14,19 @@ Font::Font(const char *path, float size){
 	texture.width = texture_size;
 	texture.height  = texture_size;
 	this->size = size;
-	unsigned char ttf_buffer[BUFFER_SIZE];
+	std::vector<unsigned char> ttf_buffer(BUFFER_SIZE);
 	unsigned char temp_bitmap[texture_size*texture_size];
 	unsigned int ftex;
 	 
-	FILE *file = fopen(path, "rb");
+	FILE* file;
+	fopen_s(&file, path, "rb");
 	
 	if(!file){
 		printf("File does not exist\n");
 		exit(1);
 	}
-	fread(ttf_buffer, 1, BUFFER_SIZE, file);
-	stbtt_BakeFontBitmap(ttf_buffer,0, size, temp_bitmap,texture_size,texture_size, FIRST_CHARACTER,AMOUNT_OF_CHARACTERS, characters_data); 
+	fread(&ttf_buffer[0], 1, BUFFER_SIZE, file);
+	stbtt_BakeFontBitmap(&ttf_buffer[0], 0, size, temp_bitmap, texture_size, texture_size, FIRST_CHARACTER, AMOUNT_OF_CHARACTERS, characters_data);
 	glGenTextures(1, &ftex);
 	glBindTexture(GL_TEXTURE_2D, ftex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, texture_size,texture_size, 0, GL_RED, GL_UNSIGNED_BYTE, (void*)temp_bitmap);
@@ -48,7 +49,7 @@ Font::Font(const char *path, float size){
 		int width  = abs(q.x1 - q.x0);
 		int height = abs(q.y1 - q.y0);
 		int clip_y_pos = texture_size - (q.t0 * texture_size) - height - 1;
-		Rect clipping_box = {q.s0 * texture_size, clip_y_pos, (q.s1 - q.s0) * texture_size, (q.t1 - q.t0) * texture_size};
+		Rect clipping_box = Rect(q.s0 * texture_size, clip_y_pos, (q.s1 - q.s0) * texture_size, (q.t1 - q.t0) * texture_size);
 		
 		CharacterInfo char_info;
 		char_info.clipping_box = clipping_box;

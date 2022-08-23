@@ -3,7 +3,7 @@
 #include "memory_arena.h"
 #include "glad/glad.h"
 #include "stb_image.h"
-#include "math.h"
+#include "def_math.h"
 #include <assert.h>
 
 struct Texture{

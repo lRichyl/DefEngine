@@ -5,7 +5,7 @@ char* text_file_to_char(const char* file_name){
      long lSize;
      char *buffer;
 
-     fp = fopen ( file_name , "rb" );
+     fopen_s (&fp, file_name , "rb" );
      if( !fp ){
           printf("File could not be opened\n" );
           exit(1);
@@ -30,7 +30,7 @@ char* text_file_to_char(const char* file_name){
 int check_if_file_exists(const char * filename)
 {
     FILE *file;
-    if (file = fopen(filename, "r"))
+    if (fopen_s(&file, filename, "r") == 0)
     {
         fclose(file);
         return 1;

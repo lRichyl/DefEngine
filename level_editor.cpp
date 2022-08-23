@@ -113,7 +113,7 @@ static void render_tiles_prototypes(LevelEditor *editor, Renderer *renderer){
 void init_entity_selector(EntitySelector *e_selector, Window *window){
 	e_selector->entity_area_offset = {15, 64};
 	float width = e_selector->entities_per_row * TILE_SIZE + (e_selector->entity_area_offset.x * 2);
-	e_selector->area = {window->internalWidth - width, window->internalHeight, width, window->internalHeight};
+	e_selector->area = Rect(window->internalWidth - width, window->internalHeight, width, window->internalHeight);
 }
 
 void update_entity_selector(EntitySelector *e_selector, LevelEditor *editor){
@@ -218,7 +218,7 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 		if(!editor->is_entity_selector_opened){
 			V2 world_pos         = get_world_position(mouse.position);
 			V2 over_tile         = get_tile(world_pos);
-			V2 floored_tile_pos  = {(int)over_tile.x * TILE_SIZE, (int)over_tile.y * TILE_SIZE};
+			V2 floored_tile_pos  = V2((int)over_tile.x * TILE_SIZE, (int)over_tile.y * TILE_SIZE);
 			
 			if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && are_coords_inside_level(floored_tile_pos)){
 				int index = V2_coords_to_array_index(over_tile);
@@ -284,21 +284,21 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 								V2 top_right     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y};
 								int width        = top_right.x - bottom_left.x;
 								int height       = top_right.y - bottom_left.y;
-								collision_region = {bottom_left.x, bottom_left.y + height, width, height};
+								collision_region = Rect( bottom_left.x, bottom_left.y + height, width, height );
 							}
 							else if (start_pos.x >= floored_tile_pos.x && start_pos.y >= floored_tile_pos.y){
-								V2 bottom_left   = {floored_tile_pos.x, floored_tile_pos.y - TILE_SIZE};
-								V2 top_right     = {start_pos.x + TILE_SIZE, start_pos.y};
+								V2 bottom_left   = V2(floored_tile_pos.x, floored_tile_pos.y - TILE_SIZE);
+								V2 top_right     = V2(start_pos.x + TILE_SIZE, start_pos.y);
 								int width        = top_right.x - bottom_left.x;
 								int height       = top_right.y - bottom_left.y;
-								collision_region = {bottom_left.x, bottom_left.y + height, width, height};
+								collision_region = Rect(bottom_left.x, bottom_left.y + height, width, height);
 							}
 							else if (start_pos.x >= floored_tile_pos.x && start_pos.y < floored_tile_pos.y){
-								V2 bottom_right  = {start_pos.x + TILE_SIZE, start_pos.y - TILE_SIZE};
-								V2 top_left      = {floored_tile_pos.x, floored_tile_pos.y};
+								V2 bottom_right  = V2(start_pos.x + TILE_SIZE, start_pos.y - TILE_SIZE);
+								V2 top_left      = V2(floored_tile_pos.x, floored_tile_pos.y);
 								int width        = bottom_right.x - top_left.x;
 								int height       = top_left.y - bottom_right.y;
-								collision_region = {top_left.x, top_left.y, width, height};
+								collision_region = Rect(top_left.x, top_left.y, width, height);
 							}
 
 							editor->is_phase_one_collider_placement = true;
@@ -357,9 +357,11 @@ void render_level_editor(LevelEditor *editor, Renderer *renderer){
 	render_entities(&Game::em, renderer);
 	if(editor->state == EditorState::EDITOR_EDIT){
 		render_colliders(&Game::em, renderer);
-		char layer_string[] = "Layer: ";
-		const char *number_string    = to_string(editor->current_layer);
-		const char *complete_string  = strcat(layer_string, number_string);
+		const char * layer_string = "Layer: ";
+		const char * number_string = to_string(editor->current_layer);
+		char complete_string[] = "*********";
+		strcpy_s(complete_string, 8, layer_string);
+		strcat_s(complete_string, 2, number_string);
 		render_queue_text(&Game::layers_render_commands[LEVEL_LAYERS - 1], renderer, get_font(&Game::asset_manager, "default"), complete_string, {0,0}, {255,255,255}, false,  get_shader_ptr(&Game::asset_manager, "gui_shader"));
 
 		if(editor->is_entity_selector_opened) 

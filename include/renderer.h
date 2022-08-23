@@ -4,7 +4,7 @@
 #include "glm/gtc/type_ptr.hpp"
 // #include "collision.h"
 #include "window.h"
-#include "math.h"
+#include "def_math.h"
 #include "texture.h"
 #include "memory_arena.h"
 #include "def_array.h"

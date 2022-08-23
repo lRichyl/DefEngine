@@ -2,7 +2,7 @@
 
 #include "GLFW/glfw3.h"
 #include "window.h"
-#include "math.h"
+#include "def_math.h"
 #include "def_array.h"
 
 #define KEYS_AMOUNT 100

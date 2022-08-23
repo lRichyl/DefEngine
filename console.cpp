@@ -9,9 +9,9 @@ const char EXTENSION[]   = ".lvl";
 
 void init_console(Console *console, Renderer *renderer){
 	console->font = get_font(&Game::asset_manager, "console_font");
-	console->bounding_box     = {0, renderer->window->internalHeight, renderer->window->internalWidth, CONSOLE_HEIGHT};
-	console->text_box_divider = {0, console->bounding_box.y - (CONSOLE_HEIGHT - console->text_box_divider_height * 2 )+ console->font->size, renderer->window->internalWidth, console->text_box_divider_height};
-	console->division_color   = {console->color.x - console->color.x * 0.5, console->color.y - console->color.y * 0.5, console->color.z - console->color.z * 0.5};
+	console->bounding_box     = Rect(0, renderer->window->internalHeight, renderer->window->internalWidth, CONSOLE_HEIGHT);
+	console->text_box_divider = Rect(0, console->bounding_box.y - (CONSOLE_HEIGHT - console->text_box_divider_height * 2 )+ console->font->size, renderer->window->internalWidth, console->text_box_divider_height);
+	console->division_color   = V3(console->color.x - console->color.x * 0.5, console->color.y - console->color.y * 0.5, console->color.z - console->color.z * 0.5);
 	
 	init_array(&console->buffer, &Game::main_arena, BUFFER_SIZE);
 	// Configure the console shader and its view matrix.

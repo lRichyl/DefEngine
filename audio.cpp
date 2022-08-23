@@ -148,8 +148,8 @@ void update_audio_streams(){
 		}else if(state == AL_STOPPED){
 			int buffers_processed = 0;
 			ALCall(alGetSourcei(music->source.id, AL_BUFFERS_PROCESSED, &buffers_processed));
-			unsigned int b[buffers_processed];
-			ALCall(alSourceUnqueueBuffers(music->source.id, buffers_processed, b));
+			std::vector<unsigned int> b(buffers_processed);
+			ALCall(alSourceUnqueueBuffers(music->source.id, buffers_processed, &b[0]));
 			
 			free((stb_vorbis*)music->v);
 			int error;

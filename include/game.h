@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAME_H
+#define GAME_H
 
 #include "time.h"
 #include "renderer.h"
@@ -47,3 +48,4 @@ struct Game{
 
 	LevelEditor level_editor;
 };
+#endif

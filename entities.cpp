@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "game.h"
+#include <cstdlib>
 
 #define RENDER_ENTITIES(type , list)\
 	for(int i = 0; i < ENTITIES_PER_TYPE; i++){ type *e = &em->list[i]; if(e->is_active) render_entity(e, renderer);}\
@@ -234,7 +235,7 @@ Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer)
 		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime); break;}
 		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions, Collider); break;}
 		case ENTITY_TILE:    { 
-			TileSpecifier *e;
+			TileSpecifier *e = NULL;
 			int i = 0;
 			for(i; i < MAX_TILES_PER_LEVEL; i++){ 
 				if(!em->tiles[i].is_active){
@@ -242,6 +243,12 @@ Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer)
 					e->id = i;
 					break;
 				} 
+			}
+			if (e == NULL) {
+				char buf[] = "****";
+				std::string err = "TileSpecifier 'e' was NULL, at 'i' : ";
+				err += _itoa_s(i, buf, 10);
+				throw(err);
 			}
 			init_entity(e);
 			e->is_active = true;

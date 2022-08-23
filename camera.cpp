@@ -9,7 +9,7 @@
 void init_camera(Camera *camera, Renderer *renderer){
 	camera->renderer = renderer;
 	camera->position = {0,0};
-	camera->size     = {renderer->window->internalWidth, renderer->window->internalHeight};
+	camera->size     = V2(renderer->window->internalWidth, renderer->window->internalHeight);
 }
 
 void set_camera_position(){
@@ -101,7 +101,7 @@ void reset_camera(){
 	
 	glUseProgram(0);
 	
-	camera->size = {window->internalWidth, window->internalHeight};
+	camera->size = V2(window->internalWidth, window->internalHeight);
 }
 
 // This function is used for updating the camera while editing a level.

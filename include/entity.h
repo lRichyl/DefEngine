@@ -21,7 +21,7 @@
 }\
 
 #define ADD_ENTITY(entity_list, entity_type)  \
-	entity_type *e;\
+	entity_type *e = NULL;\
 	GET_AVAILABLE_ENTITY(entity_list, em);\
 	e->is_active = true;\
 	e->position = position;\

@@ -126,8 +126,8 @@ V4 get_pixel(Texture *texture, V2 location){
 
 void clear_texture(Texture *texture){
 	glBindTexture(GL_TEXTURE_2D, texture->id);
-	unsigned char data[texture->size] = {}; 
-	glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, texture->width, texture->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)data);
+	std::vector<unsigned char> data(texture->size, 0); 
+	glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, texture->width, texture->height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)&data[0]);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	memset(texture->data_buffer, 0, texture->size);
 }
