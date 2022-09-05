@@ -23,3 +23,5 @@ To save and load levels you can open the console by pressing the ESC key while o
 
 ![image](https://user-images.githubusercontent.com/66743720/160709637-c7a0d718-e0db-4629-a5ae-beb167462739.png)
 
+### TODO 
+* Wrap all source code in 'def' namespace.
