@@ -22,7 +22,7 @@
 #include "stb_truetype.h"
 
 
-
+using namespace def;
 
 void WindowResizeCallback(GLFWwindow* window, int width, int height){
      glViewport(0, 0, width, height);

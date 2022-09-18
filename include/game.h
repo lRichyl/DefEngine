@@ -14,38 +14,40 @@
 
 #define DEV 1
 
-const int UNICODE_BUFFER_SIZE = 10;
+namespace def{
+	const int UNICODE_BUFFER_SIZE = 10;
 
-enum GameState{
-	GAME_PLAY,
-	GAME_EDITOR
-};
+	enum GameState{
+		GAME_PLAY,
+		GAME_EDITOR
+	};
 
-struct Game{
-	void UpdateGame(float dt);
-	void DrawGame(float dt, float fps);
-	void GameLoop(float dt, float fps);
-	Game(Renderer *r, Window *w);
+	struct Game{
+		void UpdateGame(float dt);
+		void DrawGame(float dt, float fps);
+		void GameLoop(float dt, float fps);
+		Game(Renderer *r, Window *w);
 
-	static void clear_render_lists();
-	
-	Renderer *renderer;
-	Window *window;
-	bool showFPS = true;
-	GameState state = GameState::GAME_PLAY;
-	
-	static MouseInfo              mouse;
-	static AssetManager           asset_manager;
-	static MemoryArena            main_arena;
-	static EntityManager          em;
-	static float                  dt;
-	static Console                console;
-	static Camera                 camera;
-	static DefArray<RenderCommand> layers_render_commands[LEVEL_LAYERS];
-	static LevelEditor level_editor;
+		static void clear_render_lists();
+		
+		Renderer *renderer;
+		Window *window;
+		bool showFPS = true;
+		GameState state = GameState::GAME_PLAY;
+		
+		static MouseInfo              mouse;
+		static AssetManager           asset_manager;
+		static MemoryArena            main_arena;
+		static EntityManager          em;
+		static float                  dt;
+		static Console                console;
+		static Camera                 camera;
+		static DefArray<RenderCommand> layers_render_commands[LEVEL_LAYERS];
+		static LevelEditor level_editor;
 
-	// Font font  = Font("assets/fonts/Simvoni.ttf", 16);
-	// Frame frame;
+		// Font font  = Font("assets/fonts/Simvoni.ttf", 16);
+		// Frame frame;
 
-};
+	};
+}
 #endif

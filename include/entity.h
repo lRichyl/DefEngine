@@ -33,155 +33,155 @@
 #define ELIMINATE_ENTITY(entity_list)\
 	em->entity_list[id].is_active = false;\
 
+namespace def {
+	struct Renderer;
+	struct LevelEditor;
 
-struct Renderer;
-struct LevelEditor;
+	enum EntityType{
+		ENTITY_NONE,
+		ENTITY_EMPTY,
+		ENTITY_TILE,
+		ENITY_AUTOTILE,
+		ENTITY_COLLIDER,
+		ENTITY_PLAYER,
+		ENTITY_SLIME,
+		ENTITY_AMOUNT
+	};
 
-enum EntityType{
-	ENTITY_NONE,
-	ENTITY_EMPTY,
-	ENTITY_TILE,
-	ENITY_AUTOTILE,
-	ENTITY_COLLIDER,
-	ENTITY_PLAYER,
-	ENTITY_SLIME,
-	ENTITY_AMOUNT
-};
+	enum AreaType{
+		AREA_NONE,
+		AREA_SINGLE,
+		AREA_MULTI
+	};
 
-enum AreaType{
-	AREA_NONE,
-	AREA_SINGLE,
-	AREA_MULTI
-};
+	// struct Icon{
+	// 	Sprite sprite;
+	// 	// Rect bounding_box;
+	// };
 
-// struct Icon{
-// 	Sprite sprite;
-// 	// Rect bounding_box;
-// };
-
-struct Entity{
-	EntityType type      = EntityType::ENTITY_NONE;
-	// AreaType   area_type = AreaType::AREA_NONE;
-	bool is_active = false;
-	bool is_disabled = false;
-	Rect bounding_box;
-	V2 position;
-	V2 area = {1,1};
-	Sprite icon;
-	// Texture texture;
-	int id = -1;
-	int layer = -1;
-	
-	// This function pointer is set when a placed entity requires extra configuration, like setting a relantionship with another entity, 
-	// setting text, etc.
-	void (*special_placement)() = NULL;
-};
+	struct Entity{
+		EntityType type      = EntityType::ENTITY_NONE;
+		// AreaType   area_type = AreaType::AREA_NONE;
+		bool is_active = false;
+		bool is_disabled = false;
+		Rect bounding_box;
+		V2 position;
+		V2 area = {1,1};
+		Sprite icon;
+		// Texture texture;
+		int id = -1;
+		int layer = -1;
+		
+		// This function pointer is set when a placed entity requires extra configuration, like setting a relantionship with another entity, 
+		// setting text, etc.
+		void (*special_placement)() = NULL;
+	};
 
 
-// Entity* get_selection_entity(EntitySelection *selection);
+	// Entity* get_selection_entity(EntitySelection *selection);
 
-struct Collider : public Entity{
-	Sprite sprite;
-};
+	struct Collider : public Entity{
+		Sprite sprite;
+	};
 
-void init_entity(Collider   *collider);
-// void update_collider(Collider *collider, Renderer *renderer);
-void render_collider(Collider *collider, Renderer *renderer);
+	void init_entity(Collider   *collider);
+	// void update_collider(Collider *collider, Renderer *renderer);
+	void render_collider(Collider *collider, Renderer *renderer);
 
-struct Tile : public Entity{
-	// Tile(){
-	// 	type = EntityType::ENTITY_TILE;
-	// 	// area_type = AreaType::AREA_SINGLE;
-	// 	// area = {1,1};
+	struct Tile : public Entity{
+		// Tile(){
+		// 	type = EntityType::ENTITY_TILE;
+		// 	// area_type = AreaType::AREA_SINGLE;
+		// 	// area = {1,1};
+		// }
+		Sprite sprite;
+	};
+
+	void init_entity(Tile *tile);
+	void set_tile_sprite(Tile *tile, Texture texture, Rect clip_region);
+
+	struct TileSpecifier : public Entity{
+		// Tile *tile = NULL;
+		int tile_id = -1;
+	};
+
+	void init_entity(TileSpecifier *tile_e);
+	void render_entity(TileSpecifier *tile_e, Renderer *renderer);
+
+	struct Player : public Entity{
+		float speed;
+		V2 direction;
+		Sprite sprite;
+		bool is_on_level = false;
+	};
+
+	void init_entity(Player *player);
+	void update_player(Player *player, Renderer *renderer);
+	void render_player(Player *player, Renderer *renderer);
+
+	struct Slime : public Entity{
+		Sprite sprite;
+	};
+
+	void init_entity(Slime *slime);
+	void update_entity(Slime *slime, Renderer *renderer);
+	void render_entity(Slime *slime, Renderer *renderer);
+
+	struct Multi : public Entity{
+		Sprite sprite;
+	};
+
+	void init_entity(Multi *multi);
+	void update_multi(Multi *multi, Renderer *renderer);
+	void render_multi(Multi *multi, Renderer *renderer);
+		
+	struct EntityManager{
+		Player player;
+		Slime slimes[ENTITIES_PER_TYPE];
+
+		TileSpecifier tiles[MAX_TILES_PER_LEVEL];
+		// When adding a new entity type DO NOT FORGET to call the UPDATE_ENTITES, RENDER_ENTITIES and CLEAR_ENTITIES macros for that entity type in 
+		// the entity manager's update, render and clear functions.
+		
+		// The entities in this array have to be sorted according to their Y position in descending order and cleared at the end after drawing them.
+		// Not every entity will be here, only the entities that need to be sorted, like any moving entities (enemies, habilities, etc).
+		// DefArray<Entity*> entities_draw_list;
+		// TODO:     !!!!!DO NOT FORGET TO CALL clear_array() FOR THIS LIST AFTER DRAWING !!!!!!!!!!
+		Collider collision_regions[MAX_COLLIDERS]; // This is used for collision with solid objects.
+
+		DefArray<Tile*> tiles_prototypes;
+		DefArray<Entity*> entities_prototypes;
+	};
+
+	Entity* add_entity(EntityType type, EntityManager *em, V2 position, int layer);
+	void eliminate_entity(EntityManager *em, EntityType type ,int id);
+	Entity* get_entity_prototype(EntityManager *em, EntityType type);
+	DefArray<RenderCommand>* get_render_list_for_layer(int layer);
+	void init_entity_manager(EntityManager *em);
+	void update_entities(EntityManager *em, Renderer *renderer);
+	void render_entities(EntityManager *em, Renderer *renderer);
+	void render_colliders(EntityManager *em, Renderer *renderer);
+	void clear_entity_manager(EntityManager *em);
+
+	// template<typename T>
+	// T cast_and_position_entity(Entity *e, V2 position){
+	// 	T *entity_T = (T*)e;
+	// 	T new_T = *entity_T;
+	// 	new_T.position = position;
+	// 	return new_T;
 	// }
-	Sprite sprite;
-};
 
-void init_entity(Tile *tile);
-void set_tile_sprite(Tile *tile, Texture texture, Rect clip_region);
+	void update_bounding_box(Entity *entity);
 
-struct TileSpecifier : public Entity{
-	// Tile *tile = NULL;
-	int tile_id = -1;
-};
-
-void init_entity(TileSpecifier *tile_e);
-void render_entity(TileSpecifier *tile_e, Renderer *renderer);
-
-struct Player : public Entity{
-	float speed;
-	V2 direction;
-	Sprite sprite;
-	bool is_on_level = false;
-};
-
-void init_entity(Player *player);
-void update_player(Player *player, Renderer *renderer);
-void render_player(Player *player, Renderer *renderer);
-
-struct Slime : public Entity{
-	Sprite sprite;
-};
-
-void init_entity(Slime *slime);
-void update_entity(Slime *slime, Renderer *renderer);
-void render_entity(Slime *slime, Renderer *renderer);
-
-struct Multi : public Entity{
-	Sprite sprite;
-};
-
-void init_entity(Multi *multi);
-void update_multi(Multi *multi, Renderer *renderer);
-void render_multi(Multi *multi, Renderer *renderer);
-	
-struct EntityManager{
-	Player player;
-	Slime slimes[ENTITIES_PER_TYPE];
-
-	TileSpecifier tiles[MAX_TILES_PER_LEVEL];
-	// When adding a new entity type DO NOT FORGET to call the UPDATE_ENTITES, RENDER_ENTITIES and CLEAR_ENTITIES macros for that entity type in 
-	// the entity manager's update, render and clear functions.
-	
-	// The entities in this array have to be sorted according to their Y position in descending order and cleared at the end after drawing them.
-	// Not every entity will be here, only the entities that need to be sorted, like any moving entities (enemies, habilities, etc).
-	// DefArray<Entity*> entities_draw_list;
-	// TODO:     !!!!!DO NOT FORGET TO CALL clear_array() FOR THIS LIST AFTER DRAWING !!!!!!!!!!
-	Collider collision_regions[MAX_COLLIDERS]; // This is used for collision with solid objects.
-
-	DefArray<Tile*> tiles_prototypes;
-	DefArray<Entity*> entities_prototypes;
-};
-
-Entity* add_entity(EntityType type, EntityManager *em, V2 position, int layer);
-void eliminate_entity(EntityManager *em, EntityType type ,int id);
-Entity* get_entity_prototype(EntityManager *em, EntityType type);
-DefArray<RenderCommand>* get_render_list_for_layer(int layer);
-void init_entity_manager(EntityManager *em);
-void update_entities(EntityManager *em, Renderer *renderer);
-void render_entities(EntityManager *em, Renderer *renderer);
-void render_colliders(EntityManager *em, Renderer *renderer);
-void clear_entity_manager(EntityManager *em);
-
-// template<typename T>
-// T cast_and_position_entity(Entity *e, V2 position){
-// 	T *entity_T = (T*)e;
-// 	T new_T = *entity_T;
-// 	new_T.position = position;
-// 	return new_T;
-// }
-
-void update_bounding_box(Entity *entity);
-
-// inline void add_enemy(EntityManager *em, Enemy *e){
-	// add_array(&em->enemies, *e);
-	// Entity *entity = get_last_element(&em->enemies);
-	// add_array(&em->entities_draw_list, entity);
-// }
+	// inline void add_enemy(EntityManager *em, Enemy *e){
+		// add_array(&em->enemies, *e);
+		// Entity *entity = get_last_element(&em->enemies);
+		// add_array(&em->entities_draw_list, entity);
+	// }
 
 
-////COLLISIONS
-void collision_between(Player *player, Slime *slime, V2 *penetration);
-// void collision_between_player_and_collision_regions(Level *level, Player *player);
-// void collision_between(Player *player, )
-
+	////COLLISIONS
+	void collision_between(Player *player, Slime *slime, V2 *penetration);
+	// void collision_between_player_and_collision_regions(Level *level, Player *player);
+	// void collision_between(Player *player, )
+}
