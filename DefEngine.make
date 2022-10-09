@@ -74,7 +74,7 @@ GENERATED += $(OBJDIR)/input.o
 GENERATED += $(OBJDIR)/level.o
 GENERATED += $(OBJDIR)/level_editor.o
 GENERATED += $(OBJDIR)/main.o
-GENERATED += $(OBJDIR)/math.o
+GENERATED += $(OBJDIR)/def_math.o
 GENERATED += $(OBJDIR)/renderer.o
 GENERATED += $(OBJDIR)/sprite.o
 GENERATED += $(OBJDIR)/text.o
@@ -96,7 +96,7 @@ OBJECTS += $(OBJDIR)/input.o
 OBJECTS += $(OBJDIR)/level.o
 OBJECTS += $(OBJDIR)/level_editor.o
 OBJECTS += $(OBJDIR)/main.o
-OBJECTS += $(OBJDIR)/math.o
+OBJECTS += $(OBJDIR)/def_math.o
 OBJECTS += $(OBJDIR)/renderer.o
 OBJECTS += $(OBJDIR)/sprite.o
 OBJECTS += $(OBJDIR)/text.o
@@ -209,7 +209,7 @@ $(OBJDIR)/level_editor.o: level_editor.cpp
 $(OBJDIR)/main.o: main.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/math.o: math.cpp
+$(OBJDIR)/def_math.o: def_math.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/renderer.o: renderer.cpp
