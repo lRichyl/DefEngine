@@ -28,3 +28,8 @@ To save and load levels you can open the console by pressing the ESC key while o
 2. 'Select OpenAL 1.1 Windows Installer (zip)'
 3. Download will start, extract it and run the installer.
 4. Done.
+
+### Build guide
+This engine needs to be build using mingw32 (not mingw64).
+1. Build the necessary .o files running the batch file lib/build_lib.bat
+2. Run make on repository root folder.
