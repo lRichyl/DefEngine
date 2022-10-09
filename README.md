@@ -23,5 +23,8 @@ To save and load levels you can open the console by pressing the ESC key while o
 
 ![image](https://user-images.githubusercontent.com/66743720/160709637-c7a0d718-e0db-4629-a5ae-beb167462739.png)
 
-### TODO 
-* Wrap all source code in 'def' namespace.
+### OpenAl dependencies 
+1. Go to this website: https://www.openal.org/downloads/
+2. 'Select OpenAL 1.1 Windows Installer (zip)'
+3. Download will start, extract it and run the installer.
+4. Done.
