@@ -6,6 +6,7 @@
 #include "memory_arena.h"
 
 #include <cmath>
+#include <stdlib.h>
 
 static V2 get_tile(V2 mouse_pos){
 	return V2{mouse_pos.x / TILE_SIZE, ceil(mouse_pos.y / TILE_SIZE)};
@@ -52,6 +53,7 @@ static void init_prototypes(EntityManager *em){
 	add_entity_prototype<Collider>(em, EntityType::ENTITY_COLLIDER);
 	add_entity_prototype<Player>(em, EntityType::ENTITY_PLAYER);
 	add_entity_prototype<Slime>(em, EntityType::ENTITY_SLIME);
+	add_entity_prototype<LevelSelector>(em, EntityType::ENTITY_LEVEL_SELECTOR);
 
 	add_tile_prototype(em, get_texture(&Game::asset_manager, "test_tiles"), {0,0,32,32});
 	add_tile_prototype(em, get_texture(&Game::asset_manager, "test_tiles"), {32,0,32,32});
@@ -221,16 +223,11 @@ void init_level_editor(LevelEditor *editor, Window *window){
 	update_entity_prototypes_positions(&editor->entity_selector);
 	update_tile_prototypes_positions(&editor->entity_selector);
 
-	// init_button(&editor->button, "TEST");
-	// set_button_position(&editor->button, {100,100});
-	// set_button_size(&editor->button, {32,32});
-	// editor->button.sprite.info.texture = get_texture(&Game::asset_manager, "test_tiles");
-	// editor->button.sprite.clipping_box = {0,0,32,32};
-
 }
 
-
+Entity *placed_entity = NULL;
 void update_level_editor(LevelEditor *editor, Renderer *renderer){
+	MouseInfo mouse = Game::mouse;
 	if(editor->state == EditorState::EDITOR_EDIT){
 		
 		if(was_key_pressed(GLFW_KEY_SPACE)){
@@ -257,7 +254,7 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 			editor->current_layer = layer;
 		}
 
-		MouseInfo mouse = Game::mouse;	
+		// MouseInfo mouse = Game::mouse;	
 		if(!editor->is_entity_selector_opened){
 			V2 world_pos         = get_world_position(mouse.position);
 			V2 over_tile         = get_tile(world_pos);
@@ -289,6 +286,7 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 						e_spec->type = editor->selected_entity.type;
 						e_spec->id   = e->id;
 						e_spec->tile_id = e->tile_id;
+						placed_entity = e;
 						return;
 					}
 					// If the selected entity is not a collider, a tile or the player it just gets added.
@@ -296,7 +294,9 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 						Entity *e = add_entity(editor->selected_entity.type, &Game::em, floored_tile_pos, editor->current_layer);
 						e_spec->type = editor->selected_entity.type;
 						e_spec->id   = e->id;
-						
+						placed_entity = e;
+						if(e->has_special_placement) editor->state = EditorState::EDITOR_SPECIAL_PLACEMENT;
+						return;
 					}
 					
 				}
@@ -378,6 +378,19 @@ void update_level_editor(LevelEditor *editor, Renderer *renderer){
 		}
 		update_camera();
 	}
+	else if(editor->state == EditorState::EDITOR_SPECIAL_PLACEMENT){
+		switch(placed_entity->type){
+		case EntityType::ENTITY_LEVEL_SELECTOR:{
+				LevelSelector *lvl_sel = (LevelSelector*)placed_entity;
+				type_level_name(lvl_sel, renderer); 
+				if(was_key_pressed(GLFW_KEY_ENTER)){
+					editor->state = EditorState::EDITOR_EDIT;
+					set_level_name(lvl_sel);
+				}
+				break;
+			}
+		}
+	}
 	else if(editor->state == EditorState::EDITOR_TEST){
 		// update_button(&editor->button);
 		if(was_key_pressed(GLFW_KEY_SPACE)){
@@ -400,11 +413,9 @@ void render_level_editor(LevelEditor *editor, Renderer *renderer){
 	render_entities(&Game::em, renderer);
 	if(editor->state == EditorState::EDITOR_EDIT){
 		render_colliders(&Game::em, renderer);
-		const char * layer_string = "Layer: ";
-		const char * number_string = to_string(editor->current_layer);
-		char complete_string[] = "*********";
-		strcpy_s(complete_string, 8, layer_string);
-		strcat_s(complete_string, 2, number_string);
+		char layer_string[] = "Layer: ";
+		const char *number_string    = to_string(editor->current_layer);
+		const char *complete_string  = strcat(layer_string, number_string);
 		render_queue_text(&Game::layers_render_commands[LEVEL_LAYERS - 1], renderer, get_font(&Game::asset_manager, "default"), complete_string, {0,0}, {255,255,255}, false,  get_shader_ptr(&Game::asset_manager, "gui_shader"));
 
 		if(editor->is_entity_selector_opened) 
@@ -424,7 +435,7 @@ bool save_new_level(const char *filename){
 	LevelEditor *editor = &Game::level_editor;
 	if(check_if_file_exists(filename)) return false;
 	FILE *file;
-	fopen_s(&file, filename, "wb");
+	file = fopen(filename, "wb");
 	if(!file) return false;
 	
 	fwrite(HEADER, sizeof(char), 6, file);
@@ -437,6 +448,7 @@ bool save_new_level(const char *filename){
 	
 	// Collision regions data.
 	fwrite((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
+	fwrite((void*)&Game::em.level_selectors, sizeof(LevelSelector), ENTITIES_PER_TYPE, file); 
 	
 	fclose(file);
 	return true;
@@ -446,7 +458,7 @@ bool save_level(const char *level_name){
 	LevelEditor *editor = &Game::level_editor;
 	if(!check_if_file_exists(level_name)) return false;
 	FILE *file;
-	fopen_s(&file, level_name, "wb+");
+	file = fopen(level_name, "wb+");
 	if(!file) return false;
 	
 	fwrite(HEADER, sizeof(char), 6, file);
@@ -459,6 +471,7 @@ bool save_level(const char *level_name){
 	
 	// Collision regions data.
 	fwrite((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
+	fwrite((void*)&Game::em.level_selectors, sizeof(LevelSelector), ENTITIES_PER_TYPE, file);
 	
 	fclose(file);
 	return true;
@@ -468,7 +481,7 @@ bool load_level_in_editor(const char *filename){
 	LevelEditor *editor = &Game::level_editor;
 	if(!check_if_file_exists(filename)) return false;
 	FILE *file;
-	fopen_s(&file, filename, "rb");
+	file = fopen(filename, "rb");
 	if(!file) return false;
 	
 	Level *level = &editor->edited_level;
@@ -482,7 +495,7 @@ bool load_level_in_editor(const char *filename){
 	char level_name[LEVEL_NAME_SIZE]{};
 	// fscanf(file, "%s", level_name);
 	fread(level_name, sizeof(char), LEVEL_NAME_SIZE, file);
-	strcpy_s(level->name, level_name);
+	strcpy(level->name, level_name);
 	
 	// Data from the 5 layers of the level.
 	for(int i = 0; i < LEVEL_LAYERS; i++){
@@ -491,6 +504,7 @@ bool load_level_in_editor(const char *filename){
 	
 	// Collision regions data.
 	fread((void*)&Game::em.collision_regions, sizeof(Collider), MAX_COLLIDERS, file);
+	fread((void*)&Game::em.level_selectors, sizeof(LevelSelector), ENTITIES_PER_TYPE, file);
 	load_entities_to_level(level, &Game::em);
 	// save_collision_regions_to_level(level, &Game::em);
 	

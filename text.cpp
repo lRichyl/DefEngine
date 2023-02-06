@@ -19,7 +19,7 @@ Font::Font(const char *path, float size){
 	unsigned int ftex;
 	 
 	FILE* file;
-	fopen_s(&file, path, "rb");
+	file = fopen(path, "rb");
 	
 	if(!file){
 		printf("File does not exist\n");
@@ -295,5 +295,6 @@ char *unicode_array_to_string(EditableString *e_string,MemoryArena *arena){
 		}
 		// We do not handle 3 nor 4 byte unicode codepoints.
 	}
+	string[e_string->cursor] = '\000';
 	return string;
 }

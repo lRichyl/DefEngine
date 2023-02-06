@@ -45,3 +45,4 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer);
 void toggle_console(Console *console);
 void render_console(Console *console, Renderer *renderer);
 void console_out(Console *console, const char *message);
+void console_load_level(const char *level_name);

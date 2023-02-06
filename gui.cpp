@@ -44,3 +44,24 @@ void set_button_sprite(Button *button, Texture texture, Rect clip_region){
 	button->sprite.info.texture = texture;
 	button->sprite.clipping_box = clip_region;
 }
+
+void init_temp_text_input(TempTextInput *tmp_text_in, float text_box_height){
+	tmp_text_in->height = text_box_height;
+	tmp_text_in->bounding_box = {0.0, 0.0, 32.0, text_box_height};
+}
+
+void render_temp_text_input(TempTextInput *tmp_text_in, Renderer *renderer){
+	render_queue_colored_rect(get_render_list_for_layer(LEVEL_LAYERS - 1), renderer, &tmp_text_in->bounding_box, tmp_text_in->color);
+	V2 text_position = {tmp_text_in->bounding_box.x , tmp_text_in->bounding_box.y - tmp_text_in->height};
+	render_queue_text(&Game::layers_render_commands[LEVEL_LAYERS - 1], renderer, get_font(&Game::asset_manager, "console_font"), &tmp_text_in->text, text_position, {255,255,255}, false);
+}
+
+void update_temp_text_input(TempTextInput *tmp_text_in, Renderer *renderer){
+	for(int i = 0; i < Input::unicode_array.size; i++){
+		add_unicode_to_string(&tmp_text_in->text, Input::unicode_array[i]);
+	}
+
+	if(is_key_being_pressed(renderer->window, GLFW_KEY_BACKSPACE)){
+		backspace_string(&tmp_text_in->text);
+	}
+}

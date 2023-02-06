@@ -34,6 +34,7 @@ struct Game{
 	bool showFPS = true;
 	GameState state = GameState::GAME_PLAY;
 	
+	static bool                   exit;
 	static MouseInfo              mouse;
 	static AssetManager           asset_manager;
 	static MemoryArena            main_arena;

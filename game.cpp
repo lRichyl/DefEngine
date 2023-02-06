@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 
+bool                    Game::exit;
 AssetManager            Game::asset_manager;
 MemoryArena             Game::main_arena;
 MouseInfo               Game::mouse;
@@ -28,6 +29,7 @@ static void render_command_lists(){
 
 static EditableString e_string;
 Game::Game(Renderer *r, Window *w){
+	exit = false;
     init_memory_arena(&main_arena, 10000000);
 	init_entity_manager(&em);
 	init_asset_manager(&asset_manager);

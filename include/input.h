@@ -10,6 +10,7 @@
 struct Input{
 	static DefArray<unsigned int> unicode_array;
 	static unsigned int keys_state[KEYS_AMOUNT];
+	// static bool is_ui_capturing_text = false;
 };
 
 struct Event{

@@ -98,7 +98,7 @@ int main(){
 	Game game = Game(renderer, window);
 	clear_keys_state();
 	// float realfps ;
-     while(!glfwWindowShouldClose(window->GLFWInstance)){
+     while(!glfwWindowShouldClose(window->GLFWInstance) && !Game::exit){
 
 		 
 		//This is done because when we select the window it stops the execution of

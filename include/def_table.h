@@ -6,6 +6,7 @@ const int MAX_CHARACTERS_FOR_HASH = 10;
 
 template<typename T>
 struct DefTableEntry{
+	bool empty = true;
 	const char *key;
 	T value;
 };
@@ -48,6 +49,7 @@ void insert_to_def_table(DefTable<T> *table, const char *name, T value){
 	while(table->entries[hash].key){
 		hash++;
 	}
+	table->entries[hash].empty = false;
 	table->entries[hash].key   = name;
 	table->entries[hash].value = value;
 }
@@ -55,11 +57,17 @@ void insert_to_def_table(DefTable<T> *table, const char *name, T value){
 template<typename T>
 T get_from_def_table(DefTable<T> *table, const char *key){
 	int hash = calculate_hash(table->size, key);
-	while( 0 != strcmp(table->entries[hash].key, key)){
-		hash++;
-		assert(hash < table->size);
-	}
-	return table->entries[hash].value;
+	T empty_value;
+	
+	while(hash < table->size){
+		if(!table->entries[hash].empty){
+			if(!strcmp(table->entries[hash].key, key)) return table->entries[hash].value;
+		}
+		hash++;	
+		
+	}	
+	printf("There's nothing stored with the key %s\n", key);
+	assert(false);
 }
 
 template<typename T>

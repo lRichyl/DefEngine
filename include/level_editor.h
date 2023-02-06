@@ -29,6 +29,7 @@ void update_entity_selector(EntitySelector *e_selector, LevelEditor *editor);
 
 enum EditorState{
 	EDITOR_EDIT,
+	EDITOR_SPECIAL_PLACEMENT,
 	EDITOR_TEST
 };
 

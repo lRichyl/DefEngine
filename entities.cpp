@@ -1,6 +1,6 @@
 #include "entity.h"
 #include "game.h"
-#include <cstdlib>
+#include <stdlib.h>
 
 #define RENDER_ENTITIES(type , list)\
 	for(int i = 0; i < ENTITIES_PER_TYPE; i++){ type *e = &em->list[i]; if(e->is_active) render_entity(e, renderer);}\
@@ -32,10 +32,15 @@ void eliminate_entity(EntityManager *em, EntityType type ,int id){
 			em->player.is_active = false;
 			break;
 		}
-		// We run the init_entity function outside the ADD_ENTITY macro for each entity because it may be different.
-		case ENTITY_SLIME:   { ELIMINATE_ENTITY(slimes); break;}
-		case ENTITY_TILE:    { ELIMINATE_ENTITY(tiles); break;}
-		case ENTITY_COLLIDER:{ ELIMINATE_ENTITY(collision_regions); break;}
+		
+		case ENTITY_SLIME:         { ELIMINATE_ENTITY(slimes); break;}
+		case ENTITY_TILE:          { ELIMINATE_ENTITY(tiles); break;}
+		case ENTITY_COLLIDER:      { ELIMINATE_ENTITY(collision_regions); break;}
+		case ENTITY_LEVEL_SELECTOR:{ 
+			ELIMINATE_ENTITY(level_selectors);  
+			LevelSelector *lvl_sel = (LevelSelector*)&em->level_selectors[id];
+			lvl_sel->temp_text_input.text.cursor = 0;
+			break;}
 		case ENTITY_NONE:
 			printf("Invalid entity type\n");
 		default:
@@ -54,6 +59,7 @@ void update_entities(EntityManager *em, Renderer *renderer){
 		update_bounding_box(&em->player);
 	}
 	UPDATE_ENTITIES(Slime , slimes);
+	UPDATE_ENTITIES(LevelSelector, level_selectors);
 	// UPDATE_ENTITIES(Collider, collision_regions)
 }
 
@@ -62,6 +68,7 @@ void render_entities(EntityManager *em, Renderer *renderer){
 	if(em->player.is_on_level)
 		render_player(&em->player, renderer);
 	RENDER_ENTITIES(Slime, slimes);
+	RENDER_ENTITIES(LevelSelector, level_selectors);
 	for(int i = 0; i < MAX_TILES_PER_LEVEL; i++){ TileSpecifier *t = &em->tiles[i]; if(t->is_active) render_entity(t, renderer);}
 }
 
@@ -73,6 +80,11 @@ void clear_entity_manager(EntityManager *em){
 	CLEAR_ENTITIES(tiles);
 	for(int  i = 0; i < MAX_TILES_PER_LEVEL; i++) {em->tiles[i].is_active = false; em->tiles[i].is_disabled = false;}
 	CLEAR_ENTITIES(collision_regions);
+	// CLEAR_ENTITIES(level_selectors);
+	for(int  i = 0; i < ENTITIES_PER_TYPE; i++) {
+		em->level_selectors[i].is_active = false; 
+		em->level_selectors[i].is_disabled = false;
+	}
 }
 
 void render_colliders(EntityManager *em, Renderer *renderer){
@@ -179,20 +191,20 @@ void render_entity(Slime *slime, Renderer *renderer){
 	render_queue_sprite(get_render_list_for_layer(slime->layer), renderer, &slime->sprite, slime->position);
 }
 
-void init_entity(Multi *multi){
-	multi->sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
-	multi->sprite.info.size      = {64,64};
-	multi->sprite.clipping_box   = {0,32,64,64};
+// void init_entity(Multi *multi){
+// 	multi->sprite.info.texture   = get_texture(&Game::asset_manager, "test_tiles");
+// 	multi->sprite.info.size      = {64,64};
+// 	multi->sprite.clipping_box   = {0,32,64,64};
 	
-	multi->icon           = multi->sprite;
-	// multi->icon.info.size = icon_size;
+// 	multi->icon           = multi->sprite;
+// 	// multi->icon.info.size = icon_size;
 
-	multi->type                  = EntityType::ENTITY_NONE;
-	// multi->area_type             = AreaType::AREA_MULTI;
-	// multi->area                  = {2,2};
-}
-void update_multi(Multi *multi, Renderer *renderer);
-void render_multi(Multi *multi, Renderer *renderer);
+// 	multi->type                  = EntityType::ENTITY_NONE;
+// 	// multi->area_type             = AreaType::AREA_MULTI;
+// 	// multi->area                  = {2,2};
+// }
+// void update_multi(Multi *multi, Renderer *renderer);
+// void render_multi(Multi *multi, Renderer *renderer);
 
 void update_bounding_box(Entity *entity){
 	// We need to update the bounding box position because it is use for collision detection and position is used for rendering the sprite at 
@@ -224,6 +236,43 @@ void render_entity(TileSpecifier *tile_e, Renderer *renderer){
 	render_queue_sprite(get_render_list_for_layer(tile_e->layer), renderer, &tile->sprite, tile_e->position);
 }
 
+void init_entity(LevelSelector *level_selector){
+	level_selector->type = ENTITY_LEVEL_SELECTOR;
+	level_selector->has_special_placement = true;
+
+	level_selector->icon.info.texture = get_texture(&Game::asset_manager, "test_tiles");
+	level_selector->icon.clipping_box = {64,64,32,32};
+	init_temp_text_input(&level_selector->temp_text_input, get_font(&Game::asset_manager, "console_font")->size);
+	level_selector->level_name = unicode_array_to_string(&level_selector->temp_text_input.text, &Game::main_arena);
+}
+
+void update_entity(LevelSelector *level_selector, Renderer *renderer){
+
+
+}
+
+void render_entity(LevelSelector *level_selector, Renderer *renderer){
+	render_queue_sprite(get_render_list_for_layer(level_selector->layer), renderer, &level_selector->icon, level_selector->position);
+}
+
+
+
+void type_level_name(LevelSelector *level_selector, Renderer *renderer){
+	// Obtain the entity's world position so we can render the text box on top of the entity.
+	V2 pos = get_world_position(level_selector->position);
+	level_selector->temp_text_input.bounding_box.x = pos.x;
+	level_selector->temp_text_input.bounding_box.y = pos.y;
+	level_selector->temp_text_input.color          = {200,200,200};
+	update_temp_text_input(&level_selector->temp_text_input, renderer);
+	render_temp_text_input(&level_selector->temp_text_input, renderer);
+
+
+}
+
+void set_level_name(LevelSelector *level_selector){
+	level_selector->level_name = unicode_array_to_string(&level_selector->temp_text_input.text, &Game::main_arena);
+}
+
 Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer){
 	switch(e_type){
 		case ENTITY_PLAYER:{
@@ -236,6 +285,7 @@ Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer)
 		// We run the init_entity function outside the ADD_ENTITY macro for each entity because it may be different.
 		case ENTITY_SLIME:   { ADD_ENTITY(slimes, Slime); break;}
 		case ENTITY_COLLIDER:{ ADD_ENTITY(collision_regions, Collider); break;}
+		case ENTITY_LEVEL_SELECTOR:{ ADD_ENTITY(level_selectors, LevelSelector); break;}
 		case ENTITY_TILE:    { 
 			TileSpecifier *e = NULL;
 			int i = 0;
@@ -249,7 +299,7 @@ Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer)
 			if (e == NULL) {
 				char buf[] = "****";
 				std::string err = "TileSpecifier 'e' was NULL, at 'i' : ";
-				err += _itoa_s(i, buf, 10);
+				err += itoa(i, buf, 10);
 				throw(err);
 			}
 			init_entity(e);

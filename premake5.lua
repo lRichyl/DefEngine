@@ -13,7 +13,7 @@ project "DefEngine"
    language "C++"
 	
    files { "*.h", "*.cpp", "glad.cpp"}
-   targetname ("EngineTest")
+   targetname ("DefEngine")
    targetdir ("")
 
    filter "configurations:Debug"

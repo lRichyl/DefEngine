@@ -2,10 +2,12 @@
 #include "math.h"
 #include "def_array.h"
 #include "sprite.h"
+#include "gui.h"
 
 #define ENTITIES_PER_TYPE 50
 #define MAX_COLLIDERS 100
 #define MAX_TILES_PER_LEVEL 50000 // This should be LEVEL_WIDTH * LEVEL_HEGIHT
+#define TILES_PER_AUTOTILE 16
 
 #define GET_AVAILABLE_ENTITY(entity_list, entity_manager) {\
 	int i = 0;\
@@ -21,7 +23,7 @@
 }\
 
 #define ADD_ENTITY(entity_list, entity_type)  \
-	entity_type *e = NULL;\
+	entity_type *e;\
 	GET_AVAILABLE_ENTITY(entity_list, em);\
 	e->is_active = true;\
 	e->position = position;\
@@ -41,8 +43,8 @@ enum EntityType{
 	ENTITY_NONE,
 	ENTITY_EMPTY,
 	ENTITY_TILE,
-	ENITY_AUTOTILE,
 	ENTITY_COLLIDER,
+	ENTITY_LEVEL_SELECTOR,
 	ENTITY_PLAYER,
 	ENTITY_SLIME,
 	ENTITY_AMOUNT
@@ -74,7 +76,8 @@ struct Entity{
 	
 	// This function pointer is set when a placed entity requires extra configuration, like setting a relantionship with another entity, 
 	// setting text, etc.
-	void (*special_placement)() = NULL;
+	bool has_special_placement = false;
+	// void (*special_placement)() = NULL;
 };
 
 
@@ -99,6 +102,13 @@ struct Tile : public Entity{
 
 void init_entity(Tile *tile);
 void set_tile_sprite(Tile *tile, Texture texture, Rect clip_region);
+
+// struct AutoTile : public Entity{
+// 	Tile tiles[TILES_PER_AUTOTILE];
+// };
+
+// void init_entity(AutoTile *autotile);
+// void set_autotile_sprites(AutoTile *autotile, Texture texture, Rect initial_clip_region);
 
 struct TileSpecifier : public Entity{
 	// Tile *tile = NULL;
@@ -127,17 +137,29 @@ void init_entity(Slime *slime);
 void update_entity(Slime *slime, Renderer *renderer);
 void render_entity(Slime *slime, Renderer *renderer);
 
-struct Multi : public Entity{
-	Sprite sprite;
+struct LevelSelector : public Entity{
+	TempTextInput temp_text_input;
+	const char *level_name;
 };
 
-void init_entity(Multi *multi);
-void update_multi(Multi *multi, Renderer *renderer);
-void render_multi(Multi *multi, Renderer *renderer);
+void init_entity(LevelSelector *level_selector);
+void update_entity(LevelSelector *level_selector, Renderer *renderer);
+void render_entity(LevelSelector *level_selector, Renderer *renderer);
+void type_level_name(LevelSelector *level_selector, Renderer *renderer);
+void set_level_name(LevelSelector *level_selector);
+
+// struct Multi : public Entity{
+// 	Sprite sprite;
+// };
+
+// void init_entity(Multi *multi);
+// void update_multi(Multi *multi, Renderer *renderer);
+// void render_multi(Multi *multi, Renderer *renderer);
 	
 struct EntityManager{
 	Player player;
 	Slime slimes[ENTITIES_PER_TYPE];
+	LevelSelector level_selectors[ENTITIES_PER_TYPE];
 
 	TileSpecifier tiles[MAX_TILES_PER_LEVEL];
 	// When adding a new entity type DO NOT FORGET to call the UPDATE_ENTITES, RENDER_ENTITIES and CLEAR_ENTITIES macros for that entity type in 
@@ -151,6 +173,7 @@ struct EntityManager{
 
 	DefArray<Tile*> tiles_prototypes;
 	DefArray<Entity*> entities_prototypes;
+	// DefArray<AutoTile*> autotiles_prototypes;
 };
 
 Entity* add_entity(EntityType type, EntityManager *em, V2 position, int layer);
@@ -182,6 +205,7 @@ void update_bounding_box(Entity *entity);
 
 ////COLLISIONS
 void collision_between(Player *player, Slime *slime, V2 *penetration);
+void collision_between(Player *player, LevelSelector *lvl_sel, V2 *penetration);
 // void collision_between_player_and_collision_regions(Level *level, Player *player);
 // void collision_between(Player *player, )
 

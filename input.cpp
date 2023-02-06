@@ -5,6 +5,7 @@
 DefArray<unsigned int> Input::unicode_array;
 // static std::queue<Event> events; 
 unsigned int           Input::keys_state[KEYS_AMOUNT];
+// bool 			   Input::is_ui_capturing_text;
 
 static MouseInfo mouseInfo;
 

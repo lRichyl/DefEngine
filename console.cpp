@@ -2,6 +2,9 @@
 #include "game.h"
 #include "utilities.h"
 
+#include <cstdlib>
+#include <string.h>
+
 const int CONSOLE_HEIGHT = 300;
 const int BUFFER_SIZE    = 100;
 const char LEVELS_PATH[] = "assets/levels/";
@@ -65,11 +68,11 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 		if(word_count == 2){
 				
 			if(!strcmp(first, "save_new")){
-				strcpy_s(editor->edited_level.name, second);
+				strcpy(editor->edited_level.name, second);
 				char level_path[50] = {};
-				strcat_s(level_path, LEVELS_PATH);
-				strcat_s(level_path, second);
-				strcat_s(level_path, EXTENSION);
+				strcat(level_path, LEVELS_PATH);
+				strcat(level_path, second);
+				strcat(level_path, EXTENSION);
 
 				if(editor->state == EditorState::EDITOR_TEST){
 					console_out(console, "Cannot save a level while it is being played.");
@@ -81,9 +84,9 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 			}
 			else if(!strcmp(first, "load")){
 				char level_path[50] = {};
-				strcat_s(level_path, LEVELS_PATH);
-				strcat_s(level_path, second);
-				strcat_s(level_path, EXTENSION);
+				strcat(level_path, LEVELS_PATH);
+				strcat(level_path, second);
+				strcat(level_path, EXTENSION);
 				if(editor->state == EditorState::EDITOR_TEST){
 					console_out(console, "Cannot load a level while it is being played.");
 				}
@@ -107,16 +110,16 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 					// return;
 				}
 				else{
-					strcat_s(level_path, LEVELS_PATH);
-					strcat_s(level_path, editor->edited_level.name);
-					strcat_s(level_path, EXTENSION);
+					strcat(level_path, LEVELS_PATH);
+					strcat(level_path, editor->edited_level.name);
+					strcat(level_path, EXTENSION);
 					if(save_level(level_path)){
 						console_out(console, "Level succesfully overwritten.");
 					}
 					else console_out(console, "The current level is not saved. Use save_new LEVEL_NAME.");
 				}
 			}
-			if(!strcmp(first, "new")){
+			else if(!strcmp(first, "new")){
 				if(editor->state == EditorState::EDITOR_TEST){
 					console_out(console, "Cannot create a new level while a level is being played.");
 				}
@@ -125,6 +128,9 @@ void update_console(Console *console, LevelEditor *editor, Renderer *renderer){
 					// load_entities_to_level(&editor->edited_level, &Game::em);
 					console_out(console, "Empty level created.");
 				}
+			}
+			else if(!strcmp(first, "exit")){
+				Game::exit = true;
 			}
 		}
 		free_from_arena(&Game::main_arena, string);
@@ -157,6 +163,17 @@ void console_out(Console *console, const char *message){
 	add_array(&console->buffer, message);
 }
 
+void console_load_level(const char *level_name){
+	char level_path[50] = {};
+	strcat(level_path, LEVELS_PATH);
+	strcat(level_path, level_name);
+	strcat(level_path, EXTENSION);
+	if(!load_level_in_editor(level_path)){
+		printf("Level %s could not be loaded. Possibly doesn't exist.\n", level_name);
+	}
+}
+
+
 void add_unicode_to_string(EditableString *e_string, unsigned int unicode){
 	// const char *s = string;
 	if(e_string->cursor < MAX_EDITABLE_STRING_SIZE){
@@ -174,7 +191,7 @@ void backspace_string(EditableString *e_string){
 
 void clear_string(EditableString *string){
 	for(int i = 0; i < string->cursor; i++){
-		string->data[i] = 0;
+		string->data[i] = '\000';
 	}
 	string->cursor = 0;
 }
