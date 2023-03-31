@@ -21,7 +21,8 @@ namespace def {
 		fopen_s(&file, path, "rb");
 		
 		if(!file){
-			printf("File does not exist\n");
+			printf("This file does not exist:\n");
+			printf(path);
 			exit(1);
 		}
 		fread(&ttf_buffer[0], 1, BUFFER_SIZE, file);
