@@ -1,10 +1,11 @@
 #pragma once
+#include "defines.h"
 #include <iostream>
 #include "AL/al.h"
 #include "AL/alc.h"
 
 namespace def{
-	inline void print_error_ALC(int error, int line, const char *file){
+	inline void print_error_ALC(int error, int line, CHR_STR_CON file){
 		switch(error){
 			case ALC_INVALID_DEVICE:{
 				printf("OPENAL ERROR CODE : AL_INVALID_DEVICE\nLine: %d\nFile: %s", line, file);\
@@ -31,7 +32,7 @@ namespace def{
 		}
 	}
 
-	inline void print_error_AL(int error, int line, const char *file){
+	inline void print_error_AL(int error, int line, CHR_STR_CON file){
 		switch(error){
 			case AL_INVALID_NAME:{
 				printf("OPENAL ERROR CODE : AL_INVALID_NAME\nLine: %d\nFile: %s", line, file);\
@@ -87,7 +88,7 @@ namespace def{
 		int format = 0;
 		int channels = 0;
 		
-		const char *filename;
+		CHR_STR_CON filename;
 	};
 	struct Sound{
 		unsigned int id = 0;
@@ -115,8 +116,8 @@ namespace def{
 	};
 
 
-	Sound make_sound(const char *filename);
-	Music make_music(const char *filename);
+	Sound make_sound(CHR_STR_CON filename);
+	Music make_music(CHR_STR_CON filename);
 	void play_music(Music *music);
 	void stop_music(Music *music);
 	void play_sound(Sound *sound);

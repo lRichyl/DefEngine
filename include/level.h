@@ -14,7 +14,7 @@ namespace def {
 		// The id is only used if the type is ENTITY_TILE. It is used to get the correct tile from a list.
 		int id = -1; 
 		int tile_id = -1;
-		V2 area;
+		VEC_2D area;
 	};
 
 	struct Level{

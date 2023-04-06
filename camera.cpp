@@ -10,7 +10,7 @@ namespace def {
 	void init_camera(Camera *camera, Renderer *renderer){
 		camera->renderer = renderer;
 		camera->position = {0,0};
-		camera->size     = V2(renderer->window->internalWidth, renderer->window->internalHeight);
+		camera->size     = VEC_2D(renderer->window->internalWidth, renderer->window->internalHeight);
 	}
 
 	void set_camera_position(){
@@ -62,10 +62,10 @@ namespace def {
 		}
 	}
 
-	V2 get_world_position(V2 position){
+	VEC_2D get_world_position(VEC_2D position){
 		Camera *camera = &Game::camera;
-		V2 world_pos;
-		V2 scale  = {camera->size.x / camera->renderer->window->internalWidth, camera->size.y / camera->renderer->window->internalHeight};
+		VEC_2D world_pos;
+		VEC_2D scale  = {camera->size.x / camera->renderer->window->internalWidth, camera->size.y / camera->renderer->window->internalHeight};
 		position.x *= scale.x;
 		position.y *= scale.y;
 		world_pos = {position.x - camera->position.x, position.y - camera->position.y};
@@ -74,10 +74,10 @@ namespace def {
 		return world_pos;
 	}
 
-	V2 get_screen_position(V2 world_pos){
+	VEC_2D get_screen_position(VEC_2D world_pos){
 		Camera *camera = &Game::camera;
-		V2 screen_pos;
-		V2 scale  = {camera->size.x / camera->renderer->window->internalWidth, camera->size.y / camera->renderer->window->internalHeight};
+		VEC_2D screen_pos;
+		VEC_2D scale  = {camera->size.x / camera->renderer->window->internalWidth, camera->size.y / camera->renderer->window->internalHeight};
 		world_pos.x /= scale.x;
 		world_pos.y /= scale.y;
 		screen_pos = {world_pos.x - camera->position.x, world_pos.y - camera->position.y};
@@ -102,7 +102,7 @@ namespace def {
 		
 		glUseProgram(0);
 		
-		camera->size = V2(window->internalWidth, window->internalHeight);
+		camera->size = VEC_2D(window->internalWidth, window->internalHeight);
 	}
 
 	// This function is used for updating the camera while editing a level.

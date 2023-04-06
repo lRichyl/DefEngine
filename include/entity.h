@@ -56,7 +56,7 @@ namespace def {
 
 	// struct Icon{
 	// 	Sprite sprite;
-	// 	// Rect bounding_box;
+	// 	// RECT bounding_box;
 	// };
 
 	struct Entity{
@@ -64,9 +64,9 @@ namespace def {
 		// AreaType   area_type = AreaType::AREA_NONE;
 		bool is_active = false;
 		bool is_disabled = false;
-		Rect bounding_box;
-		V2 position;
-		V2 area = {1,1};
+		RECT bounding_box;
+		VEC_2D position;
+		VEC_2D area = {1,1};
 		Sprite icon;
 		// Texture texture;
 		int id = -1;
@@ -98,7 +98,7 @@ namespace def {
 	};
 
 	void init_entity(Tile *tile);
-	void set_tile_sprite(Tile *tile, Texture texture, Rect clip_region);
+	void set_tile_sprite(Tile *tile, Texture texture, RECT clip_region);
 
 	struct TileSpecifier : public Entity{
 		// Tile *tile = NULL;
@@ -108,9 +108,16 @@ namespace def {
 	void init_entity(TileSpecifier *tile_e);
 	void render_entity(TileSpecifier *tile_e, Renderer *renderer);
 
-	struct Player : public Entity{
+	//m stands for mixin
+	typedef struct def_m_has_force
+	{
 		float speed;
-		V2 direction;
+		VEC_2D direction;
+	}MIX_HAS_FORCE;
+
+	struct Player : public Entity, public MIX_HAS_FORCE{
+		//float speed;
+		//VEC_2D direction;
 		Sprite sprite;
 		bool is_on_level = false;
 	};
@@ -119,7 +126,7 @@ namespace def {
 	void update_player(Player *player, Renderer *renderer);
 	void render_player(Player *player, Renderer *renderer);
 
-	struct Slime : public Entity{
+	struct Slime : public Entity, public MIX_HAS_FORCE{
 		Sprite sprite;
 	};
 
@@ -153,7 +160,7 @@ namespace def {
 		DefArray<Entity*> entities_prototypes;
 	};
 
-	Entity* add_entity(EntityType type, EntityManager *em, V2 position, int layer);
+	Entity* add_entity(EntityType type, EntityManager *em, VEC_2D position, int layer);
 	void eliminate_entity(EntityManager *em, EntityType type ,int id);
 	Entity* get_entity_prototype(EntityManager *em, EntityType type);
 	DefArray<RenderCommand>* get_render_list_for_layer(int layer);
@@ -164,7 +171,7 @@ namespace def {
 	void clear_entity_manager(EntityManager *em);
 
 	// template<typename T>
-	// T cast_and_position_entity(Entity *e, V2 position){
+	// T cast_and_position_entity(Entity *e, VEC_2D position){
 	// 	T *entity_T = (T*)e;
 	// 	T new_T = *entity_T;
 	// 	new_T.position = position;
@@ -181,7 +188,7 @@ namespace def {
 
 
 	////COLLISIONS
-	void collision_between(Player *player, Slime *slime, V2 *penetration);
+	void collision_between(Player *player, Slime *slime, VEC_2D *penetration);
 	// void collision_between_player_and_collision_regions(Level *level, Player *player);
 	// void collision_between(Player *player, )
 }

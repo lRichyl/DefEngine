@@ -16,7 +16,7 @@ namespace def {
 				int tile_y = j / LEVEL_WIDTH;
 				float x_pixel_pos = tile_x * TILE_SIZE;
 				float y_pixel_pos = tile_y * TILE_SIZE;
-				V2 position = {x_pixel_pos,y_pixel_pos};
+				VEC_2D position = {x_pixel_pos,y_pixel_pos};
 				EntitySpecifier *e_spec_layer = level->map_layers[i];
 				EntitySpecifier *e_spec        = &e_spec_layer[j];
 				if(e_spec->type != EntityType::ENTITY_NONE){

@@ -28,7 +28,7 @@ namespace def{
 	     return buffer;
 	}
 
-	int check_if_file_exists(const char * filename)
+	int check_if_file_exists(CHR_STR_CON  filename)
 	{
 	    FILE *file;
 	    if (fopen_s(&file, filename, "r") == 0)
@@ -40,7 +40,7 @@ namespace def{
 	    return 0;
 	}
 
-	int get_word_count(const char *string){
+	int get_word_count(CHR_STR_CON string){
 		int count = 1;
 		for(int i = 1; string[i] != 0; i++){
 			if(string[i - 1] == ' ' && string[i] == ' ') continue;
@@ -49,7 +49,7 @@ namespace def{
 		return count;
 	}
 
-	void get_first_two_words(const char *string, char *first, char *second){
+	void get_first_two_words(CHR_STR_CON string, char *first, char *second){
 		int index = 0;
 		for(int i = 0 ; string[i] != 0; i++, index++){
 			if(string[index - 1] != ' ' && string[index] == ' '){

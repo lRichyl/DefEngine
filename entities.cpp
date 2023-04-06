@@ -209,7 +209,7 @@ namespace def {
 		tile->icon = tile->sprite;
 	}
 
-	void set_tile_sprite(Tile *tile, Texture texture, Rect clip_region){
+	void set_tile_sprite(Tile *tile, Texture texture, RECT clip_region){
 		tile->sprite.info.texture = texture;
 		tile->sprite.clipping_box = clip_region;
 	}
@@ -225,7 +225,7 @@ namespace def {
 		render_queue_sprite(get_render_list_for_layer(tile_e->layer), renderer, &tile->sprite, tile_e->position);
 	}
 
-	Entity* add_entity(EntityType e_type, EntityManager *em, V2 position, int layer){
+	Entity* add_entity(EntityType e_type, EntityManager *em, VEC_2D position, int layer){
 		switch(e_type){
 			case ENTITY_PLAYER:{
 				em->player.is_on_level = true;

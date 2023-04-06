@@ -103,8 +103,8 @@ namespace def {
 	    
 	}
 
-	static Rect r  = {640, 360, 100, 100};
-	static Rect r1 = {660, 360, 100, 100};
+	static RECT r  = {640, 360, 100, 100};
+	static RECT r1 = {660, 360, 100, 100};
 
 	void Game::DrawGame(float dt, float fps){
 		switch(state){
@@ -120,7 +120,7 @@ namespace def {
 		}
 		if(console.show)
 			render_console(&console, renderer);
-		// render_colored_rect(renderer, &r1, V3 {0 , 159, 255});
+		// render_colored_rect(renderer, &r1, VEC_3D {0 , 159, 255});
 		render_command_lists();
 	    renderer_draw(renderer);
 	    swap_buffers(window);

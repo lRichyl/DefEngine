@@ -9,7 +9,7 @@
 
 namespace def {
 	// TODO: Add the ability to choose the type of filter when creating the texture.
-	Texture make_texture(const char *path){
+	Texture make_texture(CHR_STR_CON path){
 		Texture texture;
 		texture.data_buffer = stbi_load(path, &texture.width, &texture.height, &texture.channels, 0);
 		if(!texture.data_buffer){
@@ -95,7 +95,7 @@ namespace def {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void set_pixel(Texture *texture, V4 color, V2 location){
+	void set_pixel(Texture *texture, VEC_4D color, VEC_2D location){
 		int index = (location.y * texture->width + location.x) * (texture->channels);
 		// printf("%d , %d\n", index, texture->size);
 		assert(index <= texture->size);
@@ -111,10 +111,10 @@ namespace def {
 		texture->data_buffer[index + 3] = color.w;
 	}
 
-	V4 get_pixel(Texture *texture, V2 location){
+	VEC_4D get_pixel(Texture *texture, VEC_2D location){
 		int index = (location.y * texture->width + location.x) * (texture->channels);
 		// printf("%d , %d\n", index, texture->size);
-		V4 result;
+		VEC_4D result;
 		assert(index <= texture->size);
 		result.x = texture->data_buffer[index];
 		result.y = texture->data_buffer[index + 1];

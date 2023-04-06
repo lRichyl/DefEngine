@@ -7,22 +7,22 @@
 
 #include <cmath>
 namespace def {
-	static V2 get_tile(V2 mouse_pos){
-		return V2{mouse_pos.x / TILE_SIZE, ceil(mouse_pos.y / TILE_SIZE)};
+	static VEC_2D get_tile(VEC_2D mouse_pos){
+		return VEC_2D{mouse_pos.x / TILE_SIZE, ceil(mouse_pos.y / TILE_SIZE)};
 	}
 
-	static int V2_coords_to_array_index(V2 tile_coords){
+	static int F_VEC_2_coords_to_array_index(VEC_2D tile_coords){
 		return tile_coords.y * LEVEL_WIDTH + tile_coords.x;
 	}
 
-	static bool are_coords_inside_level(V2 coords){
+	static bool are_coords_inside_level(VEC_2D coords){
 		 return (coords.x < LEVEL_WIDTH * TILE_SIZE && coords.x >= 0 && coords.y <= LEVEL_HEIGHT * TILE_SIZE && coords.y > 0);
 	}
 
-	static bool is_mouse_on_collision_region(EntityManager *em, V2 mouse_pos, int *index = NULL){
+	static bool is_mouse_on_collision_region(EntityManager *em, VEC_2D mouse_pos, int *index = NULL){
 		for(int i = 0; i < ENTITIES_PER_TYPE; i++){
 			if(!em->collision_regions[i].is_active) continue;
-			Rect col_reg = em->collision_regions[i].bounding_box;
+			RECT col_reg = em->collision_regions[i].bounding_box;
 			if(DoRectContainsPoint(col_reg, mouse_pos)){
 				if(index) *index = i;
 				return true;
@@ -38,7 +38,7 @@ namespace def {
 		em->entities_prototypes[type] = e;
 	}
 
-	static void add_tile_prototype(EntityManager *em, Texture texture, Rect clip_region){
+	static void add_tile_prototype(EntityManager *em, Texture texture, RECT clip_region){
 		Tile *tile = allocate_from_arena<Tile>(&Game::main_arena);
 		set_tile_sprite(tile, texture, clip_region);
 		init_entity(tile);
@@ -113,12 +113,12 @@ namespace def {
 	void init_entity_selector(EntitySelector *e_selector, Window *window){
 		e_selector->entity_area_offset = {15, 64};
 		float width = e_selector->entities_per_row * TILE_SIZE + (e_selector->entity_area_offset.x * 2);
-		e_selector->area = Rect(window->internalWidth - width, window->internalHeight, width, window->internalHeight);
+		e_selector->area = RECT(window->internalWidth - width, window->internalHeight, width, window->internalHeight);
 
 		init_button(&e_selector->button_next, "Next_selector_tab");
 		set_button_size(&e_selector->button_next,     {32,32});
 		set_button_sprite(&e_selector->button_next, get_texture(&Game::asset_manager, "test_tiles"), {96, 32, 32, 32});
-		V2 button_position = {e_selector->area.x + e_selector->area.w - e_selector->button_next.bounding_box.w, e_selector->area.y};
+		VEC_2D button_position = {e_selector->area.x + e_selector->area.w - e_selector->button_next.bounding_box.w, e_selector->area.y};
 		set_button_position(&e_selector->button_next, button_position);
 
 		init_button(&e_selector->button_previous, "Previous_selector_tab");
@@ -193,7 +193,7 @@ namespace def {
 	}
 
 	void render_entity_selector(EntitySelector *e_selector, LevelEditor *editor, Renderer *renderer){
-		render_queue_colored_rect(get_render_list_for_layer(LEVEL_LAYERS - 1), renderer, &e_selector->area, V3{0,0,0}, 255, get_shader_ptr(&Game::asset_manager, "gui_shader"));
+		render_queue_colored_rect(get_render_list_for_layer(LEVEL_LAYERS - 1), renderer, &e_selector->area, VEC_3D{0,0,0}, 255, get_shader_ptr(&Game::asset_manager, "gui_shader"));
 		render_button(&e_selector->button_next, renderer);
 		render_button(&e_selector->button_previous, renderer);
 		switch(e_selector->tab){
@@ -259,12 +259,12 @@ namespace def {
 
 			MouseInfo mouse = Game::mouse;	
 			if(!editor->is_entity_selector_opened){
-				V2 world_pos         = get_world_position(mouse.position);
-				V2 over_tile         = get_tile(world_pos);
-				V2 floored_tile_pos  = V2((int)over_tile.x * TILE_SIZE, (int)over_tile.y * TILE_SIZE);
+				VEC_2D world_pos         = get_world_position(mouse.position);
+				VEC_2D over_tile         = get_tile(world_pos);
+				VEC_2D floored_tile_pos  = VEC_2D((int)over_tile.x * TILE_SIZE, (int)over_tile.y * TILE_SIZE);
 				
 				if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && are_coords_inside_level(floored_tile_pos)){
-					int index = V2_coords_to_array_index(over_tile);
+					int index = F_VEC_2_coords_to_array_index(over_tile);
 					EntitySpecifier *e_spec_layer = editor->edited_level.map_layers[editor->current_layer];
 					EntitySpecifier *e_spec       = &e_spec_layer[index];
 					// printf("%d\n", e_spec->type);
@@ -277,8 +277,8 @@ namespace def {
 							if(Game::em.player.layer > -1){
 								EntitySpecifier *previous_player_layer = editor->edited_level.map_layers[Game::em.player.layer];
 								
-								V2 player_tile_pos = get_tile(Game::em.player.position);
-								int index = V2_coords_to_array_index(player_tile_pos);
+								VEC_2D player_tile_pos = get_tile(Game::em.player.position);
+								int index = F_VEC_2_coords_to_array_index(player_tile_pos);
 								previous_player_layer[index].type = EntityType::ENTITY_NONE;						
 							}
 						}
@@ -302,7 +302,7 @@ namespace def {
 					}
 					if(editor->selected_entity.type == EntityType::ENTITY_COLLIDER){
 							// static bool is_phase_one = true;
-							static V2 start_pos;
+							static VEC_2D start_pos;
 							 
 						if(editor->is_phase_one_collider_placement){
 							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&Game::em, world_pos)){
@@ -312,40 +312,40 @@ namespace def {
 						}
 						else{
 							// This code determines the corner positions of the collision region depending on where the second click is pressed.
-							Rect collision_region;
+							RECT collision_region;
 							if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && !is_mouse_on_collision_region(&Game::em, world_pos)){
 								if(start_pos.x == floored_tile_pos.x && start_pos.y == floored_tile_pos.y){
-									V2 final_pos     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y - TILE_SIZE};
+									VEC_2D final_pos     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y - TILE_SIZE};
 									collision_region = {start_pos.x, start_pos.y, std::abs(final_pos.x - start_pos.x), std::abs(final_pos.y - start_pos.y)};
 								}
 								else if (start_pos.x <= floored_tile_pos.x && start_pos.y >= floored_tile_pos.y){
-									V2 final_pos     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y - TILE_SIZE};
+									VEC_2D final_pos     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y - TILE_SIZE};
 									collision_region = {start_pos.x, start_pos.y, std::abs(final_pos.x - start_pos.x), std::abs(final_pos.y - start_pos.y)};
 								}
 								else if (start_pos.x <= floored_tile_pos.x && start_pos.y < floored_tile_pos.y){
-									V2 bottom_left   = {start_pos.x, start_pos.y - TILE_SIZE};
-									V2 top_right     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y};
+									VEC_2D bottom_left   = {start_pos.x, start_pos.y - TILE_SIZE};
+									VEC_2D top_right     = {floored_tile_pos.x + TILE_SIZE, floored_tile_pos.y};
 									int width        = top_right.x - bottom_left.x;
 									int height       = top_right.y - bottom_left.y;
-									collision_region = Rect( bottom_left.x, bottom_left.y + height, width, height );
+									collision_region = RECT( bottom_left.x, bottom_left.y + height, width, height );
 								}
 								else if (start_pos.x >= floored_tile_pos.x && start_pos.y >= floored_tile_pos.y){
-									V2 bottom_left   = V2(floored_tile_pos.x, floored_tile_pos.y - TILE_SIZE);
-									V2 top_right     = V2(start_pos.x + TILE_SIZE, start_pos.y);
+									VEC_2D bottom_left   = VEC_2D(floored_tile_pos.x, floored_tile_pos.y - TILE_SIZE);
+									VEC_2D top_right     = VEC_2D(start_pos.x + TILE_SIZE, start_pos.y);
 									int width        = top_right.x - bottom_left.x;
 									int height       = top_right.y - bottom_left.y;
-									collision_region = Rect(bottom_left.x, bottom_left.y + height, width, height);
+									collision_region = RECT(bottom_left.x, bottom_left.y + height, width, height);
 								}
 								else if (start_pos.x >= floored_tile_pos.x && start_pos.y < floored_tile_pos.y){
-									V2 bottom_right  = V2(start_pos.x + TILE_SIZE, start_pos.y - TILE_SIZE);
-									V2 top_left      = V2(floored_tile_pos.x, floored_tile_pos.y);
+									VEC_2D bottom_right  = VEC_2D(start_pos.x + TILE_SIZE, start_pos.y - TILE_SIZE);
+									VEC_2D top_left      = VEC_2D(floored_tile_pos.x, floored_tile_pos.y);
 									int width        = bottom_right.x - top_left.x;
 									int height       = top_left.y - bottom_right.y;
-									collision_region = Rect(top_left.x, top_left.y, width, height);
+									collision_region = RECT(top_left.x, top_left.y, width, height);
 								}
 
 								editor->is_phase_one_collider_placement = true;
-								V2 position = {collision_region.x, collision_region.y};
+								VEC_2D position = {collision_region.x, collision_region.y};
 								Collider *c = (Collider*)add_entity(editor->selected_entity.type, &Game::em, position, 2);
 								c->bounding_box = collision_region;
 								c->sprite.info.size = {collision_region.w, collision_region.h};
@@ -364,7 +364,7 @@ namespace def {
 						}
 					}
 					else{
-						int index = V2_coords_to_array_index(over_tile);
+						int index = F_VEC_2_coords_to_array_index(over_tile);
 						EntitySpecifier *e_spec_layer = editor->edited_level.map_layers[editor->current_layer];
 						EntitySpecifier *e_spec       = &e_spec_layer[index];
 						eliminate_entity(&Game::em, e_spec->type, e_spec->id);
@@ -392,7 +392,7 @@ namespace def {
 
 	void render_level_editor(LevelEditor *editor, Renderer *renderer){
 		// Render the background color of the level editor.
-		render_queue_colored_rect(&Game::layers_render_commands[0], renderer, &editor->work_area, V3 {0 , 159, 255});
+		render_queue_colored_rect(&Game::layers_render_commands[0], renderer, &editor->work_area, VEC_3D {0 , 159, 255});
 
 		// render_button(&editor->button, renderer);
 
@@ -400,8 +400,8 @@ namespace def {
 		render_entities(&Game::em, renderer);
 		if(editor->state == EditorState::EDITOR_EDIT){
 			render_colliders(&Game::em, renderer);
-			const char * layer_string = "Layer: ";
-			const char * number_string = to_string(editor->current_layer);
+			CHR_STR_CON  layer_string = "Layer: ";
+			CHR_STR_CON  number_string = to_string(editor->current_layer);
 			char complete_string[] = "*********";
 			strcpy_s(complete_string, 8, layer_string);
 			strcat_s(complete_string, 2, number_string);
@@ -418,9 +418,9 @@ namespace def {
 		
 	}
 
-	const char *HEADER = "LVLDAT";
+	CHR_STR_CON HEADER = "LVLDAT";
 
-	bool save_new_level(const char *filename){
+	bool save_new_level(CHR_STR_CON filename){
 		LevelEditor *editor = &Game::level_editor;
 		if(check_if_file_exists(filename)) return false;
 		FILE *file;
@@ -442,7 +442,7 @@ namespace def {
 		return true;
 	}
 
-	bool save_level(const char *level_name){
+	bool save_level(CHR_STR_CON level_name){
 		LevelEditor *editor = &Game::level_editor;
 		if(!check_if_file_exists(level_name)) return false;
 		FILE *file;
@@ -464,7 +464,7 @@ namespace def {
 		return true;
 	}
 
-	bool load_level_in_editor(const char *filename){
+	bool load_level_in_editor(CHR_STR_CON filename){
 		LevelEditor *editor = &Game::level_editor;
 		if(!check_if_file_exists(filename)) return false;
 		FILE *file;

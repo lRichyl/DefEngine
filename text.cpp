@@ -9,7 +9,7 @@
 namespace def {
 	static int BUFFER_SIZE = 1 << 20;
 
-	Font::Font(const char *path, float size){
+	Font::Font(CHR_STR_CON path, float size){
 		texture.width = texture_size;
 		texture.height  = texture_size;
 		this->size = size;
@@ -49,7 +49,7 @@ namespace def {
 			int width  = abs(q.x1 - q.x0);
 			int height = abs(q.y1 - q.y0);
 			int clip_y_pos = texture_size - (q.t0 * texture_size) - height - 1;
-			Rect clipping_box = Rect(q.s0 * texture_size, clip_y_pos, (q.s1 - q.s0) * texture_size, (q.t1 - q.t0) * texture_size);
+			RECT clipping_box = RECT(q.s0 * texture_size, clip_y_pos, (q.s1 - q.s0) * texture_size, (q.t1 - q.t0) * texture_size);
 			
 			CharacterInfo char_info;
 			char_info.clipping_box = clipping_box;
@@ -70,7 +70,7 @@ namespace def {
 	// The text origin is on the bottom left. 
 	// @SPEED: For static text it's probably best to make a text type and calculate it's length when created so that we don't have
 	// 		 to do it every frame. And leave this function for text that changes constantly. 
-	void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color, bool center, ShaderProgram *shader){
+	void render_text(Renderer* renderer, Font *font, CHR_STR_CON text, VEC_2D position, VEC_3D color, bool center, ShaderProgram *shader){
 	     int length = strlen(text);
 		 
 		if(center){
@@ -108,8 +108,8 @@ namespace def {
 			int char_index = utf8_to_unicode(c);
 			char_index    -= 32;
 			CharacterInfo *character = &font->characters[char_index];
-			// Rect boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
-			Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
+			// RECT boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
+			RECT bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
 			position.x += character->advance;
 			
 			if(!shader)
@@ -119,7 +119,7 @@ namespace def {
 		}
 
 	}
-	void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, const char *text, V2 position, V3 color
+	void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, CHR_STR_CON text, VEC_2D position, VEC_3D color
 		, bool center, ShaderProgram *shader){
 		int length = strlen(text);
 		 
@@ -158,8 +158,8 @@ namespace def {
 			int char_index = utf8_to_unicode(c);
 			char_index    -= 32;
 			CharacterInfo *character = &font->characters[char_index];
-			// Rect boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
-			Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
+			// RECT boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
+			RECT bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
 			position.x += character->advance;
 			
 			if(!shader)
@@ -169,7 +169,7 @@ namespace def {
 		}
 	}
 
-	void render_text(Renderer* renderer, Font *font, EditableString *string, V2 position, V3 color, bool center, ShaderProgram *shader){
+	void render_text(Renderer* renderer, Font *font, EditableString *string, VEC_2D position, VEC_3D color, bool center, ShaderProgram *shader){
 		if(center){
 			float whole_text_size = 0;
 			float tallest = 0;
@@ -195,8 +195,8 @@ namespace def {
 			int char_index = string->data[i];
 			char_index    -= 32;
 			CharacterInfo *character = &font->characters[char_index];
-			// Rect boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
-			Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
+			// RECT boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
+			RECT bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
 			position.x += character->advance;
 			
 			if(!shader)
@@ -206,7 +206,7 @@ namespace def {
 		}
 	}
 
-	void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, EditableString *string, V2 position, V3 color, bool center, ShaderProgram *shader){
+	void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, EditableString *string, VEC_2D position, VEC_3D color, bool center, ShaderProgram *shader){
 		if(center){
 			float whole_text_size = 0;
 			float tallest = 0;
@@ -232,8 +232,8 @@ namespace def {
 			int char_index = string->data[i];
 			char_index    -= 32;
 			CharacterInfo *character = &font->characters[char_index];
-			// Rect boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
-			Rect bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
+			// RECT boundingBox = {q.x0, finalPosition.y * 2 - q.y0  - font->size, (q.x1 - q.x0), (q.y1 - q.y0)}; // Left this here in case I need it later.
+			RECT bounding_box = {position.x , position.y + character->height - character->down_padding, character->width, character->height};
 			position.x += character->advance;
 			
 			if(!shader)
@@ -243,7 +243,7 @@ namespace def {
 		}
 	}
 
-	float get_text_width(Font *font, const char *text){
+	float get_text_width(Font *font, CHR_STR_CON text){
 		float whole_text_size = 0;
 		int length = strlen(text);
 		for(int i = 0; i < length; i++){

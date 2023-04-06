@@ -1,4 +1,5 @@
 #pragma once
+#include "defines.h"
 #include "renderer.h"
 #include "text.h"
 #include "timer.h"
@@ -22,10 +23,10 @@ namespace def {
 	void clear_string(EditableString *string);
 
 	struct Console{
-		Rect bounding_box;
-		Rect text_box_divider;
-		V3 color = {120, 130, 50};
-		V3 division_color;
+		RECT bounding_box;
+		RECT text_box_divider;
+		VEC_3D color = {120, 130, 50};
+		VEC_3D division_color;
 		Font *font = NULL;
 		bool show = false;
 		
@@ -45,5 +46,5 @@ namespace def {
 	void update_console(Console *console, LevelEditor *editor, Renderer *renderer);
 	void toggle_console(Console *console);
 	void render_console(Console *console, Renderer *renderer);
-	void console_out(Console *console, const char *message);
+	void console_out(Console *console, CHR_STR_CON message);
 }

@@ -24,7 +24,7 @@ namespace def {
 
      struct ShaderProgram{
           unsigned int id = -1;
-          const char *name;
+          CHR_STR_CON name;
      };
      struct Batch{
           unsigned int vbo;
@@ -52,7 +52,7 @@ namespace def {
           unsigned int framebuffer_vbo;
           unsigned int framebuffer_rbo;
           unsigned int framebuffer_texture;
-          V2 drawing_resolution = {800, 600};
+          VEC_2D drawing_resolution = {800, 600};
           ShaderProgram framebuffer_shader_program;
           Window *window;
           unsigned int framebuffer_index_buffer[6] = {0,1,2,2,3,0};
@@ -84,17 +84,17 @@ namespace def {
      struct RenderCommand{
           Renderer *renderer;
           RenderType render_type = RenderType::RENDER_NONE;
-          Rect bounding_box;
+          RECT bounding_box;
           Texture *texture = NULL;
-          Rect clip_region;
+          RECT clip_region;
           bool mirrorX = false;
           float alpha_value = 255.0f;
-          V3 color = {255.f,255.f,255.f};
+          VEC_3D color = {255.f,255.f,255.f};
           bool mirrorY = false;
 
           // For rendering textured lines.
-          V2 a;
-          V2 b;
+          VEC_2D a;
+          VEC_2D b;
           float thickness;
 
           ShaderProgram *shader = NULL;
@@ -108,7 +108,7 @@ namespace def {
 
      // This function should not be called unless you want to use a different vertex shader than the default one. If you only want to 
      // use a custom fragment shader use the make_shader funcion.
-     void compile_shader_program(ShaderProgram *shader_program, const char *vs_path, const char *fs_path);
+     void compile_shader_program(ShaderProgram *shader_program, CHR_STR_CON vs_path, CHR_STR_CON fs_path);
 
      // Call this after compiling a shader program. If not called the shader will not work.
      void initialize_texture_sampler(ShaderProgram shader);
@@ -117,32 +117,32 @@ namespace def {
      void load_mvp_to_shader(Renderer *renderer, ShaderProgram shader);
 
      // Renders a textured quad in the specified position with no rotation. Using the default shader program.
-     void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
+     void render_quad(Renderer *renderer, RECT *position, Texture *texture, RECT *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, VEC_3D color = {255.f,255.f,255.f}, bool mirrorY = false);
 
      // This function renders a textured quad from point A to point B. As if it was a line.
-     void render_quad(Renderer *renderer, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
+     void render_quad(Renderer *renderer, VEC_2D a, VEC_2D b, float thickness, Texture *texture, RECT *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, VEC_3D color = {255.f,255.f,255.f}, bool mirrorY = false);
 
      // Render a colored quad at the specified position. If no shader is provided the default one is used.
-     void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alpha_value = 255, ShaderProgram *shader = NULL);
+     void render_colored_rect(Renderer *renderer, RECT *position, VEC_3D color, float alpha_value = 255, ShaderProgram *shader = NULL);
 
      // Works the same as render_quad but you can provide a different shader program.
-     void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture, ShaderProgram *shader, Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
+     void render_quad_with_shader(Renderer *renderer, RECT *position, Texture *texture, ShaderProgram *shader, RECT *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, VEC_3D color = {255.f,255.f,255.f}, bool mirrorY = false);
 
      // Use this to change the rendering resolution at runtime.
      void change_drawing_resolution(Renderer *renderer, int width, int height);
 
      // Creates a new shader using the default vertex shader provided a custom fragment shader.
-     ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shader, const char *name);
+     ShaderProgram make_shader(Renderer *renderer, CHR_STR_CON path_to_fragment_shader, CHR_STR_CON name);
 
      void renderer_draw(Renderer *renderer);
      void destroy_renderer(Renderer *renderer);
-     void print_rect(Rect *rect);
+     void print_rect(RECT *rect);
 
 
      // This functions queue up render commands that will later be rendered using the render functions above.
-     void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
-     void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
-     void render_queue_colored_rect(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, V3 color, float alpha_value = 255, ShaderProgram *shader = NULL);
-     void render_queue_quad_with_shader(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, Texture *texture, ShaderProgram *shader, Rect *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, V3 color = {255.f,255.f,255.f}, bool mirrorY = false);
+     void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, RECT *position, Texture *texture, RECT *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, VEC_3D color = {255.f,255.f,255.f}, bool mirrorY = false);
+     void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, VEC_2D a, VEC_2D b, float thickness, Texture *texture, RECT *clip_region = NULL, bool mirrorX = false, float alpha_value = 255, VEC_3D color = {255.f,255.f,255.f}, bool mirrorY = false);
+     void render_queue_colored_rect(DefArray<RenderCommand> *commands_list, Renderer *renderer, RECT *position, VEC_3D color, float alpha_value = 255, ShaderProgram *shader = NULL);
+     void render_queue_quad_with_shader(DefArray<RenderCommand> *commands_list, Renderer *renderer, RECT *position, Texture *texture, ShaderProgram *shader, RECT *clip_region = NULL , bool mirrorX = false, float alpha_value = 255, VEC_3D color = {255.f,255.f,255.f}, bool mirrorY = false);
      void render_queued_commands(DefArray<RenderCommand> *commands);
 }

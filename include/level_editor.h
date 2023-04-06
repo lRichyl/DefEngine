@@ -1,4 +1,5 @@
 #pragma once
+#include "defines.h"
 #include "level.h"
 #include "window.h"
 #include "entity.h"
@@ -18,8 +19,8 @@ namespace def {
 		Button button_previous;
 		SelectorTab tab = SelectorTab::SELECTOR_ENTITIES;
 		int entities_per_row = 5;
-		Rect area;
-		V2 entity_area_offset;
+		RECT area;
+		VEC_2D entity_area_offset;
 	};
 
 	void init_entity_selector(EntitySelector *e_selector, Window *window);
@@ -37,7 +38,7 @@ namespace def {
 		bool is_phase_one_collider_placement = true;
 		EntitySpecifier selected_entity;
 		Level edited_level;
-		Rect work_area;
+		RECT work_area;
 		EditorState state;
 
 		EntitySelector entity_selector;
@@ -48,7 +49,7 @@ namespace def {
 	void init_level_editor(LevelEditor *editor, Window *window);
 	void update_level_editor(LevelEditor *editor, Renderer *renderer);
 	void render_level_editor(LevelEditor *editor, Renderer *renderer);
-	bool save_level(const char *filename);
-	bool save_new_level(const char *filename);
-	bool load_level_in_editor(const char *filename);
+	bool save_level(CHR_STR_CON filename);
+	bool save_new_level(CHR_STR_CON filename);
+	bool load_level_in_editor(CHR_STR_CON filename);
 }

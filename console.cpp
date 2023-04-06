@@ -10,9 +10,9 @@ namespace def {
 
 	void init_console(Console *console, Renderer *renderer){
 		console->font = get_font(&Game::asset_manager, "console_font");
-		console->bounding_box     = Rect(0, renderer->window->internalHeight, renderer->window->internalWidth, CONSOLE_HEIGHT);
-		console->text_box_divider = Rect(0, console->bounding_box.y - (CONSOLE_HEIGHT - console->text_box_divider_height * 2 )+ console->font->size, renderer->window->internalWidth, console->text_box_divider_height);
-		console->division_color   = V3(console->color.x - console->color.x * 0.5, console->color.y - console->color.y * 0.5, console->color.z - console->color.z * 0.5);
+		console->bounding_box     = RECT(0, renderer->window->internalHeight, renderer->window->internalWidth, CONSOLE_HEIGHT);
+		console->text_box_divider = RECT(0, console->bounding_box.y - (CONSOLE_HEIGHT - console->text_box_divider_height * 2 )+ console->font->size, renderer->window->internalWidth, console->text_box_divider_height);
+		console->division_color   = VEC_3D(console->color.x - console->color.x * 0.5, console->color.y - console->color.y * 0.5, console->color.z - console->color.z * 0.5);
 		
 		init_array(&console->buffer, &Game::main_arena, BUFFER_SIZE);
 		// Configure the console shader and its view matrix.
@@ -136,12 +136,12 @@ namespace def {
 	void render_console(Console *console, Renderer *renderer){
 		render_queue_colored_rect(&Game::layers_render_commands[LEVEL_LAYERS - 1], renderer, &console->bounding_box, console->color, 255, &console->shader);
 		render_queue_colored_rect(&Game::layers_render_commands[LEVEL_LAYERS - 1], renderer, &console->text_box_divider, console->division_color, 255, &console->shader);
-		static V2 text_position = {console->bounding_box.x, console->bounding_box.y - console->bounding_box.h};
+		static VEC_2D text_position = {console->bounding_box.x, console->bounding_box.y - console->bounding_box.h};
 		render_queue_text(&Game::layers_render_commands[LEVEL_LAYERS - 1], renderer, console->font, &console->string, text_position, {255,255,255}, false, &console->shader);
 		
-		static V2 buffer_origin_position =  {console->bounding_box.x, console->bounding_box.y - console->bounding_box.h + console->font->size + console->text_box_divider.h * 2};
+		static VEC_2D buffer_origin_position =  {console->bounding_box.x, console->bounding_box.y - console->bounding_box.h + console->font->size + console->text_box_divider.h * 2};
 		for(int i = 0; i < console->buffer.size; i++){
-			V2 position = buffer_origin_position;
+			VEC_2D position = buffer_origin_position;
 			position.y += i * console->font->size;
 			render_queue_text(&Game::layers_render_commands[LEVEL_LAYERS - 1], renderer, console->font, console->buffer[console->buffer.size - 1 - i], position, {255,255,255}, false, &console->shader);
 		}
@@ -154,12 +154,12 @@ namespace def {
 		}
 	}
 
-	void console_out(Console *console, const char *message){
+	void console_out(Console *console, CHR_STR_CON message){
 		add_array(&console->buffer, message);
 	}
 
 	void add_unicode_to_string(EditableString *e_string, unsigned int unicode){
-		// const char *s = string;
+		// CHR_STR_CON s = string;
 		if(e_string->cursor < MAX_EDITABLE_STRING_SIZE){
 			e_string->data[e_string->cursor] = unicode;
 			e_string->cursor++;

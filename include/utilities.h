@@ -1,5 +1,5 @@
 #pragma once
-
+#include "defines.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "game.h"
@@ -9,10 +9,10 @@ namespace def {
 	char* text_file_to_char(const char* file_name);
 
 	template<typename T>
-	const char *to_string(T number){
+	CHR_STR_CON to_string(T number){
 		std::string s = std::to_string(number);
 		char *result = allocate_array_from_arena<char>(&Game::main_arena, 5);
-		const char *string = s.c_str();
+		CHR_STR_CON string = s.c_str();
 		for(int i = 0; i < 5; i++){
 			result[i] = string[i] ;
 		}
@@ -20,7 +20,7 @@ namespace def {
 		return result;
 	}
 
-	int check_if_file_exists(const char * filename);
-	int get_word_count(const char *string);
-	void get_first_two_words(const char *string, char *first, char *second);
+	int check_if_file_exists(CHR_STR_CON  filename);
+	int get_word_count(CHR_STR_CON string);
+	void get_first_two_words(CHR_STR_CON string, char *first, char *second);
 }

@@ -4,7 +4,7 @@
 #include "window.h"
 
 namespace def {
-     Window* create_window(int width, int height, const char *title){
+     Window* create_window(int width, int height, CHR_STR_CON title){
           Window *window = new Window;
           stbi_set_flip_vertically_on_load(true);
           if(!glfwInit()){

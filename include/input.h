@@ -38,7 +38,7 @@ namespace def{
 	};
 
 	struct MouseInfo{
-		V2 position;
+		VEC_2D position;
 		MouseButton left {GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE};
 		MouseButton right {GLFW_MOUSE_BUTTON_RIGHT, GLFW_RELEASE};
 		ScrollWheelState wheel = ScrollWheelState::WHEEL_NONE;

@@ -9,7 +9,7 @@
 
 namespace def {
      /////////// Default internal shaders ///////////////
-     static const char *default_vertex_shader = 
+     static CHR_STR_CON default_vertex_shader = 
      "#version 330 core \n"
      "layout(location = 0) in vec2 position;\n"
      "layout(location = 1) in vec2 texCoord;\n"
@@ -36,7 +36,7 @@ namespace def {
          "outColor = color;\n"
      "}";
 
-     static const char *default_fragment_shader =
+     static CHR_STR_CON default_fragment_shader =
      "#version 330 core\n"
      "layout(location = 0)out vec4 fragColor;\n"
      "in vec2 outTexCoord;\n"
@@ -92,7 +92,7 @@ namespace def {
      	
      "}\n";
 
-     static const char *framebuffer_vertex_shader = 
+     static CHR_STR_CON framebuffer_vertex_shader = 
      "#version 330 core\n"
      "layout (location = 0) in vec2 aPos;\n"
      "layout (location = 1) in vec2 aTexCoords;\n"
@@ -105,7 +105,7 @@ namespace def {
          "TexCoords = aTexCoords;\n"
      "}  \n";
 
-     static const char *framebuffer_fragment_shader =
+     static CHR_STR_CON framebuffer_fragment_shader =
      "#version 330 core\n"
      "out vec4 FragColor;\n"
 
@@ -318,7 +318,7 @@ namespace def {
 
 
 
-     void compile_shader_program(ShaderProgram *shader_program, const char *vs_path, const char *fs_path){
+     void compile_shader_program(ShaderProgram *shader_program, CHR_STR_CON vs_path, CHR_STR_CON fs_path){
           unsigned int vs;
           unsigned int fs;
           make_vertex_shader(vs_path, &vs);
@@ -330,7 +330,7 @@ namespace def {
           printf("Succesfully compiled\n\n");
      }
 
-     static void compile_shader_program_from_source(ShaderProgram *shader_program, const char *vs_text, const char *fs_text){
+     static void compile_shader_program_from_source(ShaderProgram *shader_program, CHR_STR_CON vs_text, CHR_STR_CON fs_text){
           unsigned int vs;
           unsigned int fs;
           make_vertex_shader_from_source(vs_text, &vs);
@@ -387,15 +387,15 @@ namespace def {
           delete renderer;
      }
 
-     static void render_quad_on_batch(Renderer *renderer, Batch *batch, Rect *position, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     static void render_quad_on_batch(Renderer *renderer, Batch *batch, RECT *position, Texture *texture, RECT *clip_region, bool mirrorX, float alpha_value, VEC_3D color, bool mirrorY){
           Window *win = renderer->window;
-          V2 top_left_clip;
-          V2 bottom_left_clip;
-          V2 top_right_clip;
-          V2 bottom_right_clip;
+          VEC_2D top_left_clip;
+          VEC_2D bottom_left_clip;
+          VEC_2D top_right_clip;
+          VEC_2D bottom_right_clip;
           float normalized_alpha_value = alpha_value / 255.f; // / 255.f;
-     	 V3 normalized_color = {color.x/255.f, color.y/255.f, color.z/255.f};
-          Rect final_position;
+     	 VEC_3D normalized_color = {color.x/255.f, color.y/255.f, color.z/255.f};
+          RECT final_position;
      	 // float layer  = 0;
      	 // int max_layers = 100;
      	 // float final_layer = (float)layer;
@@ -433,13 +433,13 @@ namespace def {
 
           }
           if(mirrorX){
-               V2::SwitchXComponents(&top_left_clip, &top_right_clip);
-               V2::SwitchXComponents(&bottom_left_clip, &bottom_right_clip);
+               VEC_2D::SwitchXComponents(&top_left_clip, &top_right_clip);
+               VEC_2D::SwitchXComponents(&bottom_left_clip, &bottom_right_clip);
           }
 
           if(mirrorY){
-               V2::SwitchYComponents(&top_left_clip, &bottom_left_clip);
-               V2::SwitchYComponents(&top_right_clip, &bottom_right_clip);
+               VEC_2D::SwitchYComponents(&top_left_clip, &bottom_left_clip);
+               VEC_2D::SwitchYComponents(&top_right_clip, &bottom_right_clip);
           }
 
           // We do this so that if we try to draw outside the window we don't add data to the vertex buffer.
@@ -532,15 +532,15 @@ namespace def {
 
      }
 
-     static void render_quad_on_batch(Renderer *renderer, Batch *batch, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     static void render_quad_on_batch(Renderer *renderer, Batch *batch, VEC_2D a, VEC_2D b, float thickness, Texture *texture, RECT *clip_region, bool mirrorX, float alpha_value, VEC_3D color, bool mirrorY){
           Window *win = renderer->window;
-          V2 top_left_clip;
-          V2 bottom_left_clip;
-          V2 top_right_clip;
-          V2 bottom_right_clip;
+          VEC_2D top_left_clip;
+          VEC_2D bottom_left_clip;
+          VEC_2D top_right_clip;
+          VEC_2D bottom_right_clip;
           float normalized_alpha_value = alpha_value / 255.f; // / 255.f;
-     	 V3 normalized_color = {color.x/255.f, color.y/255.f, color.z/255.f};
-          Rect final_position;
+     	 VEC_3D normalized_color = {color.x/255.f, color.y/255.f, color.z/255.f};
+          RECT final_position;
 
           //The clip_region is used to select a part of a texture that we want to render.
           if(clip_region){
@@ -568,13 +568,13 @@ namespace def {
 
           }
           if(mirrorX){
-               V2::SwitchXComponents(&top_left_clip, &top_right_clip);
-               V2::SwitchXComponents(&bottom_left_clip, &bottom_right_clip);
+               VEC_2D::SwitchXComponents(&top_left_clip, &top_right_clip);
+               VEC_2D::SwitchXComponents(&bottom_left_clip, &bottom_right_clip);
           }
 
           if(mirrorY){
-               V2::SwitchYComponents(&top_left_clip, &bottom_left_clip);
-               V2::SwitchYComponents(&top_right_clip, &bottom_right_clip);
+               VEC_2D::SwitchYComponents(&top_left_clip, &bottom_left_clip);
+               VEC_2D::SwitchYComponents(&top_right_clip, &bottom_right_clip);
           }
 
           // We do this so that if we try to draw outside the window we don't add data to the vertex buffer.
@@ -690,18 +690,18 @@ namespace def {
           return batch;
      }
 
-     void render_quad(Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
+     void render_quad(Renderer *renderer, RECT *position, Texture *texture, RECT *clip_region, bool mirrorX, float alpha_value, VEC_3D color , bool mirrorY){
           Batch *batch = should_change_batch(renderer);
 
           render_quad_on_batch(renderer, batch, position, texture, clip_region, mirrorX, alpha_value, color, mirrorY);
      }
 
-     void render_quad(Renderer *renderer, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     void render_quad(Renderer *renderer, VEC_2D a, VEC_2D b, float thickness, Texture *texture, RECT *clip_region, bool mirrorX, float alpha_value, VEC_3D color, bool mirrorY){
           Batch *batch = should_change_batch(renderer);
           render_quad_on_batch(renderer, batch, a, b, thickness, texture, clip_region, mirrorX, alpha_value, color, mirrorY);
      }
 
-     void render_colored_rect(Renderer *renderer, Rect *position, V3 color, float alpha_value, ShaderProgram *shader){
+     void render_colored_rect(Renderer *renderer, RECT *position, VEC_3D color, float alpha_value, ShaderProgram *shader){
      	if(!shader){
      		render_quad(renderer, position, NULL, NULL, false, alpha_value, color);
      	}
@@ -710,7 +710,7 @@ namespace def {
      	}
      }
 
-     void render_quad_with_shader(Renderer *renderer, Rect *position, Texture *texture,ShaderProgram *shader , Rect *clip_region, bool mirrorX, float alpha_value, V3 color , bool mirrorY){
+     void render_quad_with_shader(Renderer *renderer, RECT *position, Texture *texture,ShaderProgram *shader , RECT *clip_region, bool mirrorX, float alpha_value, VEC_3D color , bool mirrorY){
           if(renderer->current_batch->number_of_quads_to_copy == RendererInfo::QUADS_PER_BATCH || renderer->current_batch->texture_index == RendererInfo::MAX_TEXTURE_UNITS_PER_BATCH || renderer->current_shader.id != shader->id){
 
                // renderer->current_batch->texture_index = 0;
@@ -930,7 +930,7 @@ namespace def {
           }
      }
 
-     ShaderProgram make_shader(Renderer *renderer, const char *path_to_fragment_shader, const char *name){
+     ShaderProgram make_shader(Renderer *renderer, CHR_STR_CON path_to_fragment_shader, CHR_STR_CON name){
      	ShaderProgram shader;
      	shader.name = name;
      	unsigned int vs;
@@ -997,11 +997,11 @@ namespace def {
           }
      }
 
-     void print_rect(Rect *rect){
+     void print_rect(RECT *rect){
      	printf("x: %f, y: %f, w: %f, h: %f\n", rect->x, rect->y, rect->w, rect->h);
      }
 
-     void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, RECT *position, Texture *texture, RECT *clip_region, bool mirrorX, float alpha_value, VEC_3D color, bool mirrorY){
           RenderCommand command;
           command.renderer = renderer;
           command.render_type = RenderType::RENDER_TEXTURED_QUAD;
@@ -1014,7 +1014,7 @@ namespace def {
           command.mirrorY = mirrorY;
           add_array(commands_list, command);
      }
-     void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, V2 a, V2 b, float thickness, Texture *texture, Rect *clip_region, bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     void render_queue_quad(DefArray<RenderCommand> *commands_list, Renderer *renderer, VEC_2D a, VEC_2D b, float thickness, Texture *texture, RECT *clip_region, bool mirrorX, float alpha_value, VEC_3D color, bool mirrorY){
           RenderCommand command;
           command.renderer = renderer;
           command.render_type = RenderType::RENDER_TEXTURED_LINE;
@@ -1028,7 +1028,7 @@ namespace def {
           command.mirrorY = mirrorY;
           add_array(commands_list, command);
      }
-     void render_queue_colored_rect(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, V3 color, float alpha_value, ShaderProgram *shader){
+     void render_queue_colored_rect(DefArray<RenderCommand> *commands_list, Renderer *renderer, RECT *position, VEC_3D color, float alpha_value, ShaderProgram *shader){
           RenderCommand command;
           command.renderer = renderer;
           command.render_type = RenderType::RENDER_COLORED_RECT;
@@ -1038,7 +1038,7 @@ namespace def {
           command.shader = shader;
           add_array(commands_list, command);
      }
-     void render_queue_quad_with_shader(DefArray<RenderCommand> *commands_list, Renderer *renderer, Rect *position, Texture *texture, ShaderProgram *shader, Rect *clip_region , bool mirrorX, float alpha_value, V3 color, bool mirrorY){
+     void render_queue_quad_with_shader(DefArray<RenderCommand> *commands_list, Renderer *renderer, RECT *position, Texture *texture, ShaderProgram *shader, RECT *clip_region , bool mirrorX, float alpha_value, VEC_3D color, bool mirrorY){
           RenderCommand command;
           command.renderer = renderer;
           command.render_type = RenderType::RENDER_WITH_SHADER;

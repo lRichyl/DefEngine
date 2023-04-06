@@ -1,4 +1,5 @@
 #pragma once
+#include "defines.h"
 #include "renderer.h"
 #include "stb_truetype.h"
 #include "glad/glad.h"
@@ -15,7 +16,7 @@ namespace def {
 
 
 	struct CharacterInfo{
-		Rect clipping_box;
+		RECT clipping_box;
 		float width;
 		float height;
 		float down_padding;
@@ -24,7 +25,7 @@ namespace def {
 
 	struct Font{
 		Font(){};
-		Font(const char *path, float size);
+		Font(CHR_STR_CON path, float size);
 		static const int texture_size = 512;
 		float size;
 		
@@ -34,16 +35,16 @@ namespace def {
 	};
 
 	int utf8_to_unicode(unsigned short c);
-	void render_text(Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {255, 255, 255}
+	void render_text(Renderer* renderer, Font *font, CHR_STR_CON text, VEC_2D position, VEC_3D color = {255, 255, 255}
 	               , bool center = false, ShaderProgram *shader = NULL);
-	void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, const char *text, V2 position, V3 color = {255, 255, 255}
+	void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, CHR_STR_CON text, VEC_2D position, VEC_3D color = {255, 255, 255}
 	               , bool center = false, ShaderProgram *shader = NULL);
 
-	void render_text(Renderer* renderer, Font *font, EditableString *string, V2 position, V3 color = {255, 255, 255}
+	void render_text(Renderer* renderer, Font *font, EditableString *string, VEC_2D position, VEC_3D color = {255, 255, 255}
 	               , bool center = false, ShaderProgram *shader = NULL);
-	void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, EditableString *string, V2 position, V3 color = {255, 255, 255}
+	void render_queue_text(DefArray<RenderCommand> *commands, Renderer* renderer, Font *font, EditableString *string, VEC_2D position, VEC_3D color = {255, 255, 255}
 	               , bool center = false, ShaderProgram *shader = NULL);
-	float get_text_width(Font *font, const char *text);		
+	float get_text_width(Font *font, CHR_STR_CON text);		
 	char *unicode_array_to_string(EditableString *e_string, MemoryArena *arena);
 
 }

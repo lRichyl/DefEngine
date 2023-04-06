@@ -1,4 +1,5 @@
 #pragma once
+#include "defines.h"
 #include "GLFW/glfw3.h"
 namespace def {
      struct Window{
@@ -7,7 +8,7 @@ namespace def {
           int internalHeight = 0;
      };
 
-     Window* create_window(int width, int height, const char *title);
+     Window* create_window(int width, int height, CHR_STR_CON title);
      void set_window_size(Window *window, int width, int height);
      void swap_buffers(Window *window);
      void poll_events();

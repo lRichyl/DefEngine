@@ -16,7 +16,7 @@ namespace def {
 		printf("%d\n", sound->info.channels);
 	}
 
-	Sound make_sound(const char *filename){
+	Sound make_sound(CHR_STR_CON filename){
 		Sound sound;
 		sound.info.filename = filename;
 		short *buffer;
@@ -71,7 +71,7 @@ namespace def {
 		}
 	}
 
-	Music make_music(const char *filename){
+	Music make_music(CHR_STR_CON filename){
 		Music music;
 		music.info.filename = filename;
 		int error;

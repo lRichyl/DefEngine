@@ -1,4 +1,5 @@
 #pragma once
+#include "defines.h"
 #include <cstring>
 #include "memory_arena.h"
 
@@ -7,7 +8,7 @@ namespace def {
 
 	template<typename T>
 	struct DefTableEntry{
-		const char *key;
+		CHR_STR_CON key;
 		T value;
 	};
 
@@ -30,7 +31,7 @@ namespace def {
 		return def_table;
 	}
 
-	inline int calculate_hash(int table_size, const char *name){
+	inline int calculate_hash(int table_size, CHR_STR_CON name){
 		int count = 0;
 		for(int i = 0; i < MAX_CHARACTERS_FOR_HASH; i++){
 			if(name[i] == '\000') break;
@@ -44,7 +45,7 @@ namespace def {
 
 	// At the moment if we try insert a value with an existing key, the current value gets replaced with the new one.
 	template<typename T>
-	void insert_to_def_table(DefTable<T> *table, const char *name, T value){
+	void insert_to_def_table(DefTable<T> *table, CHR_STR_CON name, T value){
 		int hash = calculate_hash(table->size, name);
 		while(table->entries[hash].key){
 			hash++;
@@ -54,7 +55,7 @@ namespace def {
 	}
 
 	template<typename T>
-	T get_from_def_table(DefTable<T> *table, const char *key){
+	T get_from_def_table(DefTable<T> *table, CHR_STR_CON key){
 		int hash = calculate_hash(table->size, key);
 		while( 0 != strcmp(table->entries[hash].key, key)){
 			hash++;
@@ -64,9 +65,9 @@ namespace def {
 	}
 
 	template<typename T>
-	T* get_pointer_from_def_table(DefTable<T> *table, const char *key){
+	T* get_pointer_from_def_table(DefTable<T> *table, CHR_STR_CON key){
 		int hash = calculate_hash(table->size, key);
-		const char *key_target = table->entries[hash].key;
+		CHR_STR_CON key_target = table->entries[hash].key;
 		if(!key_target){
 			printf("Texture: %s doesn't exist\n");
 			return NULL;
@@ -80,7 +81,7 @@ namespace def {
 	}
 
 	template<typename T>
-	void delete_from_def_table(DefTable<T> *table, const char *key){
+	void delete_from_def_table(DefTable<T> *table, CHR_STR_CON key){
 		int hash = calculate_hash(table->size, key);
 		int comp = strcmp(table->entries[hash].key, key);
 		while( 0 != strcmp(table->entries[hash].key, key)){
