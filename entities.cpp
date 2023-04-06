@@ -1,6 +1,8 @@
 #include "entity.h"
 #include "game.h"
 #include <cstdlib>
+#include "def_math.h"
+#include <algorithm>
 
 #define RENDER_ENTITIES(type , list)\
 	for(int i = 0; i < ENTITIES_PER_TYPE; i++){ type *e = &em->list[i]; if(e->is_active) render_entity(e, renderer);}\
