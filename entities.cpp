@@ -151,6 +151,13 @@ namespace def {
 		}
 		else player->direction.y = 0;
 		
+		//normalizing player direction... to bring alttp feeling
+		if(abs(player->direction.x) > 0 && abs(player->direction.y) > 0)
+		{
+			player->direction.x *= F_INVERSE_SQRT_2;
+			player->direction.y *= F_INVERSE_SQRT_2;
+		}
+
 		player->position.x += player->direction.x * player->speed * Game::dt;
 		player->position.y += player->direction.y * player->speed * Game::dt;
 	}
