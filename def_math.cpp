@@ -43,9 +43,10 @@ namespace def {
      //with special case when x is equal to zero, then return zero
      float sign(float val) noexcept
      {
-    	 if(val < F_ZERO_APPROXIMATION && val > F_ZERO_APPROXIMATION)
+          float _abs = abs(val);
+    	 if(_abs < F_ZERO_APPROXIMATION)
     		 return 0.0f;
-    	 return val / abs(val);
+    	 return val / _abs;
      }
      //divide each component by the vector magnitude
      VEC_2D VEC_2D::Normalized(const VEC_2D &val)
