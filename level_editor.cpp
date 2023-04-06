@@ -11,7 +11,7 @@ namespace def {
 		return VEC_2D{mouse_pos.x / TILE_SIZE, ceil(mouse_pos.y / TILE_SIZE)};
 	}
 
-	static int F_VEC_2_coords_to_array_index(VEC_2D tile_coords){
+	static int vec_2d_coords_to_array_index(VEC_2D tile_coords){
 		return tile_coords.y * LEVEL_WIDTH + tile_coords.x;
 	}
 
@@ -264,7 +264,7 @@ namespace def {
 				VEC_2D floored_tile_pos  = VEC_2D((int)over_tile.x * TILE_SIZE, (int)over_tile.y * TILE_SIZE);
 				
 				if(mouse.left.state == MouseButtonState::MOUSE_PRESSED && are_coords_inside_level(floored_tile_pos)){
-					int index = F_VEC_2_coords_to_array_index(over_tile);
+					int index = vec_2d_coords_to_array_index(over_tile);
 					EntitySpecifier *e_spec_layer = editor->edited_level.map_layers[editor->current_layer];
 					EntitySpecifier *e_spec       = &e_spec_layer[index];
 					// printf("%d\n", e_spec->type);
@@ -278,7 +278,7 @@ namespace def {
 								EntitySpecifier *previous_player_layer = editor->edited_level.map_layers[Game::em.player.layer];
 								
 								VEC_2D player_tile_pos = get_tile(Game::em.player.position);
-								int index = F_VEC_2_coords_to_array_index(player_tile_pos);
+								int index = vec_2d_coords_to_array_index(player_tile_pos);
 								previous_player_layer[index].type = EntityType::ENTITY_NONE;						
 							}
 						}
@@ -364,7 +364,7 @@ namespace def {
 						}
 					}
 					else{
-						int index = F_VEC_2_coords_to_array_index(over_tile);
+						int index = vec_2d_coords_to_array_index(over_tile);
 						EntitySpecifier *e_spec_layer = editor->edited_level.map_layers[editor->current_layer];
 						EntitySpecifier *e_spec       = &e_spec_layer[index];
 						eliminate_entity(&Game::em, e_spec->type, e_spec->id);
