@@ -126,6 +126,57 @@ namespace def {
 		// };
 	}
 
+	//untested on all entities: tries to get the first entity staged on level
+
+	Entity* request_level_entity(EntityManager* em, EntityType type)
+	{
+		auto match_active = [](Entity val){ return val.is_active == true; };
+		switch(type)
+		{
+		case EntityType::ENTITY_PLAYER:
+		{
+			//special case... return player directly
+			if(em->player.is_on_level)
+				return &em->player;
+			else
+				return nullptr;
+		}
+		case EntityType::ENTITY_TILE:
+					{
+
+						//idiomatic c++... todo refactoring
+						return std::find_if(
+							std::begin(em->tiles),
+							std::end(em->tiles),
+							match_active
+						);
+					}
+					break;
+		case EntityType::ENTITY_COLLIDER:
+					{
+						//idiomatic c++... todo refactoring
+						return std::find_if(
+							std::begin(em->collision_regions),
+							std::end(em->collision_regions),
+							match_active
+						);
+					}
+					break;
+			case EntityType::ENTITY_SLIME:
+			{
+				//idiomatic c++... todo refactoring
+				return std::find_if(
+					std::begin(em->slimes),
+					std::end(em->slimes),
+					match_active
+				);
+			}
+			break;
+			default:
+				throw "Request method for that entity type doesn't exists";
+		}
+	}
+
 	void update_player(Player *player, Renderer *renderer){
 		// printf("Player position %f, %f\n", player->position.x, player->position.y);
 		if(is_key_being_pressed(renderer->window, GLFW_KEY_D)){
@@ -181,7 +232,23 @@ namespace def {
 	}
 
 	void update_entity(Slime *slime, Renderer *renderer){
-		// slime->bounding_box = Rect{slime->position.x, slime->position.y, slime->sprite.info.size.x, slime->sprite.info.size.y}; // Why was this done ? 
+		//scape from player... slimes are coward entities...
+		Player* player = static_cast<Player*>(request_level_entity(&Game::em, EntityType::ENTITY_PLAYER));
+		if(ES_NULO(player))
+			return;
+
+		VEC_2D dir;
+		dir.x = slime->position.x - player->position.x;
+		dir.y = slime->position.y - player->position.y;
+
+		slime->direction = VEC_2D::Normalized(dir);
+		//hardcoded speed
+		slime->speed = 50.5f;
+
+		slime->position.x += slime->direction.x * slime->speed * Game::dt;
+		slime->position.y += slime->direction.y * slime->speed * Game::dt;
+
+		// slime->bounding_box = RECT{slime->position.x, slime->position.y, slime->sprite.info.size.x, slime->sprite.info.size.y}; // Why was this done ? 
 		// printf("%f, %f\n", slime->position.x, slime->position.y);
 	}
 
