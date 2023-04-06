@@ -30,7 +30,7 @@ namespace def {
      //with special case when x is equal to zero, then return zero
      float abs(float val) noexcept
      {
-    	 if(val < F_ZERO_APPROXIMATION && val > F_ZERO_APPROXIMATION)
+    	 if(val < F_ZERO_APPROXIMATION && val > -F_ZERO_APPROXIMATION)
 			 return 0.0f;
     	 if(val >= F_ZERO_APPROXIMATION)
     		 return val;
