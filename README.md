@@ -19,6 +19,8 @@ To save and load levels you can open the console by pressing the backtick key ` 
 - save_new LEVEL_NAME  (Save a new level called LEVEL_NAME)
 - save                 (Save the progress on the current level)
 - load LEVEL_NAME      (Load a level named LEVEL_NAME. The level is looked up at the levels folder)
+- new                  (Generates a new blank level)
+- exit                 (Terminates the program)
 
 ![DefEngine console](https://github.com/lRichyl/DefEngine/assets/66743720/b2be31d6-800d-4890-be44-ac431d54cb20)
 
