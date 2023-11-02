@@ -15,7 +15,7 @@ The blue area represents the editable area of the level.
 ![DefEngine editor](https://github.com/lRichyl/DefEngine/assets/66743720/c8fb715e-18a2-4329-9f77-8db31fd06b85)
 
 ## Command console
-To save and load levels you can open the console by pressing the ESC key while on edit mode. The current commands are:
+To save and load levels you can open the console by pressing the backtick key ` key while on edit mode. The current commands are:
 - save_new LEVEL_NAME  (Save a new level called LEVEL_NAME)
 - save                 (Save the progress on the current level)
 - load LEVEL_NAME      (Load a level named LEVEL_NAME. The level is looked up at the levels folder)
