@@ -1,19 +1,18 @@
-# DefEngine (TO BE EDITED)
+# DefEngine 
 A simple OpenGL based 2d game engine/libray, with batching support and simple input and collision detection.
 
 ## Level Editor
-A simple level editor based on layers, you can choose between 5 diferent layers, 0 being the background and 5 the foreground. It's important to note that
-entities (like enemies and the player) must be placed on layer 2. If they are placed on a different layer they work like normal tiles, they are just drawn.
+A simple level editor based on layers, you can choose between 5 diferent layers, 0 being the background and 5 the foreground.
 The first entity on the list allows you to place static collision regions which are rendered as black semi-transparent squares.
 
-- You can change between layers using the Z and X keys.
+- You can change between layers using the Q and E keys.
 - You can move the camera with the arrow keys and zoom in and out with the mouse wheel.
 - Tiles and entities cam be removed by right clicking on them.
-- To go in and out of test mode press T.
+- To go in and out of test mode press Space bar.
 
-The gray area represents the editable area of the level which at the moment is a static 30x30 tiles. 
+The blue area represents the editable area of the level.
 
-![image](https://user-images.githubusercontent.com/66743720/160708817-9a40b290-98df-4489-baf2-2077e759fed5.png)
+![DefEngine editor](https://github.com/lRichyl/DefEngine/assets/66743720/c8fb715e-18a2-4329-9f77-8db31fd06b85)
 
 ## Command console
 To save and load levels you can open the console by pressing the ESC key while on edit mode. The current commands are:
@@ -21,7 +20,8 @@ To save and load levels you can open the console by pressing the ESC key while o
 - save                 (Save the progress on the current level)
 - load LEVEL_NAME      (Load a level named LEVEL_NAME. The level is looked up at the levels folder)
 
-![image](https://user-images.githubusercontent.com/66743720/160709637-c7a0d718-e0db-4629-a5ae-beb167462739.png)
+![DefEngine console](https://github.com/lRichyl/DefEngine/assets/66743720/b2be31d6-800d-4890-be44-ac431d54cb20)
+
 
 ### OpenAl dependencies 
 1. Go to this website: https://www.openal.org/downloads/
@@ -30,6 +30,6 @@ To save and load levels you can open the console by pressing the ESC key while o
 4. Done.
 
 ### Build guide
-This engine needs to be build using mingw32 (not mingw64).
-1. Build the necessary .o files running the batch file lib/build_lib.bat
-2. Run make on repository root folder.
+This engine needs to be build using mingw32 (not mingw64) and requires make.
+If make is install just run the make command.
+In case of any issues run the command 'premake5 gmake2' to re-generate the makefiles, then run the make command.
