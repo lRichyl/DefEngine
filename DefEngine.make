@@ -40,13 +40,13 @@ ifeq ($(config),debug)
 OBJDIR = obj/Debug
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -g -O0 -w
-ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib
+ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib -m32
 
 else ifeq ($(config),release)
 OBJDIR = obj/Release
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -g -O0 -w
-ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib -s
+ALL_LDFLAGS += $(LDFLAGS) -Ldependencies/glfw/lib -Ldependencies/OpenAL/lib -s -m32
 
 endif
 
@@ -65,6 +65,7 @@ GENERATED += $(OBJDIR)/audio.o
 GENERATED += $(OBJDIR)/camera.o
 GENERATED += $(OBJDIR)/collision.o
 GENERATED += $(OBJDIR)/console.o
+GENERATED += $(OBJDIR)/def_math.o
 GENERATED += $(OBJDIR)/entities.o
 GENERATED += $(OBJDIR)/entity_collision.o
 GENERATED += $(OBJDIR)/game.o
@@ -74,7 +75,6 @@ GENERATED += $(OBJDIR)/input.o
 GENERATED += $(OBJDIR)/level.o
 GENERATED += $(OBJDIR)/level_editor.o
 GENERATED += $(OBJDIR)/main.o
-GENERATED += $(OBJDIR)/def_math.o
 GENERATED += $(OBJDIR)/renderer.o
 GENERATED += $(OBJDIR)/sprite.o
 GENERATED += $(OBJDIR)/text.o
@@ -87,6 +87,7 @@ OBJECTS += $(OBJDIR)/audio.o
 OBJECTS += $(OBJDIR)/camera.o
 OBJECTS += $(OBJDIR)/collision.o
 OBJECTS += $(OBJDIR)/console.o
+OBJECTS += $(OBJDIR)/def_math.o
 OBJECTS += $(OBJDIR)/entities.o
 OBJECTS += $(OBJDIR)/entity_collision.o
 OBJECTS += $(OBJDIR)/game.o
@@ -96,7 +97,6 @@ OBJECTS += $(OBJDIR)/input.o
 OBJECTS += $(OBJDIR)/level.o
 OBJECTS += $(OBJDIR)/level_editor.o
 OBJECTS += $(OBJDIR)/main.o
-OBJECTS += $(OBJDIR)/def_math.o
 OBJECTS += $(OBJDIR)/renderer.o
 OBJECTS += $(OBJDIR)/sprite.o
 OBJECTS += $(OBJDIR)/text.o
@@ -182,6 +182,9 @@ $(OBJDIR)/collision.o: collision.cpp
 $(OBJDIR)/console.o: console.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/def_math.o: def_math.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/entities.o: entities.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -207,9 +210,6 @@ $(OBJDIR)/level_editor.o: level_editor.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: main.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/def_math.o: def_math.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/renderer.o: renderer.cpp
