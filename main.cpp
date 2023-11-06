@@ -4,6 +4,7 @@
 #include "text.h"
 #include "input.h"
 #include "audio.h"
+#include "defines.h"
 
 #include "AL/alc.h"
 
@@ -28,12 +29,12 @@ void WindowResizeCallback(GLFWwindow* window, int width, int height){
      glViewport(0, 0, width, height);
 }
 
-int main(){
+PROGRAM_RESULT main(){
 	srand(time(NULL));
 	Window *window;
 	//The size here is the size of the window and the initial drawing resolution.
 	//The internal resolution can be set manually and it's the one used for the game calculations.
-	window = create_window(1280, 720, "Game Engine");
+	window = create_window(1280, 720, "Def Engine");
 	window->internalWidth  = 1280;
 	window->internalHeight = 720;
 	// You should also probably change the drawing resolution with the function which is the internal resolution
@@ -140,5 +141,5 @@ int main(){
      destroy_window(window);
      destroy_renderer(renderer);
      glfwTerminate();
-     return 0;
+     return ProgramCode::Ok;
 }
